@@ -1,0 +1,22 @@
+syntax = "proto3";
+package protobuf;
+
+option go_package = "dc.uba.ar/this/search/protobuf";
+
+
+service Broker {
+    rpc GetCompatibleParticipants (RequirementsContract) returns (BrokerResult) {}
+}
+
+message RequirementsContract {
+    string contract = 1;
+    repeated string participants = 2;
+}
+
+message RemoteParticipant {
+    string url = 1;
+}
+
+message BrokerResult {
+    map<string, RemoteParticipant> participants = 1;
+}
