@@ -12,9 +12,15 @@ Por ahora habrá estos componentes en la arquitectura:
 
 ## Comunicación entre componentes
 
-gRPC 
+### gRPC 
 
 Me permite utilizar ProtoBuf para definir los tipos de los mensajes, su encoding y serialización en un stream de bits, definir las signaturas de los mensajes RPC (no define coreografías).
+
+### Thrift
+
+asdasd
+
+
 
 ## Lenguaje de programación elegido para cada componente
 
@@ -26,7 +32,7 @@ Candidatos:
 - rust
 - python
 
-- erlang
+- Elixir
 - jolie
 
 ## Alcance de un MVP
