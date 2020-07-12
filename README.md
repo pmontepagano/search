@@ -4,10 +4,10 @@
 
 Por ahora habrá estos componentes en la arquitectura:
 
-- broker
-- middleware p/requires point
-- middleware p/provides point
-- repository
+- broker + repository (posiblemente después lo parta en dos)
+- client middleware (está en un requires point)
+- server middleware (está en un provides point)
+
 
 
 ## Comunicación entre componentes
@@ -16,25 +16,27 @@ Por ahora habrá estos componentes en la arquitectura:
 
 Me permite utilizar ProtoBuf para definir los tipos de los mensajes, su encoding y serialización en un stream de bits, definir las signaturas de los mensajes RPC (no define coreografías).
 
-### Thrift
 
-asdasd
+## Cómo ejecutar para entorno de desarrollo
+
+Alcanza con tener Go instalado y ejecutar:
+
+    go run broker/broker.go
+
+En otra terminal:
 
 
+    go run clientmiddleware/clientmiddleware.go
 
-## Lenguaje de programación elegido para cada componente
 
-Por qué elijo el lenguaje X?
+Y en otra:
 
-Candidatos:
 
-- go
-- rust
-- python
+    go run servermiddleware/servermiddleware.go
 
-- Elixir
-- jolie
 
-## Alcance de un MVP
+## Organización del código
 
-No sería necesario monitoreo del estado de la interacción. 
+
+En el directorio `protobuf` se encuentan los archivos `.proto` donde definimos los tipos de mensajes y los servicios. Esos archivos se compilan con [protoc](https://developers.google.com/protocol-buffers/docs/overview) y generan los archivos `.pb.go`.
+
