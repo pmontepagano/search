@@ -9,7 +9,16 @@ import (
 
 	pb "dc.uba.ar/this/search/protobuf"
 	"google.golang.org/grpc"
+
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/testdata"
+)
+
+var (
+	tls      = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
+	certFile = flag.String("cert_file", "", "The TLS cert file")
+	keyFile  = flag.String("key_file", "", "The TLS key file")
+	port     = flag.Int("port", 10000, "The server port")
 )
 
 type providerMiddlewareServer struct {
@@ -66,6 +75,6 @@ func main() {
 	grpcServer := grpc.NewServer(opts...)
 
 	var pms providerMiddlewareServer
-	pb.RegisterProviderMiddlewareServer(grpcServer, pms)
+	pb.RegisterProviderMiddlewareServer(grpcServer, &pms)
 	grpcServer.Serve(lis)
 }

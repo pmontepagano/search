@@ -12,4 +12,4 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 RUN --mount=type=cache,target=/root/.cache/go-build \
     go build -o /out/clientmiddleware clientmiddleware/clientmiddleware.go
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    go build -o /out/servermiddleware servermiddleware/servermiddleware.go
+    go build -o /out/providermiddleware providermiddleware/providermiddleware.go
