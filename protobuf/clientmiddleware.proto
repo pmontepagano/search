@@ -1,0 +1,26 @@
+syntax = "proto3";
+package protobuf;
+
+import "protobuf/app_message.proto";
+
+option go_package = "dc.uba.ar/this/search/protobuf";
+
+
+/* 
+    A ClientMiddleware can have multiple channels registered.
+    This service is what a Middleware exposes to its users (not on the internet.)
+*/
+service ClientMiddleware {
+    rpc RegisterChannel(RegisterChannelRequest) returns(RegisterChannelResponse) {}
+    rpc UseChannel(stream ApplicationMessage) returns (stream ApplicationMessage) {}
+}
+
+message RegisterChannelRequest {
+    string requirements_contract = 1;
+}
+
+message RegisterChannelResponse {
+
+}
+
+

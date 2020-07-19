@@ -1,6 +1,8 @@
 syntax = "proto3";
 package protobuf;
 
+import "protobuf/contracts.proto";
+
 option go_package = "dc.uba.ar/this/search/protobuf";
 
 
@@ -8,13 +10,10 @@ service Broker {
     rpc GetCompatibleParticipants (RequirementsContract) returns (BrokerResult) {}
 }
 
-message RequirementsContract {
-    string contract = 1;
-    repeated string participants = 2;
-}
 
 message RemoteParticipant {
     string url = 1;
+    string participant_id = 2;
 }
 
 message BrokerResult {

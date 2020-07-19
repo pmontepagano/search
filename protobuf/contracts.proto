@@ -1,0 +1,10 @@
+syntax = "proto3";
+package protobuf;
+
+option go_package = "dc.uba.ar/this/search/protobuf";
+
+
+message RequirementsContract {
+    string contract = 1;
+    repeated string participants = 2;
+}

@@ -1,0 +1,41 @@
+syntax = "proto3";
+package protobuf;
+
+import "protobuf/app_message.proto";
+
+option go_package = "dc.uba.ar/this/search/protobuf";
+
+/* 
+    A ProviderMiddleware can have multiple Provider Applications registered.
+    This service is what a Middleware exposes to the external network.
+*/
+service ProviderMiddleware {
+    rpc InitSession(InitSessionRequest) returns(InitSessionResponse) {}
+    rpc ApplicationMessaging(stream ApplicationMessage) returns (stream ApplicationMessage) {}
+}
+
+message InitSessionRequest {
+    
+}
+
+message InitSessionResponse {
+
+}
+
+
+
+
+/* 
+    This is what the middleware exposes internally to its users.
+*/
+service InternalProviderMiddleware {
+    rpc RegisterApp(RegisterAppRequest) returns (ProviderRegistrationACK) {}
+}
+
+message RegisterAppRequest {
+    string app_id = 1;
+    string provider_contract = 2;
+}
+
+message ProviderRegistrationACK {
+}

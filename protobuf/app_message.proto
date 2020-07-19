@@ -1,0 +1,25 @@
+syntax = "proto3";
+package protobuf;
+
+option go_package = "dc.uba.ar/this/search/protobuf";
+
+/*
+    This is the kind of messages that all applications using this framework will use.
+*/
+message ApplicationMessage {
+    string session_id = 1;  // We'll use UUIDv4. It's a global ID shared by all participants
+    
+    // This is necessary because URLs don't univocally determine apps. There can be multiple applications
+    // behind the same middleware (there is a 1:1 mapping between URLs and middlewares)
+    string sender_id = 2;    // APP ID of the sending application
+    string recipient_id = 3; // APP ID of the receiving application
+
+    // TODO: how to avoid spoofing?
+
+    // This is the actual content that is sent by the app.
+    // Maybe use Self-describing messages?
+    // https://developers.google.com/protocol-buffers/docs/techniques#self-description
+    // This will depend on what specification we use on interoperability contracts.
+    bytes body = 4;
+
+}
