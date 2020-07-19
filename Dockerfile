@@ -13,3 +13,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     go build -o /out/clientmiddleware clientmiddleware/clientmiddleware.go
 RUN --mount=type=cache,target=/root/.cache/go-build \
     go build -o /out/providermiddleware providermiddleware/providermiddleware.go
+
+
+FROM alpine AS bin
+COPY --from=build /out/* /

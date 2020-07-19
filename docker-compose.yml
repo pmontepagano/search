@@ -1,0 +1,15 @@
+version: '3.4'
+services:
+    broker:
+        build: .
+        command: /broker
+        expose:
+            - 10000
+    clientmiddleware:
+        build: .
+        command: /clientmiddleware
+    providermiddleware:
+        build: .
+        command: /providermiddleware
+        expose:
+            - 10000

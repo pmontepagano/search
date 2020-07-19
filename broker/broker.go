@@ -88,6 +88,7 @@ func main() {
 	}
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterBrokerServer(grpcServer, newServer())
+	fmt.Println("Broker server starting...")
 	grpcServer.Serve(lis)
 }
 
