@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"time"
 
@@ -62,5 +63,43 @@ func main() {
 
 	// Pruebo llamar al broker
 	printTest(client, &pb.RequirementsContract{Contract: "hola mundo", Participants: []string{"p1", "p2"}})
+
+	// Ahora intento iniciar conexión al provider middleware
+	provconn, err := grpc.Dial("providermiddleware:10000")
+	if err != nil {
+		log.Fatalf("fail to dial: %v", err)
+	}
+	defer provconn.Close()
+	provClient := pb.NewProviderMiddlewareClient(provconn)
+
+	stream, err := provClient.ApplicationMessaging(context.Background())
+	waitc := make(chan struct{})
+	go func() {
+		for {
+			in, err := stream.Recv()
+			if err == io.EOF {
+				// se terminó
+				close(waitc)
+				return
+			}
+			if err != nil {
+				log.Fatalf("failed to receive data: %v", err)
+			}
+			log.Printf("Received message %s from %s", in.Body, in.SenderId)
+		}
+	}()
+	for i := 0; i < 5; i++ {
+		msg := pb.ApplicationMessage{
+			SenderId:    "clientmw-1",
+			SessionId:   "testSESSION",
+			RecipientId: "provmw-44",
+			Body:        []byte(fmt.Sprintf("hola %d", i))}
+
+		if err := stream.Send(&msg); err != nil {
+			log.Fatalf("Failed to send message: %v", err)
+		}
+	}
+	stream.CloseSend()
+	<-waitc
 
 }
