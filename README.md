@@ -40,3 +40,8 @@ Y en otra:
 
 En el directorio `protobuf` se encuentan los archivos `.proto` donde definimos los tipos de mensajes y los servicios. Esos archivos se compilan con [protoc](https://developers.google.com/protocol-buffers/docs/overview) y generan los archivos `.pb.go`.
 
+
+# Building in Docker
+
+- https://www.docker.com/blog/containerize-your-go-developer-environment-part-1/
+- https://www.docker.com/blog/docker-golang/
