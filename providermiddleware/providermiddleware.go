@@ -18,7 +18,7 @@ var (
 	tls      = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	certFile = flag.String("cert_file", "", "The TLS cert file")
 	keyFile  = flag.String("key_file", "", "The TLS key file")
-	port     = flag.Int("port", 10000, "The server port")
+	port     = flag.Int("port", 20000, "The server port")
 )
 
 type providerMiddlewareServer struct {
@@ -38,7 +38,7 @@ func (s *providerMiddlewareServer) ApplicationMessaging(stream pb.ProviderMiddle
 			return err
 		}
 
-		fmt.Println("Received AppMessage from", in.SenderId, ":", in.Body)
+		fmt.Println("Received AppMessage from", in.SenderId, ":", string(in.Body))
 
 		ack := pb.ApplicationMessage{
 			SessionId:   "session1",

@@ -10,6 +10,6 @@ services:
         command: /clientmiddleware
     providermiddleware:
         build: .
-        command: /providermiddleware
+        command: /providermiddleware --port 10000
         expose:
             - 10000

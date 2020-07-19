@@ -17,8 +17,9 @@ import (
 var (
 	tls                = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	caFile             = flag.String("ca_file", "", "The file containing the CA root cert file")
-	serverAddr         = flag.String("server_addr", "broker:10000", "The server address in the format of host:port")
+	serverAddr         = flag.String("server_addr", "localhost:10000", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name used to verify the hostname returned by the TLS handshake")
+	provAddr           = flag.String("provider_addr", "localhost:20000", "The provider middleware address in the format of host:port. Only for testing purposes.")
 )
 
 func printTest(client pb.BrokerClient, contract *pb.RequirementsContract) {
@@ -65,7 +66,7 @@ func main() {
 	printTest(client, &pb.RequirementsContract{Contract: "hola mundo", Participants: []string{"p1", "p2"}})
 
 	// Ahora intento iniciar conexión al provider middleware
-	provconn, err := grpc.Dial("providermiddleware:10000")
+	provconn, err := grpc.Dial(*provAddr, opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
