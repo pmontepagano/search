@@ -22,7 +22,7 @@ var (
 	provAddr           = flag.String("provider_addr", "localhost:20000", "The provider middleware address in the format of host:port. Only for testing purposes.")
 )
 
-func printTest(client pb.BrokerClient, contract *pb.RequirementsContract) {
+func getParticipants(client pb.BrokerClient, contract *pb.RequirementsContract) {
 	log.Printf("Llamando al broker con contrato %v", contract.Contract)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -63,7 +63,7 @@ func main() {
 	client := pb.NewBrokerClient(conn)
 
 	// Pruebo llamar al broker
-	printTest(client, &pb.RequirementsContract{Contract: "hola mundo", Participants: []string{"p1", "p2"}})
+	getParticipants(client, &pb.RequirementsContract{Contract: "hola mundo", Participants: []string{"p1", "p2"}})
 
 	// Ahora intento iniciar conexión al provider middleware
 	provconn, err := grpc.Dial(*provAddr, opts...)

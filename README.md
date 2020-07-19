@@ -32,7 +32,7 @@ En otra terminal:
 Y en otra:
 
 
-    go run servermiddleware/servermiddleware.go
+    go run providermiddleware/providermiddleware.go
 
 
 ## Organización del código
