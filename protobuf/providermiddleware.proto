@@ -10,12 +10,18 @@ option go_package = "dc.uba.ar/this/search/protobuf";
     This service is what a Middleware exposes to the external network.
 */
 service ProviderMiddleware {
+    // The Broker, when a new channel is registered, signals all participants (except initiator) with this
     rpc InitSession(InitSessionRequest) returns(InitSessionResponse) {}
+
+
     rpc ApplicationMessaging(stream ApplicationMessage) returns (stream ApplicationMessage) {}
 }
 
+// This is something that is sent by the Broker to notify that a new channel is starting
 message InitSessionRequest {
-    
+    string session_id = 1;
+    string app_id = 2;
+    map<string, RemoteParticipant> participants = 3;
 }
 
 message InitSessionResponse {
@@ -30,12 +36,14 @@ message InitSessionResponse {
 */
 service InternalProviderMiddleware {
     rpc RegisterApp(RegisterAppRequest) returns (ProviderRegistrationACK) {}
+
 }
 
 message RegisterAppRequest {
-    string app_id = 1;
-    string provider_contract = 2;
+    string provider_contract = 1;
 }
 
+// This is what the provider app receives when registration is successful
 message ProviderRegistrationACK {
+    string app_id = 1;
 }

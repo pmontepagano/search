@@ -5,6 +5,6 @@ option go_package = "dc.uba.ar/this/search/protobuf";
 
 
 message RequirementsContract {
-    string contract = 1;
-    repeated string participants = 2;
+    string contract = 1; // local participant must be called "self" or some other distinguished name
+    repeated string remote_participants = 2; // participant identifiers (must be referenced in the contract)
 }
