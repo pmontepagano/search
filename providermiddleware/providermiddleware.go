@@ -21,12 +21,12 @@ var (
 	port     = flag.Int("port", 20000, "The server port")
 )
 
-type providerMiddlewareServer struct {
-	pb.UnimplementedProviderMiddlewareServer
+type publicMiddlewareServer struct {
+	pb.UnimplementedPublicMiddlewareServer
 }
 
 // ApplicationMessaging is the main function that allows the two apps connected to speak to each other
-func (s *providerMiddlewareServer) ApplicationMessaging(stream pb.ProviderMiddleware_ApplicationMessagingServer) error {
+func (s *publicMiddlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {
 	// I need a channel that is exposed to the local app
 	// for now we'll send mock messages from the MW itself
 	for {
@@ -38,13 +38,15 @@ func (s *providerMiddlewareServer) ApplicationMessaging(stream pb.ProviderMiddle
 			return err
 		}
 
-		fmt.Println("Received AppMessage from", in.SenderId, ":", string(in.Body))
+		fmt.Println("Received message from", in.SenderId, ":", string(in.Content.Body))
 
-		ack := pb.ApplicationMessage{
-			SessionId:   "session1",
-			RecipientId: "clientmwID-1",
+		// TODO: send to local app replacing sender name with local name
+
+		ack := pb.ApplicationMessageWithHeaders{
+			ChannelId:   in.ChannelId,
+			RecipientId: in.SenderId,
 			SenderId:    "provmwID-44",
-			Body:        []byte("ack")}
+			Content:     &pb.MessageContent{Body: []byte("ack")}}
 
 		if err := stream.Send(&ack); err != nil {
 			return err
@@ -74,7 +76,7 @@ func main() {
 	}
 	grpcServer := grpc.NewServer(opts...)
 
-	var pms providerMiddlewareServer
-	pb.RegisterProviderMiddlewareServer(grpcServer, &pms)
+	var pms publicMiddlewareServer
+	pb.RegisterPublicMiddlewareServer(grpcServer, &pms)
 	grpcServer.Serve(lis)
 }

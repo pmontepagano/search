@@ -22,13 +22,13 @@ var (
 	provAddr           = flag.String("provider_addr", "localhost:20000", "The provider middleware address in the format of host:port. Only for testing purposes.")
 )
 
-func getParticipants(client pb.BrokerClient, contract *pb.RequirementsContract) {
+func initiateChannel(client pb.BrokerClient, contract *pb.Contract) {
 	log.Printf("Llamando al broker con contrato %v", contract.Contract)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	brokerresult, err := client.GetCompatibleParticipants(ctx, contract)
+	brokerresult, err := client.InitiateChannel(ctx, contract)
 	if err != nil {
 		log.Fatalf("%v.GetCompatibleParticipants(_) = _, %v: ", client, err)
 	}
@@ -63,7 +63,7 @@ func main() {
 	client := pb.NewBrokerClient(conn)
 
 	// Pruebo llamar al broker
-	getParticipants(client, &pb.RequirementsContract{Contract: "hola mundo", Participants: []string{"p1", "p2"}})
+	initiateChannel(client, &pb.Contract{Contract: "hola mundo", RemoteParticipants: []string{"p1", "p2"}})
 
 	// Ahora intento iniciar conexión al provider middleware
 	provconn, err := grpc.Dial(*provAddr, opts...)
@@ -71,9 +71,9 @@ func main() {
 		log.Fatalf("fail to dial: %v", err)
 	}
 	defer provconn.Close()
-	provClient := pb.NewProviderMiddlewareClient(provconn)
+	provClient := pb.NewPublicMiddlewareClient(provconn)
 
-	stream, err := provClient.ApplicationMessaging(context.Background())
+	stream, err := provClient.MessageExchange(context.Background())
 	waitc := make(chan struct{})
 	go func() {
 		for {
@@ -86,15 +86,15 @@ func main() {
 			if err != nil {
 				log.Fatalf("failed to receive data: %v", err)
 			}
-			log.Printf("Received message %s from %s", in.Body, in.SenderId)
+			log.Printf("Received message %s from %s", in.Content.Body, in.SenderId)
 		}
 	}()
 	for i := 0; i < 5; i++ {
-		msg := pb.ApplicationMessage{
+		msg := pb.ApplicationMessageWithHeaders{
 			SenderId:    "clientmw-1",
-			SessionId:   "testSESSION",
+			ChannelId:   "testSESSION",
 			RecipientId: "provmw-44",
-			Body:        []byte(fmt.Sprintf("hola %d", i))}
+			Content:     &pb.MessageContent{Body: []byte(fmt.Sprintf("hola %d", i))}}
 
 		if err := stream.Send(&msg); err != nil {
 			log.Fatalf("Failed to send message: %v", err)
