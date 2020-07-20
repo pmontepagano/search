@@ -25,27 +25,22 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-//
-//This is the kind of messages that all applications using this framework will use.
-type ApplicationMessage struct {
+// This is what will be exchanged between middlewares
+type ApplicationMessageWithHeaders struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	SessionId string `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"` // We'll use UUIDv4. It's a global ID shared by all participants
+	ChannelId string `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"` // We'll use UUIDv4. It's a global ID shared by all participants
 	// This is necessary because URLs don't univocally determine apps. There can be multiple applications
 	// behind the same middleware (there is a 1:1 mapping between URLs and middlewares)
-	SenderId    string `protobuf:"bytes,2,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`          // APP ID of the sending application
-	RecipientId string `protobuf:"bytes,3,opt,name=recipient_id,json=recipientId,proto3" json:"recipient_id,omitempty"` // APP ID of the receiving application
-	// This is the actual content that is sent by the app.
-	// Maybe use Self-describing messages?
-	// https://developers.google.com/protocol-buffers/docs/techniques#self-description
-	// This will depend on what specification we use on interoperability contracts.
-	Body []byte `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
+	SenderId    string          `protobuf:"bytes,2,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`          // APP ID of the sending application
+	RecipientId string          `protobuf:"bytes,3,opt,name=recipient_id,json=recipientId,proto3" json:"recipient_id,omitempty"` // APP ID of the receiving application
+	Content     *MessageContent `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
 }
 
-func (x *ApplicationMessage) Reset() {
-	*x = ApplicationMessage{}
+func (x *ApplicationMessageWithHeaders) Reset() {
+	*x = ApplicationMessageWithHeaders{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_protobuf_app_message_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -53,13 +48,13 @@ func (x *ApplicationMessage) Reset() {
 	}
 }
 
-func (x *ApplicationMessage) String() string {
+func (x *ApplicationMessageWithHeaders) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ApplicationMessage) ProtoMessage() {}
+func (*ApplicationMessageWithHeaders) ProtoMessage() {}
 
-func (x *ApplicationMessage) ProtoReflect() protoreflect.Message {
+func (x *ApplicationMessageWithHeaders) ProtoReflect() protoreflect.Message {
 	mi := &file_protobuf_app_message_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -71,33 +66,193 @@ func (x *ApplicationMessage) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ApplicationMessage.ProtoReflect.Descriptor instead.
-func (*ApplicationMessage) Descriptor() ([]byte, []int) {
+// Deprecated: Use ApplicationMessageWithHeaders.ProtoReflect.Descriptor instead.
+func (*ApplicationMessageWithHeaders) Descriptor() ([]byte, []int) {
 	return file_protobuf_app_message_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ApplicationMessage) GetSessionId() string {
+func (x *ApplicationMessageWithHeaders) GetChannelId() string {
 	if x != nil {
-		return x.SessionId
+		return x.ChannelId
 	}
 	return ""
 }
 
-func (x *ApplicationMessage) GetSenderId() string {
+func (x *ApplicationMessageWithHeaders) GetSenderId() string {
 	if x != nil {
 		return x.SenderId
 	}
 	return ""
 }
 
-func (x *ApplicationMessage) GetRecipientId() string {
+func (x *ApplicationMessageWithHeaders) GetRecipientId() string {
 	if x != nil {
 		return x.RecipientId
 	}
 	return ""
 }
 
-func (x *ApplicationMessage) GetBody() []byte {
+func (x *ApplicationMessageWithHeaders) GetContent() *MessageContent {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+// This is what will be sent from an app to the middleware
+type ApplicationMessageOut struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Recipient string          `protobuf:"bytes,1,opt,name=recipient,proto3" json:"recipient,omitempty"` // name of the recipient in the local contract
+	Content   *MessageContent `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+}
+
+func (x *ApplicationMessageOut) Reset() {
+	*x = ApplicationMessageOut{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protobuf_app_message_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ApplicationMessageOut) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplicationMessageOut) ProtoMessage() {}
+
+func (x *ApplicationMessageOut) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_app_message_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplicationMessageOut.ProtoReflect.Descriptor instead.
+func (*ApplicationMessageOut) Descriptor() ([]byte, []int) {
+	return file_protobuf_app_message_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ApplicationMessageOut) GetRecipient() string {
+	if x != nil {
+		return x.Recipient
+	}
+	return ""
+}
+
+func (x *ApplicationMessageOut) GetContent() *MessageContent {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+// This is what will be sent from the middleware to a local app
+type ApplicationMessageIn struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Sender  string          `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"` // name of the sender in the local contract
+	Content *MessageContent `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+}
+
+func (x *ApplicationMessageIn) Reset() {
+	*x = ApplicationMessageIn{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protobuf_app_message_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ApplicationMessageIn) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplicationMessageIn) ProtoMessage() {}
+
+func (x *ApplicationMessageIn) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_app_message_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplicationMessageIn.ProtoReflect.Descriptor instead.
+func (*ApplicationMessageIn) Descriptor() ([]byte, []int) {
+	return file_protobuf_app_message_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ApplicationMessageIn) GetSender() string {
+	if x != nil {
+		return x.Sender
+	}
+	return ""
+}
+
+func (x *ApplicationMessageIn) GetContent() *MessageContent {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+// This is the message content that is sent by the app (this is copied as-is by the middlewares)
+type MessageContent struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Body []byte `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
+}
+
+func (x *MessageContent) Reset() {
+	*x = MessageContent{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protobuf_app_message_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MessageContent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MessageContent) ProtoMessage() {}
+
+func (x *MessageContent) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_app_message_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MessageContent.ProtoReflect.Descriptor instead.
+func (*MessageContent) Descriptor() ([]byte, []int) {
+	return file_protobuf_app_message_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *MessageContent) GetBody() []byte {
 	if x != nil {
 		return x.Body
 	}
@@ -109,15 +264,33 @@ var File_protobuf_app_message_proto protoreflect.FileDescriptor
 var file_protobuf_app_message_proto_rawDesc = []byte{
 	0x0a, 0x1a, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x61, 0x70, 0x70, 0x5f, 0x6d,
 	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x08, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x22, 0x87, 0x01, 0x0a, 0x12, 0x41, 0x70, 0x70, 0x6c, 0x69,
-	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x1d, 0x0a,
-	0x0a, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x09, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09,
-	0x73, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x08, 0x73, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x49, 0x64, 0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x63,
-	0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x0b, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04,
-	0x62, 0x6f, 0x64, 0x79, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x22, 0xb2, 0x01, 0x0a, 0x1d, 0x41, 0x70, 0x70, 0x6c, 0x69,
+	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x57, 0x69, 0x74,
+	0x68, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x68, 0x61, 0x6e,
+	0x6e, 0x65, 0x6c, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x68,
+	0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x73, 0x65, 0x6e, 0x64, 0x65,
+	0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x73, 0x65, 0x6e, 0x64,
+	0x65, 0x72, 0x49, 0x64, 0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e,
+	0x74, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x72, 0x65, 0x63, 0x69,
+	0x70, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65,
+	0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x62, 0x75, 0x66, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x43, 0x6f, 0x6e, 0x74, 0x65,
+	0x6e, 0x74, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x69, 0x0a, 0x15, 0x41,
+	0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x4f, 0x75, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e,
+	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65,
+	0x6e, 0x74, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x52, 0x07, 0x63,
+	0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x62, 0x0a, 0x14, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x49, 0x6e, 0x12, 0x16,
+	0x0a, 0x06, 0x73, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06,
+	0x73, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e,
+	0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e,
+	0x74, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x24, 0x0a, 0x0e, 0x4d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12, 0x12, 0x0a, 0x04,
+	0x62, 0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79,
 	0x42, 0x20, 0x5a, 0x1e, 0x64, 0x63, 0x2e, 0x75, 0x62, 0x61, 0x2e, 0x61, 0x72, 0x2f, 0x74, 0x68,
 	0x69, 0x73, 0x2f, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
 	0x75, 0x66, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
@@ -135,16 +308,22 @@ func file_protobuf_app_message_proto_rawDescGZIP() []byte {
 	return file_protobuf_app_message_proto_rawDescData
 }
 
-var file_protobuf_app_message_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_protobuf_app_message_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_protobuf_app_message_proto_goTypes = []interface{}{
-	(*ApplicationMessage)(nil), // 0: protobuf.ApplicationMessage
+	(*ApplicationMessageWithHeaders)(nil), // 0: protobuf.ApplicationMessageWithHeaders
+	(*ApplicationMessageOut)(nil),         // 1: protobuf.ApplicationMessageOut
+	(*ApplicationMessageIn)(nil),          // 2: protobuf.ApplicationMessageIn
+	(*MessageContent)(nil),                // 3: protobuf.MessageContent
 }
 var file_protobuf_app_message_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	3, // 0: protobuf.ApplicationMessageWithHeaders.content:type_name -> protobuf.MessageContent
+	3, // 1: protobuf.ApplicationMessageOut.content:type_name -> protobuf.MessageContent
+	3, // 2: protobuf.ApplicationMessageIn.content:type_name -> protobuf.MessageContent
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_protobuf_app_message_proto_init() }
@@ -154,7 +333,43 @@ func file_protobuf_app_message_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_protobuf_app_message_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplicationMessage); i {
+			switch v := v.(*ApplicationMessageWithHeaders); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protobuf_app_message_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ApplicationMessageOut); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protobuf_app_message_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ApplicationMessageIn); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protobuf_app_message_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MessageContent); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -172,7 +387,7 @@ func file_protobuf_app_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_protobuf_app_message_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

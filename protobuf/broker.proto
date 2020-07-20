@@ -7,7 +7,8 @@ option go_package = "dc.uba.ar/this/search/protobuf";
 
 
 service Broker {
-    rpc InitiateChannel (RequirementsContract) returns (ChannelCreation) {}
+    rpc InitiateChannel (Contract) returns (ChannelCreation) {}
+    rpc RegisterProvider (Contract) returns (ProviderRegistration) {}
 }
 
 
@@ -19,4 +20,9 @@ message ChannelCreation {
 message RemoteParticipant {
     string url = 1;
     string app_id = 2;
+}
+
+// The registry assigns the provider an ID
+message ProviderRegistration {
+    string app_id = 1;
 }

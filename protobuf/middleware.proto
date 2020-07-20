@@ -1,0 +1,67 @@
+syntax = "proto3";
+package protobuf;
+
+import "protobuf/app_message.proto";
+import "protobuf/contracts.proto";
+import "protobuf/broker.proto";
+
+option go_package = "dc.uba.ar/this/search/protobuf";
+
+
+/* 
+    This service is what a Middleware exposes to its local users (not on the internet.)
+*/
+service PrivateMiddleware {
+    // This is used by the initiator to register a new channel
+    rpc RegisterChannel(RegisterChannelRequest) returns(RegisterChannelResponse) {}
+
+    // This is used by the local app to register an app with the registry
+    rpc RegisterApp(RegisterAppRequest) returns (stream ChannelInitNotification) {}
+    
+    // This is used by the local app to communicate with other participants in an already
+    // initiated or registered channel
+    rpc UseChannel(stream ApplicationMessageOut) returns (stream ApplicationMessageIn) {}
+
+    
+}
+
+message RegisterChannelRequest {
+    Contract requirements_contract = 1;
+}
+
+message RegisterChannelResponse {
+    string channel_id = 1;
+}
+
+message RegisterAppRequest {
+    Contract provider_contract = 1;
+}
+
+// This is what the provider app receives each time the broker notifies it that there is a new channel
+// that involves it. The app must then open a UseChannel stream with the middleware.
+message ChannelInitNotification {
+    string channel_id = 1;
+    // TODO: error codes ?
+}
+
+/*
+    This service is what a Middleware exposes to external components (other participants and the broker)
+*/
+service PublicMiddleware {
+    // The Broker, when a new channel is registered, signals all participants (except initiator) with this
+    rpc InitChannel(InitChannelRequest) returns(InitChannelResponse) {}
+    rpc MessageExchange (stream ApplicationMessageWithHeaders) returns (stream ApplicationMessageWithHeaders) {}
+}
+
+
+// This is something that is sent by the Broker to providers to notify that a new channel is starting
+message InitChannelRequest {
+    string channel_id = 1;
+    string app_id = 2; // which app behind the middleware is being notified
+    map<string, RemoteParticipant> participants = 3;
+}
+
+message InitChannelResponse {
+    // TODO: error codes?
+}
+

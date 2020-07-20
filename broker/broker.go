@@ -11,6 +11,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/google/uuid"
+
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
@@ -32,18 +34,21 @@ type brokerServer struct {
 	savedData []*pb.RemoteParticipant // read-only after initialized
 }
 
-func (s *brokerServer) GetCompatibleParticipants(ctx context.Context, contract *pb.RequirementsContract) (*pb.BrokerResult, error) {
+func (s *brokerServer) InitiateChannel(ctx context.Context, contract *pb.Contract) (*pb.ChannelCreation, error) {
 	rand.Seed(time.Now().Unix())
 	res := make(map[string]*pb.RemoteParticipant)
-	for _, v := range contract.GetParticipants() {
+	for _, v := range contract.GetRemoteParticipants() {
 		log.Println("Received requirements contract with participant", v)
 		res[v] = s.savedData[rand.Intn(len(s.savedData))]
 	}
-	return &pb.BrokerResult{Participants: res}, nil
-
+	sessionID, err := uuid.NewRandom()
+	if err != nil {
+		log.Fatalf("Failed to generate UUID")
+	}
+	return &pb.ChannelCreation{Participants: res, SessionId: sessionID.String()}, nil
 }
 
-// loadFeatures loads data from a JSON file
+// loads data from a JSON file
 func (s *brokerServer) loadData(filePath string) {
 	var data []byte
 	if filePath != "" {
@@ -95,7 +100,9 @@ func main() {
 // exampleData is a copy of testdata/route_guide_db.json. It's to avoid
 // specifying file path with `go run`.
 var exampleData = []byte(`[{
-    "Url": "https://dc.uba.ar/this/example-1"
+	"Url": "https://dc.uba.ar/this/example-1",
+	"AppId": "example1FAKEuuid"
 }, {
-    "Url": "https://example.org/example-2"
+	"Url": "https://example.org/example-2",
+	"AppId": "example2FAKEuuid"
 }]`)
