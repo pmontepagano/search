@@ -74,7 +74,7 @@ func newServer() *brokerServer {
 
 func main() {
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -101,9 +101,9 @@ func main() {
 // exampleData is a copy of testdata/route_guide_db.json. It's to avoid
 // specifying file path with `go run`.
 var exampleData = []byte(`[{
-	"Url": "https://dc.uba.ar/this/example-1",
+	"Url": "providermiddleware",
 	"AppId": "example1FAKEuuid"
 }, {
-	"Url": "https://example.org/example-2",
+	"Url": "providermiddleware",
 	"AppId": "example2FAKEuuid"
 }]`)

@@ -7,7 +7,9 @@ services:
             - 10000
     clientmiddleware:
         build: .
-        command: /clientmiddleware
+        command: /clientmiddleware --broker_addr broker
+        expose:
+            - 10000
     providermiddleware:
         build: .
         command: /providermiddleware --port 10000

@@ -17,12 +17,14 @@ import (
 var (
 	tls                = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	caFile             = flag.String("ca_file", "", "The file containing the CA root cert file")
-	serverAddr         = flag.String("server_addr", "localhost:10000", "The server address in the format of host:port")
+	brokerAddr         = flag.String("broker_addr", "localhost", "The server address in the format of host:port")
+	brokerPort         = flag.Int("broker_port", 10000, "The port in which the broker is listening")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name used to verify the hostname returned by the TLS handshake")
-	provAddr           = flag.String("provider_addr", "localhost:20000", "The provider middleware address in the format of host:port. Only for testing purposes.")
+	// provAddr           = flag.String("provider_addr", "localhost:20000", "The provider middleware address (ONLY FOR TESTING PURPOSES)")
+	// provPort           = flag.Int("provider_port", 10000, "The provider middleware port (ONLY FOR TESTING PURPOSES)")
 )
 
-func initiateChannel(client pb.BrokerClient, contract *pb.Contract) {
+func initiateChannel(client pb.BrokerClient, contract *pb.Contract) pb.BrokerChannelResponse {
 	log.Printf("Llamando al broker con contrato %v", contract.Contract)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -33,6 +35,7 @@ func initiateChannel(client pb.BrokerClient, contract *pb.Contract) {
 		log.Fatalf("%v.GetCompatibleParticipants(_) = _, %v: ", client, err)
 	}
 	log.Println(brokerresult.Participants)
+	return *brokerresult
 }
 
 func main() {
@@ -55,7 +58,7 @@ func main() {
 	fmt.Println("Waiting 2 seconds for broker...")
 	time.Sleep(2 * time.Second)
 
-	conn, err := grpc.Dial(*serverAddr, opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", *brokerAddr, *brokerPort), opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
@@ -63,10 +66,13 @@ func main() {
 	client := pb.NewBrokerClient(conn)
 
 	// Pruebo llamar al broker
-	initiateChannel(client, &pb.Contract{Contract: "hola mundo", RemoteParticipants: []string{"p1", "p2"}})
+	brokerRes := initiateChannel(client, &pb.Contract{Contract: "hola mundo", RemoteParticipants: []string{"p1", "p2"}})
 
-	// Ahora intento iniciar conexión al provider middleware
-	provconn, err := grpc.Dial(*provAddr, opts...)
+	// Ahora intento iniciar conexión con p1
+	participants := brokerRes.GetParticipants()
+	p1 := participants["p1"]
+
+	provconn, err := grpc.Dial(fmt.Sprintf("%s:10000", p1.GetUrl()), opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
