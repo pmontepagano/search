@@ -34,8 +34,9 @@ type brokerServer struct {
 	savedData []*pb.RemoteParticipant // read-only after initialized
 }
 
-func (s *brokerServer) InitiateChannel(ctx context.Context, contract *pb.Contract) (*pb.ChannelCreation, error) {
+func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
 	rand.Seed(time.Now().Unix())
+	contract := request.GetContract()
 	res := make(map[string]*pb.RemoteParticipant)
 	for _, v := range contract.GetRemoteParticipants() {
 		log.Println("Received requirements contract with participant", v)
@@ -45,7 +46,7 @@ func (s *brokerServer) InitiateChannel(ctx context.Context, contract *pb.Contrac
 	if err != nil {
 		log.Fatalf("Failed to generate UUID")
 	}
-	return &pb.ChannelCreation{Participants: res, SessionId: sessionID.String()}, nil
+	return &pb.BrokerChannelResponse{Participants: res, SessionId: sessionID.String()}, nil
 }
 
 // loads data from a JSON file

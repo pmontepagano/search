@@ -16,7 +16,7 @@ service PrivateMiddleware {
     rpc RegisterChannel(RegisterChannelRequest) returns(RegisterChannelResponse) {}
 
     // This is used by the local app to register an app with the registry
-    rpc RegisterApp(RegisterAppRequest) returns (stream ChannelInitNotification) {}
+    rpc RegisterApp(RegisterAppRequest) returns (RegisterAppResponse) {}
     
     // This is used by the local app to communicate with other participants in an already
     // initiated or registered channel
@@ -37,10 +37,8 @@ message RegisterAppRequest {
     Contract provider_contract = 1;
 }
 
-// This is what the provider app receives each time the broker notifies it that there is a new channel
-// that involves it. The app must then open a UseChannel stream with the middleware.
-message ChannelInitNotification {
-    string channel_id = 1;
+message RegisterAppResponse {
+    string app_id = 1;
     // TODO: error codes ?
 }
 

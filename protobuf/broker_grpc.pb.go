@@ -17,8 +17,8 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BrokerClient interface {
-	InitiateChannel(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*ChannelCreation, error)
-	RegisterProvider(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*ProviderRegistration, error)
+	BrokerChannel(ctx context.Context, in *BrokerChannelRequest, opts ...grpc.CallOption) (*BrokerChannelResponse, error)
+	RegisterProvider(ctx context.Context, in *RegisterProviderRequest, opts ...grpc.CallOption) (*RegisterProviderResponse, error)
 }
 
 type brokerClient struct {
@@ -29,17 +29,17 @@ func NewBrokerClient(cc grpc.ClientConnInterface) BrokerClient {
 	return &brokerClient{cc}
 }
 
-func (c *brokerClient) InitiateChannel(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*ChannelCreation, error) {
-	out := new(ChannelCreation)
-	err := c.cc.Invoke(ctx, "/protobuf.Broker/InitiateChannel", in, out, opts...)
+func (c *brokerClient) BrokerChannel(ctx context.Context, in *BrokerChannelRequest, opts ...grpc.CallOption) (*BrokerChannelResponse, error) {
+	out := new(BrokerChannelResponse)
+	err := c.cc.Invoke(ctx, "/protobuf.Broker/BrokerChannel", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *brokerClient) RegisterProvider(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*ProviderRegistration, error) {
-	out := new(ProviderRegistration)
+func (c *brokerClient) RegisterProvider(ctx context.Context, in *RegisterProviderRequest, opts ...grpc.CallOption) (*RegisterProviderResponse, error) {
+	out := new(RegisterProviderResponse)
 	err := c.cc.Invoke(ctx, "/protobuf.Broker/RegisterProvider", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -51,8 +51,8 @@ func (c *brokerClient) RegisterProvider(ctx context.Context, in *Contract, opts 
 // All implementations must embed UnimplementedBrokerServer
 // for forward compatibility
 type BrokerServer interface {
-	InitiateChannel(context.Context, *Contract) (*ChannelCreation, error)
-	RegisterProvider(context.Context, *Contract) (*ProviderRegistration, error)
+	BrokerChannel(context.Context, *BrokerChannelRequest) (*BrokerChannelResponse, error)
+	RegisterProvider(context.Context, *RegisterProviderRequest) (*RegisterProviderResponse, error)
 	mustEmbedUnimplementedBrokerServer()
 }
 
@@ -60,10 +60,10 @@ type BrokerServer interface {
 type UnimplementedBrokerServer struct {
 }
 
-func (*UnimplementedBrokerServer) InitiateChannel(context.Context, *Contract) (*ChannelCreation, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method InitiateChannel not implemented")
+func (*UnimplementedBrokerServer) BrokerChannel(context.Context, *BrokerChannelRequest) (*BrokerChannelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BrokerChannel not implemented")
 }
-func (*UnimplementedBrokerServer) RegisterProvider(context.Context, *Contract) (*ProviderRegistration, error) {
+func (*UnimplementedBrokerServer) RegisterProvider(context.Context, *RegisterProviderRequest) (*RegisterProviderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterProvider not implemented")
 }
 func (*UnimplementedBrokerServer) mustEmbedUnimplementedBrokerServer() {}
@@ -72,26 +72,26 @@ func RegisterBrokerServer(s *grpc.Server, srv BrokerServer) {
 	s.RegisterService(&_Broker_serviceDesc, srv)
 }
 
-func _Broker_InitiateChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Contract)
+func _Broker_BrokerChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BrokerChannelRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BrokerServer).InitiateChannel(ctx, in)
+		return srv.(BrokerServer).BrokerChannel(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protobuf.Broker/InitiateChannel",
+		FullMethod: "/protobuf.Broker/BrokerChannel",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BrokerServer).InitiateChannel(ctx, req.(*Contract))
+		return srv.(BrokerServer).BrokerChannel(ctx, req.(*BrokerChannelRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Broker_RegisterProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Contract)
+	in := new(RegisterProviderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func _Broker_RegisterProvider_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/protobuf.Broker/RegisterProvider",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BrokerServer).RegisterProvider(ctx, req.(*Contract))
+		return srv.(BrokerServer).RegisterProvider(ctx, req.(*RegisterProviderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -113,8 +113,8 @@ var _Broker_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*BrokerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "InitiateChannel",
-			Handler:    _Broker_InitiateChannel_Handler,
+			MethodName: "BrokerChannel",
+			Handler:    _Broker_BrokerChannel_Handler,
 		},
 		{
 			MethodName: "RegisterProvider",

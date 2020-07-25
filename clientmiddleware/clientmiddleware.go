@@ -28,7 +28,7 @@ func initiateChannel(client pb.BrokerClient, contract *pb.Contract) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	brokerresult, err := client.InitiateChannel(ctx, contract)
+	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{Contract: contract})
 	if err != nil {
 		log.Fatalf("%v.GetCompatibleParticipants(_) = _, %v: ", client, err)
 	}
