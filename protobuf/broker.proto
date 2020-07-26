@@ -17,7 +17,7 @@ message BrokerChannelRequest {
 
 
 message BrokerChannelResponse {
-    string session_id = 1;
+    string channel_id = 1;
     map<string, RemoteParticipant> participants = 2;
 }
 

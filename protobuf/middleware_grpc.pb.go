@@ -20,7 +20,7 @@ type PrivateMiddlewareClient interface {
 	// This is used by the initiator to register a new channel
 	RegisterChannel(ctx context.Context, in *RegisterChannelRequest, opts ...grpc.CallOption) (*RegisterChannelResponse, error)
 	// This is used by the local app to register an app with the registry
-	RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (*RegisterAppResponse, error)
+	RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (PrivateMiddleware_RegisterAppClient, error)
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel
 	UseChannel(ctx context.Context, opts ...grpc.CallOption) (PrivateMiddleware_UseChannelClient, error)
@@ -43,17 +43,40 @@ func (c *privateMiddlewareClient) RegisterChannel(ctx context.Context, in *Regis
 	return out, nil
 }
 
-func (c *privateMiddlewareClient) RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (*RegisterAppResponse, error) {
-	out := new(RegisterAppResponse)
-	err := c.cc.Invoke(ctx, "/protobuf.PrivateMiddleware/RegisterApp", in, out, opts...)
+func (c *privateMiddlewareClient) RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (PrivateMiddleware_RegisterAppClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_PrivateMiddleware_serviceDesc.Streams[0], "/protobuf.PrivateMiddleware/RegisterApp", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &privateMiddlewareRegisterAppClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PrivateMiddleware_RegisterAppClient interface {
+	Recv() (*RegisterAppResponse, error)
+	grpc.ClientStream
+}
+
+type privateMiddlewareRegisterAppClient struct {
+	grpc.ClientStream
+}
+
+func (x *privateMiddlewareRegisterAppClient) Recv() (*RegisterAppResponse, error) {
+	m := new(RegisterAppResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *privateMiddlewareClient) UseChannel(ctx context.Context, opts ...grpc.CallOption) (PrivateMiddleware_UseChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_PrivateMiddleware_serviceDesc.Streams[0], "/protobuf.PrivateMiddleware/UseChannel", opts...)
+	stream, err := c.cc.NewStream(ctx, &_PrivateMiddleware_serviceDesc.Streams[1], "/protobuf.PrivateMiddleware/UseChannel", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +113,7 @@ type PrivateMiddlewareServer interface {
 	// This is used by the initiator to register a new channel
 	RegisterChannel(context.Context, *RegisterChannelRequest) (*RegisterChannelResponse, error)
 	// This is used by the local app to register an app with the registry
-	RegisterApp(context.Context, *RegisterAppRequest) (*RegisterAppResponse, error)
+	RegisterApp(*RegisterAppRequest, PrivateMiddleware_RegisterAppServer) error
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel
 	UseChannel(PrivateMiddleware_UseChannelServer) error
@@ -104,8 +127,8 @@ type UnimplementedPrivateMiddlewareServer struct {
 func (*UnimplementedPrivateMiddlewareServer) RegisterChannel(context.Context, *RegisterChannelRequest) (*RegisterChannelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterChannel not implemented")
 }
-func (*UnimplementedPrivateMiddlewareServer) RegisterApp(context.Context, *RegisterAppRequest) (*RegisterAppResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterApp not implemented")
+func (*UnimplementedPrivateMiddlewareServer) RegisterApp(*RegisterAppRequest, PrivateMiddleware_RegisterAppServer) error {
+	return status.Errorf(codes.Unimplemented, "method RegisterApp not implemented")
 }
 func (*UnimplementedPrivateMiddlewareServer) UseChannel(PrivateMiddleware_UseChannelServer) error {
 	return status.Errorf(codes.Unimplemented, "method UseChannel not implemented")
@@ -134,22 +157,25 @@ func _PrivateMiddleware_RegisterChannel_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PrivateMiddleware_RegisterApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterAppRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _PrivateMiddleware_RegisterApp_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RegisterAppRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(PrivateMiddlewareServer).RegisterApp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protobuf.PrivateMiddleware/RegisterApp",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PrivateMiddlewareServer).RegisterApp(ctx, req.(*RegisterAppRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(PrivateMiddlewareServer).RegisterApp(m, &privateMiddlewareRegisterAppServer{stream})
+}
+
+type PrivateMiddleware_RegisterAppServer interface {
+	Send(*RegisterAppResponse) error
+	grpc.ServerStream
+}
+
+type privateMiddlewareRegisterAppServer struct {
+	grpc.ServerStream
+}
+
+func (x *privateMiddlewareRegisterAppServer) Send(m *RegisterAppResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _PrivateMiddleware_UseChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -186,12 +212,13 @@ var _PrivateMiddleware_serviceDesc = grpc.ServiceDesc{
 			MethodName: "RegisterChannel",
 			Handler:    _PrivateMiddleware_RegisterChannel_Handler,
 		},
-		{
-			MethodName: "RegisterApp",
-			Handler:    _PrivateMiddleware_RegisterApp_Handler,
-		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "RegisterApp",
+			Handler:       _PrivateMiddleware_RegisterApp_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "UseChannel",
 			Handler:       _PrivateMiddleware_UseChannel_Handler,

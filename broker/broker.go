@@ -42,11 +42,11 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 		log.Println("Received requirements contract with participant", v)
 		res[v] = s.savedData[rand.Intn(len(s.savedData))]
 	}
-	sessionID, err := uuid.NewRandom()
+	channelID, err := uuid.NewRandom()
 	if err != nil {
 		log.Fatalf("Failed to generate UUID")
 	}
-	return &pb.BrokerChannelResponse{Participants: res, SessionId: sessionID.String()}, nil
+	return &pb.BrokerChannelResponse{Participants: res, ChannelId: channelID.String()}, nil
 }
 
 // loads data from a JSON file
