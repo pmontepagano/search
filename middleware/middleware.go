@@ -40,7 +40,7 @@ type middlewareServer struct {
 	registeredApps map[string]pb.PrivateMiddleware_RegisterAppServer
 
 	// channels already brokered. key: ChannelID
-	brokeredChannels map[string]SEARCHChannel
+	brokeredChannels map[string]*SEARCHChannel
 
 	// channels registered by local apps that have not yet been used. key: LocalID
 	unBrokeredChannels map[string]*SEARCHChannel
@@ -51,10 +51,10 @@ type middlewareServer struct {
 
 func newMiddlewareServer() *middlewareServer {
 	var s middlewareServer
-	s.localChannels = bimap.NewBiMap()
+	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]pb.PrivateMiddleware_RegisterAppServer)
-	s.brokeredChannels = make(map[string]SEARCHChannel)
-	s.unBrokeredChannels = make(map[string]*SEARCHChannel)
+	s.brokeredChannels = make(map[string]*SEARCHChannel)   // channels already brokered (locally initiated or not)
+	s.unBrokeredChannels = make(map[string]*SEARCHChannel) // channels locally registered but not yet brokered
 
 	return &s
 }
@@ -106,7 +106,7 @@ func (r *SEARCHChannel) broker(mw *middlewareServer) {
 	r.ID = uuid.MustParse(brokerresult.GetChannelId())
 
 	// TODO: use mutex to handle maps
-	mw.brokeredChannels[r.ID.String()] = *r
+	mw.brokeredChannels[r.ID.String()] = r
 	delete(mw.unBrokeredChannels, r.LocalID.String())
 	mw.localChannels.Insert(r.LocalID.String(), r.ID.String())
 }
@@ -147,12 +147,19 @@ func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterC
 	return &pb.RegisterChannelResponse{ChannelId: c.LocalID.String()}, nil
 }
 
+// simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
 func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
-	localID := req.ChannelId
+	localID := req.ChannelId // when local app is initiator, localID != channelID (global, set by broker)
 	c, ok := s.unBrokeredChannels[localID]
 	if ok {
 		// channel has not been brokered
 		go c.broker(s)
+	} else {
+		channelID, ok := s.localChannels.Get(localID)
+		if !ok {
+			// TODO: raise error. Brokered channel should always be present in localChannels
+		}
+		c = s.brokeredChannels[channelID.(string)]
 	}
 	c.Outgoing[req.Recipient] <- *req.Content
 
