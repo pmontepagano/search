@@ -1,0 +1,95 @@
+ApplicationMessageOuttitle: Protocol for channel initialization
+
+_: **1. Prerequisite: provider registration**
+
+Provider 1 -> Provider 1 Middleware: RegisterAppRequest
+
+note:
+provider_contract (contract and participants names)
+
+Provider 1 Middleware -> Broker / Registry: RegisterProviderRequest
+
+note:
+contract and Provider 1's URL
+
+Broker / Registry -> Provider 1 Middleware: RegisterProviderResponse
+
+note:
+AppID
+
+Provider 1 Middleware --> Provider 1: RegisterAppResponse
+
+note:
+AppID
+
+(keeps connection open to notify new channels)
+
+
+_: **2. Channel initialization**
+
+
+Client A -> Client A Middleware: RegisterChannelRequest
+
+note:
+* `Contract requirements_contract`
+
+
+Client A Middleware -> Client A: RegisterChannelResponse
+
+note:
+* `string channel_id`
+
+Client A -> Client A Middleware: AppSend
+
+note:
+ApplicationMessageOut
+* `string channel_id`
+* `string recipient`
+* `MessageContent content`
+
+Client A Middleware -> Client A: AppSendResponse
+note:
+* Result (OK or ERR)
+
+Client A Middleware -> Broker / Registry: BrokerChannelRequest
+
+note:
+requirements contract
+
+Broker / Registry -> Provider 1 Middleware: InitChannelRequest
+note:
+Notify that new channel is being initialized
+
+to: AppID
+
+ChannelID
+
+map(participantID, URL + AppID): where to locate other participants
+
+Provider 1 Middleware --> Provider 1: RegisterAppResponse
+
+note:
+notify new channel with InitChannelNotification
+
+Provider 1 Middleware -> Broker / Registry: InitChannelResponse
+
+Broker / Registry -> Client A Middleware: BrokerChannelResponse
+
+note:
+ChannelID
+
+map(participantID, URL + AppID): where to locate other participants
+
+
+Client A Middleware <--> Provider 1 Middleware: MessageExchange
+
+note:
+ChannelID
+
+AppID
+
+body: "hello"
+
+Provider 1 -> Provider 1 Middleware: AppRecv
+
+Provider 1 Middleware -> Provider 1: AppRecvResponse
