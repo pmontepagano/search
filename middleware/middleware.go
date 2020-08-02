@@ -43,7 +43,7 @@ type middlewareServer struct {
 	brokeredChannels map[string]SEARCHChannel
 
 	// channels registered by local apps that have not yet been used. key: LocalID
-	unBrokeredChannels map[string]SEARCHChannel
+	unBrokeredChannels map[string]*SEARCHChannel
 
 	// mapping of channels' LocalID <--> ID (global)
 	localChannels *bimap.BiMap
@@ -54,7 +54,7 @@ func newMiddlewareServer() *middlewareServer {
 	s.localChannels = bimap.NewBiMap()
 	s.registeredApps = make(map[string]pb.PrivateMiddleware_RegisterAppServer)
 	s.brokeredChannels = make(map[string]SEARCHChannel)
-	s.unBrokeredChannels = make(map[string]SEARCHChannel)
+	s.unBrokeredChannels = make(map[string]*SEARCHChannel)
 
 	return &s
 }
@@ -143,19 +143,20 @@ func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 
 func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
 	c := newSEARCHChannel(*in.GetRequirementsContract())
-	s.unBrokeredChannels[c.LocalID.String()] = *c
+	s.unBrokeredChannels[c.LocalID.String()] = c
 	return &pb.RegisterChannelResponse{ChannelId: c.LocalID.String()}, nil
 }
 
 func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
 	localID := req.ChannelId
-	if c, ok := s.unBrokeredChannels[localID]; ok {
+	c, ok := s.unBrokeredChannels[localID]
+	if ok {
 		// channel has not been brokered
 		go c.broker(s)
 	}
-	c.Outgoing[req.Recipient] <- req.Content
+	c.Outgoing[req.Recipient] <- *req.Content
 
-	return pb.AppSendResponse{Result: OK}, nil
+	return &pb.AppSendResponse{Result: 0}, nil // TODO: use enum instead of 0
 }
 
 // When the middleware receives a message in its public interface, it must enqueue it so that
