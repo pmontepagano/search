@@ -147,6 +147,21 @@ func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterC
 	return &pb.RegisterChannelResponse{ChannelId: c.LocalID.String()}, nil
 }
 
+// routine that actually sends messages to remote particpant on a channel
+func (r *SEARCHChannel) sender(participant string) {
+	buffer := r.Outgoing[participant]
+	var msg pb.MessageContent
+	msg <- buffer
+	// check if connected to remote participant (c.connections)
+	// if not connected, connect and save stream in c.connections
+	// connectionStream <- msg
+	// for {
+	// 	msg <- buffer
+	// 	// add headers to message
+	// 	connectionStream <- msg
+	// }
+}
+
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
 func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
 	localID := req.ChannelId // when local app is initiator, localID != channelID (global, set by broker)
