@@ -23,7 +23,8 @@ type PrivateMiddlewareClient interface {
 	RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (PrivateMiddleware_RegisterAppClient, error)
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel
-	UseChannel(ctx context.Context, opts ...grpc.CallOption) (PrivateMiddleware_UseChannelClient, error)
+	AppSend(ctx context.Context, in *ApplicationMessageOut, opts ...grpc.CallOption) (*AppSendResponse, error)
+	AppRecv(ctx context.Context, in *AppRecvRequest, opts ...grpc.CallOption) (*ApplicationMessageIn, error)
 }
 
 type privateMiddlewareClient struct {
@@ -75,35 +76,22 @@ func (x *privateMiddlewareRegisterAppClient) Recv() (*RegisterAppResponse, error
 	return m, nil
 }
 
-func (c *privateMiddlewareClient) UseChannel(ctx context.Context, opts ...grpc.CallOption) (PrivateMiddleware_UseChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_PrivateMiddleware_serviceDesc.Streams[1], "/protobuf.PrivateMiddleware/UseChannel", opts...)
+func (c *privateMiddlewareClient) AppSend(ctx context.Context, in *ApplicationMessageOut, opts ...grpc.CallOption) (*AppSendResponse, error) {
+	out := new(AppSendResponse)
+	err := c.cc.Invoke(ctx, "/protobuf.PrivateMiddleware/AppSend", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &privateMiddlewareUseChannelClient{stream}
-	return x, nil
+	return out, nil
 }
 
-type PrivateMiddleware_UseChannelClient interface {
-	Send(*ApplicationMessageOut) error
-	Recv() (*ApplicationMessageIn, error)
-	grpc.ClientStream
-}
-
-type privateMiddlewareUseChannelClient struct {
-	grpc.ClientStream
-}
-
-func (x *privateMiddlewareUseChannelClient) Send(m *ApplicationMessageOut) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *privateMiddlewareUseChannelClient) Recv() (*ApplicationMessageIn, error) {
-	m := new(ApplicationMessageIn)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
+func (c *privateMiddlewareClient) AppRecv(ctx context.Context, in *AppRecvRequest, opts ...grpc.CallOption) (*ApplicationMessageIn, error) {
+	out := new(ApplicationMessageIn)
+	err := c.cc.Invoke(ctx, "/protobuf.PrivateMiddleware/AppRecv", in, out, opts...)
+	if err != nil {
 		return nil, err
 	}
-	return m, nil
+	return out, nil
 }
 
 // PrivateMiddlewareServer is the server API for PrivateMiddleware service.
@@ -116,7 +104,8 @@ type PrivateMiddlewareServer interface {
 	RegisterApp(*RegisterAppRequest, PrivateMiddleware_RegisterAppServer) error
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel
-	UseChannel(PrivateMiddleware_UseChannelServer) error
+	AppSend(context.Context, *ApplicationMessageOut) (*AppSendResponse, error)
+	AppRecv(context.Context, *AppRecvRequest) (*ApplicationMessageIn, error)
 	mustEmbedUnimplementedPrivateMiddlewareServer()
 }
 
@@ -130,8 +119,11 @@ func (*UnimplementedPrivateMiddlewareServer) RegisterChannel(context.Context, *R
 func (*UnimplementedPrivateMiddlewareServer) RegisterApp(*RegisterAppRequest, PrivateMiddleware_RegisterAppServer) error {
 	return status.Errorf(codes.Unimplemented, "method RegisterApp not implemented")
 }
-func (*UnimplementedPrivateMiddlewareServer) UseChannel(PrivateMiddleware_UseChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method UseChannel not implemented")
+func (*UnimplementedPrivateMiddlewareServer) AppSend(context.Context, *ApplicationMessageOut) (*AppSendResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AppSend not implemented")
+}
+func (*UnimplementedPrivateMiddlewareServer) AppRecv(context.Context, *AppRecvRequest) (*ApplicationMessageIn, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AppRecv not implemented")
 }
 func (*UnimplementedPrivateMiddlewareServer) mustEmbedUnimplementedPrivateMiddlewareServer() {}
 
@@ -178,30 +170,40 @@ func (x *privateMiddlewareRegisterAppServer) Send(m *RegisterAppResponse) error 
 	return x.ServerStream.SendMsg(m)
 }
 
-func _PrivateMiddleware_UseChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(PrivateMiddlewareServer).UseChannel(&privateMiddlewareUseChannelServer{stream})
-}
-
-type PrivateMiddleware_UseChannelServer interface {
-	Send(*ApplicationMessageIn) error
-	Recv() (*ApplicationMessageOut, error)
-	grpc.ServerStream
-}
-
-type privateMiddlewareUseChannelServer struct {
-	grpc.ServerStream
-}
-
-func (x *privateMiddlewareUseChannelServer) Send(m *ApplicationMessageIn) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *privateMiddlewareUseChannelServer) Recv() (*ApplicationMessageOut, error) {
-	m := new(ApplicationMessageOut)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _PrivateMiddleware_AppSend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplicationMessageOut)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(PrivateMiddlewareServer).AppSend(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobuf.PrivateMiddleware/AppSend",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateMiddlewareServer).AppSend(ctx, req.(*ApplicationMessageOut))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PrivateMiddleware_AppRecv_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppRecvRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateMiddlewareServer).AppRecv(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobuf.PrivateMiddleware/AppRecv",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateMiddlewareServer).AppRecv(ctx, req.(*AppRecvRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 var _PrivateMiddleware_serviceDesc = grpc.ServiceDesc{
@@ -212,18 +214,20 @@ var _PrivateMiddleware_serviceDesc = grpc.ServiceDesc{
 			MethodName: "RegisterChannel",
 			Handler:    _PrivateMiddleware_RegisterChannel_Handler,
 		},
+		{
+			MethodName: "AppSend",
+			Handler:    _PrivateMiddleware_AppSend_Handler,
+		},
+		{
+			MethodName: "AppRecv",
+			Handler:    _PrivateMiddleware_AppRecv_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "RegisterApp",
 			Handler:       _PrivateMiddleware_RegisterApp_Handler,
 			ServerStreams: true,
-		},
-		{
-			StreamName:    "UseChannel",
-			Handler:       _PrivateMiddleware_UseChannel_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
 		},
 	},
 	Metadata: "protobuf/middleware.proto",

@@ -25,6 +25,154 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
+type Result int32
+
+const (
+	Result_OK  Result = 0
+	Result_ERR Result = 1
+)
+
+// Enum value maps for Result.
+var (
+	Result_name = map[int32]string{
+		0: "OK",
+		1: "ERR",
+	}
+	Result_value = map[string]int32{
+		"OK":  0,
+		"ERR": 1,
+	}
+)
+
+func (x Result) Enum() *Result {
+	p := new(Result)
+	*p = x
+	return p
+}
+
+func (x Result) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Result) Descriptor() protoreflect.EnumDescriptor {
+	return file_protobuf_middleware_proto_enumTypes[0].Descriptor()
+}
+
+func (Result) Type() protoreflect.EnumType {
+	return &file_protobuf_middleware_proto_enumTypes[0]
+}
+
+func (x Result) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Result.Descriptor instead.
+func (Result) EnumDescriptor() ([]byte, []int) {
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{0}
+}
+
+type AppSendResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result Result `protobuf:"varint,1,opt,name=result,proto3,enum=protobuf.Result" json:"result,omitempty"`
+}
+
+func (x *AppSendResponse) Reset() {
+	*x = AppSendResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protobuf_middleware_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AppSendResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppSendResponse) ProtoMessage() {}
+
+func (x *AppSendResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_middleware_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppSendResponse.ProtoReflect.Descriptor instead.
+func (*AppSendResponse) Descriptor() ([]byte, []int) {
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *AppSendResponse) GetResult() Result {
+	if x != nil {
+		return x.Result
+	}
+	return Result_OK
+}
+
+type AppRecvRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ChannelId   string `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	Participant string `protobuf:"bytes,2,opt,name=participant,proto3" json:"participant,omitempty"`
+}
+
+func (x *AppRecvRequest) Reset() {
+	*x = AppRecvRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protobuf_middleware_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AppRecvRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppRecvRequest) ProtoMessage() {}
+
+func (x *AppRecvRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_middleware_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppRecvRequest.ProtoReflect.Descriptor instead.
+func (*AppRecvRequest) Descriptor() ([]byte, []int) {
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AppRecvRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *AppRecvRequest) GetParticipant() string {
+	if x != nil {
+		return x.Participant
+	}
+	return ""
+}
+
 type RegisterChannelRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -36,7 +184,7 @@ type RegisterChannelRequest struct {
 func (x *RegisterChannelRequest) Reset() {
 	*x = RegisterChannelRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protobuf_middleware_proto_msgTypes[0]
+		mi := &file_protobuf_middleware_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -49,7 +197,7 @@ func (x *RegisterChannelRequest) String() string {
 func (*RegisterChannelRequest) ProtoMessage() {}
 
 func (x *RegisterChannelRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_middleware_proto_msgTypes[0]
+	mi := &file_protobuf_middleware_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +210,7 @@ func (x *RegisterChannelRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterChannelRequest.ProtoReflect.Descriptor instead.
 func (*RegisterChannelRequest) Descriptor() ([]byte, []int) {
-	return file_protobuf_middleware_proto_rawDescGZIP(), []int{0}
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *RegisterChannelRequest) GetRequirementsContract() *Contract {
@@ -83,7 +231,7 @@ type RegisterChannelResponse struct {
 func (x *RegisterChannelResponse) Reset() {
 	*x = RegisterChannelResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protobuf_middleware_proto_msgTypes[1]
+		mi := &file_protobuf_middleware_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -96,7 +244,7 @@ func (x *RegisterChannelResponse) String() string {
 func (*RegisterChannelResponse) ProtoMessage() {}
 
 func (x *RegisterChannelResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_middleware_proto_msgTypes[1]
+	mi := &file_protobuf_middleware_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,7 +257,7 @@ func (x *RegisterChannelResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterChannelResponse.ProtoReflect.Descriptor instead.
 func (*RegisterChannelResponse) Descriptor() ([]byte, []int) {
-	return file_protobuf_middleware_proto_rawDescGZIP(), []int{1}
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RegisterChannelResponse) GetChannelId() string {
@@ -130,7 +278,7 @@ type RegisterAppRequest struct {
 func (x *RegisterAppRequest) Reset() {
 	*x = RegisterAppRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protobuf_middleware_proto_msgTypes[2]
+		mi := &file_protobuf_middleware_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -143,7 +291,7 @@ func (x *RegisterAppRequest) String() string {
 func (*RegisterAppRequest) ProtoMessage() {}
 
 func (x *RegisterAppRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_middleware_proto_msgTypes[2]
+	mi := &file_protobuf_middleware_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -156,7 +304,7 @@ func (x *RegisterAppRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterAppRequest.ProtoReflect.Descriptor instead.
 func (*RegisterAppRequest) Descriptor() ([]byte, []int) {
-	return file_protobuf_middleware_proto_rawDescGZIP(), []int{2}
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RegisterAppRequest) GetProviderContract() *Contract {
@@ -181,7 +329,7 @@ type RegisterAppResponse struct {
 func (x *RegisterAppResponse) Reset() {
 	*x = RegisterAppResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protobuf_middleware_proto_msgTypes[3]
+		mi := &file_protobuf_middleware_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -194,7 +342,7 @@ func (x *RegisterAppResponse) String() string {
 func (*RegisterAppResponse) ProtoMessage() {}
 
 func (x *RegisterAppResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_middleware_proto_msgTypes[3]
+	mi := &file_protobuf_middleware_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -207,7 +355,7 @@ func (x *RegisterAppResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterAppResponse.ProtoReflect.Descriptor instead.
 func (*RegisterAppResponse) Descriptor() ([]byte, []int) {
-	return file_protobuf_middleware_proto_rawDescGZIP(), []int{3}
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{5}
 }
 
 func (m *RegisterAppResponse) GetAckOrNew() isRegisterAppResponse_AckOrNew {
@@ -260,7 +408,7 @@ type InitChannelNotification struct {
 func (x *InitChannelNotification) Reset() {
 	*x = InitChannelNotification{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protobuf_middleware_proto_msgTypes[4]
+		mi := &file_protobuf_middleware_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -273,7 +421,7 @@ func (x *InitChannelNotification) String() string {
 func (*InitChannelNotification) ProtoMessage() {}
 
 func (x *InitChannelNotification) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_middleware_proto_msgTypes[4]
+	mi := &file_protobuf_middleware_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -286,7 +434,7 @@ func (x *InitChannelNotification) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitChannelNotification.ProtoReflect.Descriptor instead.
 func (*InitChannelNotification) Descriptor() ([]byte, []int) {
-	return file_protobuf_middleware_proto_rawDescGZIP(), []int{4}
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *InitChannelNotification) GetChannelId() string {
@@ -310,7 +458,7 @@ type InitChannelRequest struct {
 func (x *InitChannelRequest) Reset() {
 	*x = InitChannelRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protobuf_middleware_proto_msgTypes[5]
+		mi := &file_protobuf_middleware_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -323,7 +471,7 @@ func (x *InitChannelRequest) String() string {
 func (*InitChannelRequest) ProtoMessage() {}
 
 func (x *InitChannelRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_middleware_proto_msgTypes[5]
+	mi := &file_protobuf_middleware_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -336,7 +484,7 @@ func (x *InitChannelRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitChannelRequest.ProtoReflect.Descriptor instead.
 func (*InitChannelRequest) Descriptor() ([]byte, []int) {
-	return file_protobuf_middleware_proto_rawDescGZIP(), []int{5}
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *InitChannelRequest) GetChannelId() string {
@@ -369,7 +517,7 @@ type InitChannelResponse struct {
 func (x *InitChannelResponse) Reset() {
 	*x = InitChannelResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protobuf_middleware_proto_msgTypes[6]
+		mi := &file_protobuf_middleware_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -382,7 +530,7 @@ func (x *InitChannelResponse) String() string {
 func (*InitChannelResponse) ProtoMessage() {}
 
 func (x *InitChannelResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_middleware_proto_msgTypes[6]
+	mi := &file_protobuf_middleware_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -395,7 +543,7 @@ func (x *InitChannelResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitChannelResponse.ProtoReflect.Descriptor instead.
 func (*InitChannelResponse) Descriptor() ([]byte, []int) {
-	return file_protobuf_middleware_proto_rawDescGZIP(), []int{6}
+	return file_protobuf_middleware_proto_rawDescGZIP(), []int{8}
 }
 
 var File_protobuf_middleware_proto protoreflect.FileDescriptor
@@ -408,7 +556,16 @@ var file_protobuf_middleware_proto_rawDesc = []byte{
 	0x6f, 0x1a, 0x18, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x63, 0x6f, 0x6e, 0x74,
 	0x72, 0x61, 0x63, 0x74, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x15, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x62, 0x72, 0x6f, 0x6b, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x22, 0x61, 0x0a, 0x16, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x68,
+	0x74, 0x6f, 0x22, 0x3b, 0x0a, 0x0f, 0x41, 0x70, 0x70, 0x53, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x28, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22,
+	0x51, 0x0a, 0x0e, 0x41, 0x70, 0x70, 0x52, 0x65, 0x63, 0x76, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x49, 0x64,
+	0x12, 0x20, 0x0a, 0x0b, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61,
+	0x6e, 0x74, 0x22, 0x61, 0x0a, 0x16, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x68,
 	0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x47, 0x0a, 0x15,
 	0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x5f, 0x63, 0x6f, 0x6e,
 	0x74, 0x72, 0x61, 0x63, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x70, 0x72,
@@ -452,40 +609,46 @@ var file_protobuf_middleware_proto_rawDesc = []byte{
 	0x1b, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x74,
 	0x65, 0x50, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x52, 0x05, 0x76, 0x61,
 	0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x15, 0x0a, 0x13, 0x49, 0x6e, 0x69, 0x74, 0x43,
-	0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x92,
-	0x02, 0x0a, 0x11, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4d, 0x69, 0x64, 0x64, 0x6c, 0x65,
-	0x77, 0x61, 0x72, 0x65, 0x12, 0x58, 0x0a, 0x0f, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72,
-	0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12, 0x20, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x68, 0x61, 0x6e, 0x6e,
-	0x65, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x68, 0x61,
-	0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4e,
-	0x0a, 0x0b, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x41, 0x70, 0x70, 0x12, 0x1c, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65,
-	0x72, 0x41, 0x70, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x41,
-	0x70, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x53,
-	0x0a, 0x0a, 0x55, 0x73, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12, 0x1f, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x4f, 0x75, 0x74, 0x1a, 0x1e, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x49, 0x6e, 0x22, 0x00, 0x28,
-	0x01, 0x30, 0x01, 0x32, 0xcb, 0x01, 0x0a, 0x10, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4d, 0x69,
-	0x64, 0x64, 0x6c, 0x65, 0x77, 0x61, 0x72, 0x65, 0x12, 0x4c, 0x0a, 0x0b, 0x49, 0x6e, 0x69, 0x74,
-	0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12, 0x1c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
-	0x2e, 0x49, 0x6e, 0x69, 0x74, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x69, 0x0a, 0x0f, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67,
-	0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x27, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x57, 0x69, 0x74, 0x68, 0x48, 0x65, 0x61, 0x64, 0x65,
-	0x72, 0x73, 0x1a, 0x27, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x70,
-	0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
-	0x57, 0x69, 0x74, 0x68, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x73, 0x22, 0x00, 0x28, 0x01, 0x30,
-	0x01, 0x42, 0x20, 0x5a, 0x1e, 0x64, 0x63, 0x2e, 0x75, 0x62, 0x61, 0x2e, 0x61, 0x72, 0x2f, 0x74,
-	0x68, 0x69, 0x73, 0x2f, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x62, 0x75, 0x66, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2a, 0x19,
+	0x0a, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x06, 0x0a, 0x02, 0x4f, 0x4b, 0x10, 0x00,
+	0x12, 0x07, 0x0a, 0x03, 0x45, 0x52, 0x52, 0x10, 0x01, 0x32, 0xcd, 0x02, 0x0a, 0x11, 0x50, 0x72,
+	0x69, 0x76, 0x61, 0x74, 0x65, 0x4d, 0x69, 0x64, 0x64, 0x6c, 0x65, 0x77, 0x61, 0x72, 0x65, 0x12,
+	0x58, 0x0a, 0x0f, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x68, 0x61, 0x6e, 0x6e,
+	0x65, 0x6c, 0x12, 0x20, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x52, 0x65,
+	0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
+	0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4e, 0x0a, 0x0b, 0x52, 0x65, 0x67,
+	0x69, 0x73, 0x74, 0x65, 0x72, 0x41, 0x70, 0x70, 0x12, 0x1c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x62, 0x75, 0x66, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x41, 0x70, 0x70, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x41, 0x70, 0x70, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x47, 0x0a, 0x07, 0x41, 0x70, 0x70,
+	0x53, 0x65, 0x6e, 0x64, 0x12, 0x1f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
+	0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x4f, 0x75, 0x74, 0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x41, 0x70, 0x70, 0x53, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x00, 0x12, 0x45, 0x0a, 0x07, 0x41, 0x70, 0x70, 0x52, 0x65, 0x63, 0x76, 0x12, 0x18, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x70, 0x70, 0x52, 0x65, 0x63, 0x76,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x49, 0x6e, 0x22, 0x00, 0x32, 0xcb, 0x01, 0x0a, 0x10, 0x50, 0x75,
+	0x62, 0x6c, 0x69, 0x63, 0x4d, 0x69, 0x64, 0x64, 0x6c, 0x65, 0x77, 0x61, 0x72, 0x65, 0x12, 0x4c,
+	0x0a, 0x0b, 0x49, 0x6e, 0x69, 0x74, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12, 0x1c, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x43, 0x68, 0x61,
+	0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x43, 0x68, 0x61, 0x6e, 0x6e,
+	0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x69, 0x0a, 0x0f,
+	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x45, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x12,
+	0x27, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x69,
+	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x57, 0x69, 0x74,
+	0x68, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x73, 0x1a, 0x27, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x62, 0x75, 0x66, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x57, 0x69, 0x74, 0x68, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72,
+	0x73, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x42, 0x20, 0x5a, 0x1e, 0x64, 0x63, 0x2e, 0x75, 0x62,
+	0x61, 0x2e, 0x61, 0x72, 0x2f, 0x74, 0x68, 0x69, 0x73, 0x2f, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68,
+	0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -500,43 +663,50 @@ func file_protobuf_middleware_proto_rawDescGZIP() []byte {
 	return file_protobuf_middleware_proto_rawDescData
 }
 
-var file_protobuf_middleware_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_protobuf_middleware_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_protobuf_middleware_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_protobuf_middleware_proto_goTypes = []interface{}{
-	(*RegisterChannelRequest)(nil),        // 0: protobuf.RegisterChannelRequest
-	(*RegisterChannelResponse)(nil),       // 1: protobuf.RegisterChannelResponse
-	(*RegisterAppRequest)(nil),            // 2: protobuf.RegisterAppRequest
-	(*RegisterAppResponse)(nil),           // 3: protobuf.RegisterAppResponse
-	(*InitChannelNotification)(nil),       // 4: protobuf.InitChannelNotification
-	(*InitChannelRequest)(nil),            // 5: protobuf.InitChannelRequest
-	(*InitChannelResponse)(nil),           // 6: protobuf.InitChannelResponse
-	nil,                                   // 7: protobuf.InitChannelRequest.ParticipantsEntry
-	(*Contract)(nil),                      // 8: protobuf.Contract
-	(*RemoteParticipant)(nil),             // 9: protobuf.RemoteParticipant
-	(*ApplicationMessageOut)(nil),         // 10: protobuf.ApplicationMessageOut
-	(*ApplicationMessageWithHeaders)(nil), // 11: protobuf.ApplicationMessageWithHeaders
-	(*ApplicationMessageIn)(nil),          // 12: protobuf.ApplicationMessageIn
+	(Result)(0),                           // 0: protobuf.Result
+	(*AppSendResponse)(nil),               // 1: protobuf.AppSendResponse
+	(*AppRecvRequest)(nil),                // 2: protobuf.AppRecvRequest
+	(*RegisterChannelRequest)(nil),        // 3: protobuf.RegisterChannelRequest
+	(*RegisterChannelResponse)(nil),       // 4: protobuf.RegisterChannelResponse
+	(*RegisterAppRequest)(nil),            // 5: protobuf.RegisterAppRequest
+	(*RegisterAppResponse)(nil),           // 6: protobuf.RegisterAppResponse
+	(*InitChannelNotification)(nil),       // 7: protobuf.InitChannelNotification
+	(*InitChannelRequest)(nil),            // 8: protobuf.InitChannelRequest
+	(*InitChannelResponse)(nil),           // 9: protobuf.InitChannelResponse
+	nil,                                   // 10: protobuf.InitChannelRequest.ParticipantsEntry
+	(*Contract)(nil),                      // 11: protobuf.Contract
+	(*RemoteParticipant)(nil),             // 12: protobuf.RemoteParticipant
+	(*ApplicationMessageOut)(nil),         // 13: protobuf.ApplicationMessageOut
+	(*ApplicationMessageWithHeaders)(nil), // 14: protobuf.ApplicationMessageWithHeaders
+	(*ApplicationMessageIn)(nil),          // 15: protobuf.ApplicationMessageIn
 }
 var file_protobuf_middleware_proto_depIdxs = []int32{
-	8,  // 0: protobuf.RegisterChannelRequest.requirements_contract:type_name -> protobuf.Contract
-	8,  // 1: protobuf.RegisterAppRequest.provider_contract:type_name -> protobuf.Contract
-	4,  // 2: protobuf.RegisterAppResponse.notification:type_name -> protobuf.InitChannelNotification
-	7,  // 3: protobuf.InitChannelRequest.participants:type_name -> protobuf.InitChannelRequest.ParticipantsEntry
-	9,  // 4: protobuf.InitChannelRequest.ParticipantsEntry.value:type_name -> protobuf.RemoteParticipant
-	0,  // 5: protobuf.PrivateMiddleware.RegisterChannel:input_type -> protobuf.RegisterChannelRequest
-	2,  // 6: protobuf.PrivateMiddleware.RegisterApp:input_type -> protobuf.RegisterAppRequest
-	10, // 7: protobuf.PrivateMiddleware.UseChannel:input_type -> protobuf.ApplicationMessageOut
-	5,  // 8: protobuf.PublicMiddleware.InitChannel:input_type -> protobuf.InitChannelRequest
-	11, // 9: protobuf.PublicMiddleware.MessageExchange:input_type -> protobuf.ApplicationMessageWithHeaders
-	1,  // 10: protobuf.PrivateMiddleware.RegisterChannel:output_type -> protobuf.RegisterChannelResponse
-	3,  // 11: protobuf.PrivateMiddleware.RegisterApp:output_type -> protobuf.RegisterAppResponse
-	12, // 12: protobuf.PrivateMiddleware.UseChannel:output_type -> protobuf.ApplicationMessageIn
-	6,  // 13: protobuf.PublicMiddleware.InitChannel:output_type -> protobuf.InitChannelResponse
-	11, // 14: protobuf.PublicMiddleware.MessageExchange:output_type -> protobuf.ApplicationMessageWithHeaders
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0,  // 0: protobuf.AppSendResponse.result:type_name -> protobuf.Result
+	11, // 1: protobuf.RegisterChannelRequest.requirements_contract:type_name -> protobuf.Contract
+	11, // 2: protobuf.RegisterAppRequest.provider_contract:type_name -> protobuf.Contract
+	7,  // 3: protobuf.RegisterAppResponse.notification:type_name -> protobuf.InitChannelNotification
+	10, // 4: protobuf.InitChannelRequest.participants:type_name -> protobuf.InitChannelRequest.ParticipantsEntry
+	12, // 5: protobuf.InitChannelRequest.ParticipantsEntry.value:type_name -> protobuf.RemoteParticipant
+	3,  // 6: protobuf.PrivateMiddleware.RegisterChannel:input_type -> protobuf.RegisterChannelRequest
+	5,  // 7: protobuf.PrivateMiddleware.RegisterApp:input_type -> protobuf.RegisterAppRequest
+	13, // 8: protobuf.PrivateMiddleware.AppSend:input_type -> protobuf.ApplicationMessageOut
+	2,  // 9: protobuf.PrivateMiddleware.AppRecv:input_type -> protobuf.AppRecvRequest
+	8,  // 10: protobuf.PublicMiddleware.InitChannel:input_type -> protobuf.InitChannelRequest
+	14, // 11: protobuf.PublicMiddleware.MessageExchange:input_type -> protobuf.ApplicationMessageWithHeaders
+	4,  // 12: protobuf.PrivateMiddleware.RegisterChannel:output_type -> protobuf.RegisterChannelResponse
+	6,  // 13: protobuf.PrivateMiddleware.RegisterApp:output_type -> protobuf.RegisterAppResponse
+	1,  // 14: protobuf.PrivateMiddleware.AppSend:output_type -> protobuf.AppSendResponse
+	15, // 15: protobuf.PrivateMiddleware.AppRecv:output_type -> protobuf.ApplicationMessageIn
+	9,  // 16: protobuf.PublicMiddleware.InitChannel:output_type -> protobuf.InitChannelResponse
+	14, // 17: protobuf.PublicMiddleware.MessageExchange:output_type -> protobuf.ApplicationMessageWithHeaders
+	12, // [12:18] is the sub-list for method output_type
+	6,  // [6:12] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_protobuf_middleware_proto_init() }
@@ -549,7 +719,7 @@ func file_protobuf_middleware_proto_init() {
 	file_protobuf_broker_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_protobuf_middleware_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RegisterChannelRequest); i {
+			switch v := v.(*AppSendResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -561,7 +731,7 @@ func file_protobuf_middleware_proto_init() {
 			}
 		}
 		file_protobuf_middleware_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RegisterChannelResponse); i {
+			switch v := v.(*AppRecvRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -573,7 +743,7 @@ func file_protobuf_middleware_proto_init() {
 			}
 		}
 		file_protobuf_middleware_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RegisterAppRequest); i {
+			switch v := v.(*RegisterChannelRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -585,7 +755,7 @@ func file_protobuf_middleware_proto_init() {
 			}
 		}
 		file_protobuf_middleware_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RegisterAppResponse); i {
+			switch v := v.(*RegisterChannelResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -597,7 +767,7 @@ func file_protobuf_middleware_proto_init() {
 			}
 		}
 		file_protobuf_middleware_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*InitChannelNotification); i {
+			switch v := v.(*RegisterAppRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -609,7 +779,7 @@ func file_protobuf_middleware_proto_init() {
 			}
 		}
 		file_protobuf_middleware_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*InitChannelRequest); i {
+			switch v := v.(*RegisterAppResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -621,6 +791,30 @@ func file_protobuf_middleware_proto_init() {
 			}
 		}
 		file_protobuf_middleware_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*InitChannelNotification); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protobuf_middleware_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*InitChannelRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protobuf_middleware_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*InitChannelResponse); i {
 			case 0:
 				return &v.state
@@ -633,7 +827,7 @@ func file_protobuf_middleware_proto_init() {
 			}
 		}
 	}
-	file_protobuf_middleware_proto_msgTypes[3].OneofWrappers = []interface{}{
+	file_protobuf_middleware_proto_msgTypes[5].OneofWrappers = []interface{}{
 		(*RegisterAppResponse_AppId)(nil),
 		(*RegisterAppResponse_Notification)(nil),
 	}
@@ -642,13 +836,14 @@ func file_protobuf_middleware_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_protobuf_middleware_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   8,
+			NumEnums:      1,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
 		GoTypes:           file_protobuf_middleware_proto_goTypes,
 		DependencyIndexes: file_protobuf_middleware_proto_depIdxs,
+		EnumInfos:         file_protobuf_middleware_proto_enumTypes,
 		MessageInfos:      file_protobuf_middleware_proto_msgTypes,
 	}.Build()
 	File_protobuf_middleware_proto = out.File

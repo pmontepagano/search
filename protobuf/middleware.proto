@@ -20,9 +20,24 @@ service PrivateMiddleware {
     
     // This is used by the local app to communicate with other participants in an already
     // initiated or registered channel
-    rpc UseChannel(stream ApplicationMessageOut) returns (stream ApplicationMessageIn) {}
+    rpc AppSend(ApplicationMessageOut) returns (AppSendResponse) {}
+    rpc AppRecv(AppRecvRequest) returns (ApplicationMessageIn) {}
 
     
+}
+
+enum Result {
+    OK = 0;
+    ERR = 1;
+}
+
+message AppSendResponse {
+    Result result = 1;
+}
+
+message AppRecvRequest {
+    string channel_id = 1;
+    string participant = 2;
 }
 
 message RegisterChannelRequest {
