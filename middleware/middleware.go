@@ -64,8 +64,8 @@ type SEARCHChannel struct {
 	ID       uuid.UUID // channel identifier assigned by the broker
 	Contract pb.Contract
 
-	addresses   map[string]*pb.RemoteParticipant                      // map participant names to remote URLs and AppIDs
-	connections map[string]*pb.PublicMiddleware_MessageExchangeServer // map participant names to streams
+	addresses map[string]*pb.RemoteParticipant                      // map participant names to remote URLs and AppIDs
+	streams   map[string]*pb.PublicMiddleware_MessageExchangeClient // map participant names to streams
 
 	// buffers for incoming/outgoing messages from/to each participant
 	Outgoing map[string]chan pb.MessageContent
@@ -116,7 +116,7 @@ func newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
 	r.ID = uuid.New()
 	r.Contract = contract
 	r.addresses = make(map[string]*pb.RemoteParticipant)
-	r.connections = make(map[string]*pb.PublicMiddleware_MessageExchangeServer)
+	r.streams = make(map[string]*pb.PublicMiddleware_MessageExchangeClient)
 
 	r.Outgoing = make(map[string]chan pb.MessageContent)
 	r.Incoming = make(map[string]chan pb.MessageContent)
@@ -149,17 +149,36 @@ func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterC
 
 // routine that actually sends messages to remote particpant on a channel
 func (r *SEARCHChannel) sender(participant string) {
-	buffer := r.Outgoing[participant]
-	var msg pb.MessageContent
-	msg <- buffer
-	// check if connected to remote participant (c.connections)
-	// if not connected, connect and save stream in c.connections
-	// connectionStream <- msg
-	// for {
-	// 	msg <- buffer
-	// 	// add headers to message
-	// 	connectionStream <- msg
-	// }
+	for {
+		// wait for first message
+		msg := <-r.Outgoing[participant]
+		// check if connected to remote participant
+		stream, ok := r.streams[participant]
+		if !ok {
+			// if not connected, connect and save stream in r.streams
+			var opts []grpc.DialOption
+			opts = append(opts, grpc.WithBlock())
+			provconn, err := grpc.Dial(fmt.Sprintf("%s:10000", r.addresses[participant].GetUrl()), opts...)
+			if err != nil {
+				log.Fatalf("fail to dial: %v", err)
+			}
+			defer provconn.Close()
+			provClient := pb.NewPublicMiddlewareClient(provconn)
+
+			stream, err := provClient.MessageExchange(context.Background())
+			if err != nil {
+				log.Fatalf("failed to establish MessageExchange")
+			}
+			r.streams[participant] = &stream
+		}
+		messageWithHeaders := pb.ApplicationMessageWithHeaders{
+			SenderId:    "initiator", // TODO: what should we use here?
+			ChannelId:   r.ID.String(),
+			RecipientId: r.addresses[participant].AppId,
+			Content:     &msg}
+		s := *stream
+		s.Send(&messageWithHeaders)
+	}
 }
 
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
