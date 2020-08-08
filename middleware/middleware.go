@@ -109,6 +109,10 @@ func (r *SEARCHChannel) broker(mw *middlewareServer) {
 	mw.brokeredChannels[r.ID.String()] = r
 	delete(mw.unBrokeredChannels, r.LocalID.String())
 	mw.localChannels.Insert(r.LocalID.String(), r.ID.String())
+
+	for _, p := range r.Contract.GetRemoteParticipants() {
+		go r.sender(p)
+	}
 }
 
 func newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
@@ -149,6 +153,7 @@ func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterC
 
 // routine that actually sends messages to remote particpant on a channel
 func (r *SEARCHChannel) sender(participant string) {
+	// TODO: there has to be a way to stop this goroutine
 	for {
 		// wait for first message
 		msg := <-r.Outgoing[participant]
