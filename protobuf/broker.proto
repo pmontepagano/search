@@ -12,13 +12,16 @@ service Broker {
 }
 
 message BrokerChannelRequest {
-    Contract contract = 1;
+    Contract contract = 1;  // requirements contract
+    // subset of contract's participants that are already decided. This should at least
+    // include "self", with the initiator's RemoteParticpant data
+    map<string, RemoteParticipant> preset_participants = 2;
 }
 
 
 message BrokerChannelResponse {
     string channel_id = 1;
-    map<string, RemoteParticipant> participants = 2;
+    // map<string, RemoteParticipant> participants = 2;
 }
 
 message RegisterProviderRequest {

@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,19 +35,67 @@ type brokerServer struct {
 	savedData []*pb.RemoteParticipant // read-only after initialized
 }
 
-func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
+// returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
+func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []string {
+	result := make([]string, len(orig)-len(r))
+	sort.Strings(orig)
+	nOrig := 0
+	nDest := 0
+	for p := range r {
+		if orig[nOrig] != p {
+			result[nDest] = orig[nOrig]
+			nDest++
+		}
+		nOrig++
+	}
+	return result
+}
+
+// given a contract and a list of participants, get best possible candidates
+// TODO: we probably need to add a parameter to EXCLUDE candidates from results
+func (s *brokerServer) getBestCandidates(contract pb.Contract, participants []string) map[string]*pb.RemoteParticipant {
+	// sanity check
+	contractParticipants := contract.GetRemoteParticipants()
+	sort.Strings(contractParticipants)
+	for _, p := range participants {
+		// https://golang.org/pkg/sort/#Search
+		i := sort.Search(len(contractParticipants),
+			func(i int) bool { return contractParticipants[i] >= p })
+		if !(i < len(contractParticipants) && contractParticipants[i] == p) {
+			// participant element not present in contract
+			log.Fatalf("getBestCandidates got a participant not present in contract.")
+		}
+	}
+
+	response := make(map[string]*pb.RemoteParticipant)
+	// TODO: for now, we choose participants at random
 	rand.Seed(time.Now().Unix())
-	contract := request.GetContract()
-	res := make(map[string]*pb.RemoteParticipant)
-	for _, v := range contract.GetRemoteParticipants() {
+	for _, v := range participants {
 		log.Println("Received requirements contract with participant", v)
-		res[v] = s.savedData[rand.Intn(len(s.savedData))]
+		response[v] = s.savedData[rand.Intn(len(s.savedData))]
 	}
-	channelID, err := uuid.NewRandom()
-	if err != nil {
-		log.Fatalf("Failed to generate UUID")
-	}
-	return &pb.BrokerChannelResponse{Participants: res, ChannelId: channelID.String()}, nil
+	return response
+}
+
+// contract will always have a distinguished participant called "self" that corresponds to the initiator
+// self MUST be present in presetParticipants with its url and ID.
+// this routine will find compatible candidates and notify them
+func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant, channelID uuid.UUID) {
+	participantsToMatch := filterParticipants(contract.GetRemoteParticipants(), presetParticipants)
+	candidates := s.getBestCandidates(*contract, participantsToMatch)
+
+	fmt.Println(candidates)
+	// TODO: notify candidates and participantsToMatch
+}
+
+func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
+	contract := request.GetContract()
+	presetParticipants := request.GetPresetParticipants()
+
+	channelID := uuid.New()
+	go s.brokerAndInitialize(contract, presetParticipants, channelID)
+
+	return &pb.BrokerChannelResponse{ChannelId: channelID.String()}, nil
 }
 
 // loads data from a JSON file
@@ -98,12 +147,18 @@ func main() {
 	grpcServer.Serve(lis)
 }
 
-// exampleData is a copy of testdata/route_guide_db.json. It's to avoid
-// specifying file path with `go run`.
 var exampleData = []byte(`[{
 	"Url": "providermiddleware",
-	"AppId": "example1FAKEuuid"
+	"AppId": "example1FAKEuuid",
+	"Contract": {
+		"Contract": "unparsed",
+		"RemoteParticipants": ["p2"]
+	}
 }, {
 	"Url": "providermiddleware",
-	"AppId": "example2FAKEuuid"
+	"AppId": "example2FAKEuuid",
+	"Contract": {
+		"Contract": "unparsed",
+		"RemoteParticipants": ["p2", "p3"]
+	}
 }]`)

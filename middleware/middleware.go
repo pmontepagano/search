@@ -60,7 +60,7 @@ func newMiddlewareServer() *middlewareServer {
 }
 
 type registeredApp struct {
-	Contract pb.Contract
+	Contract   pb.Contract
 	NotifyChan *chan pb.InitChannelNotification
 }
 
@@ -126,17 +126,17 @@ func (r *SEARCHChannel) broker(mw *middlewareServer) {
 	}
 
 	// TODO: refactor this part into new function (also used on InitChannel)
-	r.addresses = brokerresult.GetParticipants()
-	r.ID = uuid.MustParse(brokerresult.GetChannelId())
+	// r.addresses = brokerresult.GetParticipants()
+	// r.ID = uuid.MustParse(brokerresult.GetChannelId())
 
 	// TODO: use mutex to handle maps
-	mw.brokeredChannels[r.ID.String()] = r
-	delete(mw.unBrokeredChannels, r.LocalID.String())
-	mw.localChannels.Insert(r.LocalID.String(), r.ID.String())
+	// mw.brokeredChannels[r.ID.String()] = r
+	// delete(mw.unBrokeredChannels, r.LocalID.String())
+	// mw.localChannels.Insert(r.LocalID.String(), r.ID.String())
 
-	for _, p := range r.Contract.GetRemoteParticipants() {
-		go r.sender(p)
-	}
+	// for _, p := range r.Contract.GetRemoteParticipants() {
+	// 	go r.sender(p)
+	// }
 }
 
 // invoked by local provider app with a provision contract
@@ -168,7 +168,7 @@ func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 // invoked by local initiator app with a requirements contract
 func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
 	c := newSEARCHChannel(*in.GetRequirementsContract())
-	s.unBrokeredChannels[c.LocalID.String()] = c	// this has to be changed when brokering
+	s.unBrokeredChannels[c.LocalID.String()] = c // this has to be changed when brokering
 	return &pb.RegisterChannelResponse{ChannelId: c.LocalID.String()}, nil
 }
 
@@ -199,7 +199,7 @@ func (r *SEARCHChannel) sender(participant string) {
 			r.streams[participant] = &stream
 		}
 		messageWithHeaders := pb.ApplicationMessageWithHeaders{
-			SenderId:    "initiator", // TODO: what should we use here?
+			SenderId:    "initiator", // TODO: what should we use here? participant name in contract is enough
 			ChannelId:   r.ID.String(),
 			RecipientId: r.addresses[participant].AppId,
 			Content:     &msg}
@@ -263,7 +263,7 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
 		r := newSEARCHChannel(regapp.Contract)
-		
+
 		// TODO: refactor this section (repeated in broker func)
 		r.addresses = icr.GetParticipants()
 		r.ID = uuid.MustParse(icr.GetChannelId())
@@ -276,7 +276,6 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 		for _, p := range r.Contract.GetRemoteParticipants() {
 			go r.sender(p)
 		}
-
 
 		// notify local provider app
 		*regapp.NotifyChan <- pb.InitChannelNotification{ChannelId: icr.GetChannelId()}
