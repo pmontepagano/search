@@ -12,8 +12,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/google/uuid"
-
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
@@ -51,10 +49,11 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 	return result
 }
 
-// given a contract and a list of participants, get best possible candidates
-// TODO: we probably need to add a parameter to EXCLUDE candidates from results
+// given a contract and a list of participants, get best possible candidates for those candidates
+// from all the candidates present in the registry
+// TODO: we probably need to add a parameter to EXCLUDE candidates from regitry
 func (s *brokerServer) getBestCandidates(contract pb.Contract, participants []string) map[string]*pb.RemoteParticipant {
-	// sanity check
+	// sanity check: check that all elements of param `participants` are present as participants in param `contract`
 	contractParticipants := contract.GetRemoteParticipants()
 	sort.Strings(contractParticipants)
 	for _, p := range participants {
@@ -68,23 +67,28 @@ func (s *brokerServer) getBestCandidates(contract pb.Contract, participants []st
 	}
 
 	response := make(map[string]*pb.RemoteParticipant)
+
 	// TODO: for now, we choose participants at random
 	rand.Seed(time.Now().Unix())
 	for _, v := range participants {
 		log.Println("Received requirements contract with participant", v)
 		response[v] = s.savedData[rand.Intn(len(s.savedData))]
 	}
+
 	return response
 }
 
 // contract will always have a distinguished participant called "self" that corresponds to the initiator
 // self MUST be present in presetParticipants with its url and ID.
 // this routine will find compatible candidates and notify them
-func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant, channelID uuid.UUID) {
+func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant) {
 	participantsToMatch := filterParticipants(contract.GetRemoteParticipants(), presetParticipants)
 	candidates := s.getBestCandidates(*contract, participantsToMatch)
 
 	fmt.Println(candidates)
+
+	// channelID := uuid.New()
+
 	// TODO: notify candidates and participantsToMatch
 }
 
@@ -92,10 +96,9 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 	contract := request.GetContract()
 	presetParticipants := request.GetPresetParticipants()
 
-	channelID := uuid.New()
-	go s.brokerAndInitialize(contract, presetParticipants, channelID)
+	go s.brokerAndInitialize(contract, presetParticipants)
 
-	return &pb.BrokerChannelResponse{ChannelId: channelID.String()}, nil
+	return &pb.BrokerChannelResponse{Result: pb.BrokerChannelResponse_ACK}, nil
 }
 
 // loads data from a JSON file

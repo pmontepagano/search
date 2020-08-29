@@ -20,8 +20,11 @@ message BrokerChannelRequest {
 
 
 message BrokerChannelResponse {
-    string channel_id = 1;
-    // map<string, RemoteParticipant> participants = 2;
+    enum Result {
+        ACK = 0;
+        ERR = 1;
+    }
+    Result result = 1;
 }
 
 message RegisterProviderRequest {
