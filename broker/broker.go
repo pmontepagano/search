@@ -12,6 +12,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
@@ -84,12 +85,59 @@ func (s *brokerServer) getBestCandidates(contract pb.Contract, participants []st
 func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant) {
 	participantsToMatch := filterParticipants(contract.GetRemoteParticipants(), presetParticipants)
 	candidates := s.getBestCandidates(*contract, participantsToMatch)
+	// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
 
-	fmt.Println(candidates)
+	allParticipants := make(map[string]*pb.RemoteParticipant)
+	for pname, p := range candidates {
+		allParticipants[pname] = p
+	}
+	for pname, p := range presetParticipants {
+		allParticipants[pname] = p
+	}
 
-	// channelID := uuid.New()
+	log.Println(candidates)
 
-	// TODO: notify candidates and participantsToMatch
+	channelID := uuid.New()
+
+	// first round: InitChannel to all candidates and presetParticipants and wait for response
+	// if any one of them did not respond, recurse into this func excluding unresponsive participants
+	unresponsiveParticipants := make(map[string]bool)
+	for pname, p := range allParticipants {
+		conn, err := grpc.Dial(
+			fmt.Sprintf("%s:10000", p.Url),
+			grpc.WithInsecure(), // TODO: use tls
+			grpc.WithBlock(),
+			grpc.FailOnNonTempDialError(true),
+		)
+		if err != nil {
+			// TODO: discard this participant if it's not in presetParticipants
+			unresponsiveParticipants[pname] = true
+			log.Fatalf("Couldn't contact participant")
+		}
+		defer conn.Close()
+		client := pb.NewPublicMiddlewareClient(conn)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: remove hardcoded timeout
+		defer cancel()
+		req := pb.InitChannelRequest{
+			ChannelId:    channelID.String(),
+			AppId:        p.AppId,
+			Participants: allParticipants,
+		}
+		res, err := client.InitChannel(ctx, &req)
+		if err != nil {
+			// TODO: discard this participant if it's not in presetParticipants
+			unresponsiveParticipants[pname] = true
+			log.Fatalf("Error doing InitChannel")
+		}
+		if res.Result != pb.InitChannelResponse_ACK {
+			// TODO: ??
+			log.Fatalf("Received non-ACK response to InitChannel")
+		}
+
+	}
+
+	// second round: when all responded ACK, signal them all to start choreography
+
 }
 
 func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {

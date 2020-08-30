@@ -239,6 +239,7 @@ var _PrivateMiddleware_serviceDesc = grpc.ServiceDesc{
 type PublicMiddlewareClient interface {
 	// The Broker, when a new channel is registered, signals all participants (except initiator) with this
 	InitChannel(ctx context.Context, in *InitChannelRequest, opts ...grpc.CallOption) (*InitChannelResponse, error)
+	StartChannel(ctx context.Context, in *StartChannelRequest, opts ...grpc.CallOption) (*StartChannelResponse, error)
 	MessageExchange(ctx context.Context, opts ...grpc.CallOption) (PublicMiddleware_MessageExchangeClient, error)
 }
 
@@ -253,6 +254,15 @@ func NewPublicMiddlewareClient(cc grpc.ClientConnInterface) PublicMiddlewareClie
 func (c *publicMiddlewareClient) InitChannel(ctx context.Context, in *InitChannelRequest, opts ...grpc.CallOption) (*InitChannelResponse, error) {
 	out := new(InitChannelResponse)
 	err := c.cc.Invoke(ctx, "/protobuf.PublicMiddleware/InitChannel", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *publicMiddlewareClient) StartChannel(ctx context.Context, in *StartChannelRequest, opts ...grpc.CallOption) (*StartChannelResponse, error) {
+	out := new(StartChannelResponse)
+	err := c.cc.Invoke(ctx, "/protobuf.PublicMiddleware/StartChannel", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -296,6 +306,7 @@ func (x *publicMiddlewareMessageExchangeClient) Recv() (*ApplicationMessageWithH
 type PublicMiddlewareServer interface {
 	// The Broker, when a new channel is registered, signals all participants (except initiator) with this
 	InitChannel(context.Context, *InitChannelRequest) (*InitChannelResponse, error)
+	StartChannel(context.Context, *StartChannelRequest) (*StartChannelResponse, error)
 	MessageExchange(PublicMiddleware_MessageExchangeServer) error
 	mustEmbedUnimplementedPublicMiddlewareServer()
 }
@@ -306,6 +317,9 @@ type UnimplementedPublicMiddlewareServer struct {
 
 func (*UnimplementedPublicMiddlewareServer) InitChannel(context.Context, *InitChannelRequest) (*InitChannelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitChannel not implemented")
+}
+func (*UnimplementedPublicMiddlewareServer) StartChannel(context.Context, *StartChannelRequest) (*StartChannelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartChannel not implemented")
 }
 func (*UnimplementedPublicMiddlewareServer) MessageExchange(PublicMiddleware_MessageExchangeServer) error {
 	return status.Errorf(codes.Unimplemented, "method MessageExchange not implemented")
@@ -330,6 +344,24 @@ func _PublicMiddleware_InitChannel_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PublicMiddlewareServer).InitChannel(ctx, req.(*InitChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PublicMiddleware_StartChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PublicMiddlewareServer).StartChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobuf.PublicMiddleware/StartChannel",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PublicMiddlewareServer).StartChannel(ctx, req.(*StartChannelRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -367,6 +399,10 @@ var _PublicMiddleware_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InitChannel",
 			Handler:    _PublicMiddleware_InitChannel_Handler,
+		},
+		{
+			MethodName: "StartChannel",
+			Handler:    _PublicMiddleware_StartChannel_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

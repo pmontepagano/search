@@ -73,6 +73,7 @@ message InitChannelNotification {
 service PublicMiddleware {
     // The Broker, when a new channel is registered, signals all participants (except initiator) with this
     rpc InitChannel(InitChannelRequest) returns(InitChannelResponse) {}
+    rpc StartChannel(StartChannelRequest) returns(StartChannelResponse) {}
     rpc MessageExchange (stream ApplicationMessageWithHeaders) returns (stream ApplicationMessageWithHeaders) {}
 }
 
@@ -85,6 +86,22 @@ message InitChannelRequest {
 }
 
 message InitChannelResponse {
-    // TODO: error codes?
+    enum Result {
+        ACK = 0;
+        ERR = 1;
+    }
+    Result result = 1;
 }
 
+message StartChannelRequest {
+    string channel_id = 1;
+    string app_id = 2;
+}
+
+message StartChannelResponse {
+    enum Result {
+        ACK = 0;
+        ERR = 1;
+    }
+    Result result = 1;
+}
