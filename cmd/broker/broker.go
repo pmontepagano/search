@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"dc.uba.ar/this/search/internal/broker"
+	"github.com/clpombo/search/internal/broker"
 )
 
 var (

@@ -1,7 +1,7 @@
 syntax = "proto3";
-package protobuf;
+package api;
 
-option go_package = "dc.uba.ar/this/search/protobuf";
+option go_package = "github.com/clpombo/search/api";
 
 // This is what will be exchanged between middlewares
 message ApplicationMessageWithHeaders {

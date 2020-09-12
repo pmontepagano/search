@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"dc.uba.ar/this/search/internal/middleware"
+	"github.com/clpombo/search/internal/middleware"
 )
 
 var (

@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	pb "dc.uba.ar/this/search/api"
+	pb "github.com/clpombo/search/api"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"

@@ -1,11 +1,11 @@
 syntax = "proto3";
-package protobuf;
+package api;
 
-import "protobuf/app_message.proto";
-import "protobuf/contracts.proto";
-import "protobuf/broker.proto";
+import "api/app_message.proto";
+import "api/contracts.proto";
+import "api/broker.proto";
 
-option go_package = "dc.uba.ar/this/search/protobuf";
+option go_package = "github.com/clpombo/search/api";
 
 
 /* 

@@ -1,9 +1,9 @@
 syntax = "proto3";
-package protobuf;
+package api;
 
-import "protobuf/contracts.proto";
+import "api/contracts.proto";
 
-option go_package = "dc.uba.ar/this/search/protobuf";
+option go_package = "github.com/clpombo/search/api";
 
 
 service Broker {

@@ -17,7 +17,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/testdata"
 
-	pb "dc.uba.ar/this/search/api"
+	pb "github.com/clpombo/search/api"
 )
 
 type brokerServer struct {
