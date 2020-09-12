@@ -34,7 +34,7 @@ type middlewareServer struct {
 	// channels already brokered. key: ChannelID
 	brokeredChannels map[string]*SEARCHChannel
 
-	// channels registered by local apps that have not yet been used. key: LocalID
+	// channels registered by local apps that have not yet been brokered. key: LocalID
 	unBrokeredChannels map[string]*SEARCHChannel
 
 	// mapping of channels' LocalID <--> ID (global)

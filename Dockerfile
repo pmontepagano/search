@@ -1,19 +1,22 @@
 # syntax = docker/dockerfile:1-experimental
+# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.137.0/containers/go/.devcontainer/base.Dockerfile
+ARG VARIANT="1.14"
+ARG USERNAME=search
+# You should use here your UID and GID
+ARG USER_UID=501
+ARG USER_GID=20
+FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT} as dev
 
-FROM golang:1.14-alpine AS build
 WORKDIR /src
-ENV CGO_ENABLED=1
+# ENV CGO_ENABLED=1
 COPY go.* .
 RUN go mod download
 COPY . .
 
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    go build -o /out/broker broker/broker.go
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    go build -o /out/clientmiddleware clientmiddleware/clientmiddleware.go
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    go build -o /out/providermiddleware providermiddleware/providermiddleware.go
+RUN --mount=type=cache,target=/home/$USERNAME/.cache/go-build \
+    go build -o /out/broker cmd/broker/broker.go
+RUN --mount=type=cache,target=/home/$USERNAME/.cache/go-build \
+    go build -o /out/middleware cmd/middleware/middleware.go
 
-
-FROM alpine AS bin
-COPY --from=build /out/* /
+FROM scratch AS prod
+COPY --from=dev /out/* /

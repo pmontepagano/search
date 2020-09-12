@@ -16,6 +16,6 @@ var (
 
 func main() {
 	flag.Parse()
-	broker.StartServer(port, tls, jsonDBFile, certFile, keyFile)
+	broker.StartServer(*port, *tls, *jsonDBFile, *certFile, *keyFile)
 }
 
