@@ -1,4 +1,4 @@
-module dc.uba.ar/this/search
+module github.com/clpombo/search
 
 go 1.14
 
