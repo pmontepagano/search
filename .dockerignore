@@ -1,2 +1,7 @@
 pruebas
 chorgram
+.devcontainer
+.vscode
+.git
+.env
+.gitmodules
