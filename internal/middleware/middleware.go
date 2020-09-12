@@ -1,8 +1,7 @@
-package main
+package middleware
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -11,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	pb "dc.uba.ar/this/search/protobuf"
+	pb "dc.uba.ar/this/search/api"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
@@ -21,14 +20,7 @@ import (
 )
 
 var (
-	tls        = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
-	certFile   = flag.String("cert_file", "", "The TLS cert file")
-	keyFile    = flag.String("key_file", "", "The TLS key file")
-	caFile     = flag.String("ca_file", "", "The file containing the CA root cert file")
-	port       = flag.Int("port", 10000, "The server port")
-	brokerAddr = flag.String("broker_addr", "localhost", "The server address in the format of host:port")
-	brokerPort = flag.Int("broker_port", 10000, "The port in which the broker is listening")
-	bufferSize = flag.Int("buffer_size", 100, "The size of each connection's  buffer")
+	bufferSize = 100
 )
 
 type middlewareServer struct {
@@ -47,15 +39,20 @@ type middlewareServer struct {
 
 	// mapping of channels' LocalID <--> ID (global)
 	localChannels *bimap.BiMap
+
+	brokerAddr string
+	brokerPort int
 }
 
-func newMiddlewareServer() *middlewareServer {
+func newMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
 	var s middlewareServer
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
 	s.brokeredChannels = make(map[string]*SEARCHChannel)   // channels already brokered (locally initiated or not)
 	s.unBrokeredChannels = make(map[string]*SEARCHChannel) // channels locally registered but not yet brokered
 
+	s.brokerAddr = brokerAddr
+	s.brokerPort = brokerPort
 	return &s
 }
 
@@ -88,8 +85,8 @@ func newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
 	r.Outgoing = make(map[string]chan pb.MessageContent)
 	r.Incoming = make(map[string]chan pb.MessageContent)
 	for _, p := range contract.GetRemoteParticipants() {
-		r.Outgoing[p] = make(chan pb.MessageContent, *bufferSize)
-		r.Incoming[p] = make(chan pb.MessageContent, *bufferSize)
+		r.Outgoing[p] = make(chan pb.MessageContent, bufferSize)
+		r.Incoming[p] = make(chan pb.MessageContent, bufferSize)
 	}
 
 	return &r
@@ -98,21 +95,21 @@ func newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
 // connect to the broker, send contract, wait for result and save data in the channel
 func (r *SEARCHChannel) broker(mw *middlewareServer) {
 	var opts []grpc.DialOption
-	if *tls {
-		if *caFile == "" {
-			*caFile = testdata.Path("ca.pem")
-		}
-		// creds, err := credentials.NewClientTLSFromFile(*caFile, *serverHostOverride)
-		// if err != nil {
-		// 	log.Fatalf("Failed to create TLS credentials %v", err)
-		//}
-		//opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
+	// if *tls {
+	// 	if *caFile == "" {
+	// 		*caFile = testdata.Path("ca.pem")
+	// 	}
+	// 	creds, err := credentials.NewClientTLSFromFile(*caFile, *serverHostOverride)
+	// 	if err != nil {
+	// 		log.Fatalf("Failed to create TLS credentials %v", err)
+	// 	}
+	// 	opts = append(opts, grpc.WithTransportCredentials(creds))
+	// } else {
 		opts = append(opts, grpc.WithInsecure())
-	}
+	// }
 	opts = append(opts, grpc.WithBlock())
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", *brokerAddr, *brokerPort), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", mw.brokerAddr, mw.brokerPort), opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
@@ -153,7 +150,7 @@ func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 		return err
 	}
 
-	notifyInitChannel := make(chan pb.InitChannelNotification, *bufferSize)
+	notifyInitChannel := make(chan pb.InitChannelNotification, bufferSize)
 	s.registeredApps[mockUUID.String()] = registeredApp{Contract: *req.ProviderContract, NotifyChan: &notifyInitChannel}
 	for {
 		newChan := <-notifyInitChannel
@@ -289,8 +286,8 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	return &pb.InitChannelResponse{}, nil
 }
 
-func main() {
-	flag.Parse()
+// StartServer starts gRPC middleware server
+func StartServer(port *int, tls *bool, certFile *string, keyFile *string, brokerAddr string, brokerPort int){
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -311,7 +308,7 @@ func main() {
 	}
 	grpcServer := grpc.NewServer(opts...)
 
-	pms := newMiddlewareServer()
+	pms := newMiddlewareServer(brokerAddr, brokerPort)
 	pb.RegisterPublicMiddlewareServer(grpcServer, pms)
 	grpcServer.Serve(lis)
 }

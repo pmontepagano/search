@@ -1,9 +1,8 @@
-package main
+package broker
 
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -18,15 +17,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/testdata"
 
-	pb "dc.uba.ar/this/search/protobuf"
-)
-
-var (
-	tls        = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
-	certFile   = flag.String("cert_file", "", "The TLS cert file")
-	keyFile    = flag.String("key_file", "", "The TLS key file")
-	jsonDBFile = flag.String("json_db_file", "", "A json file containing a list of features")
-	port       = flag.Int("port", 10000, "The server port")
+	pb "dc.uba.ar/this/search/api"
 )
 
 type brokerServer struct {
@@ -166,14 +157,13 @@ func (s *brokerServer) loadData(filePath string) {
 	}
 }
 
-func newServer() *brokerServer {
+func newServer(jsonDBFile *string) *brokerServer {
 	s := &brokerServer{}
 	s.loadData(*jsonDBFile)
 	return s
 }
 
-func main() {
-	flag.Parse()
+func StartServer(port *int, tls *bool, jsonDBFile *string, certFile *string, keyFile *string){
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -193,7 +183,7 @@ func main() {
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterBrokerServer(grpcServer, newServer())
+	pb.RegisterBrokerServer(grpcServer, newServer(jsonDBFile))
 	fmt.Println("Broker server starting...")
 	grpcServer.Serve(lis)
 }
