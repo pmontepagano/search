@@ -124,6 +124,9 @@ func (r *SEARCHChannel) broker(mw *middlewareServer) {
 	if err != nil {
 		log.Fatalf("%v.BrokerChannel(_) = _, %v: ", client, err)
 	}
+	if brokerresult.Result != pb.BrokerChannelResponse_ACK {
+		log.Fatalf("Non ACK return code when trying to broker channel.")
+	}
 
 	// TODO: refactor this part into new function (also used on InitChannel)
 	// r.addresses = brokerresult.GetParticipants()
@@ -218,14 +221,14 @@ func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessa
 	} else {
 		channelID, ok := s.localChannels.Get(localID)
 		if !ok {
-			log.Fatalf("Brokered channel %s not found in localChannels", localID)
+			log.Fatalf("AppSend invoked on channel ID %s: there's no localChannel with that ID.", localID)
 		}
 		c = s.brokeredChannels[channelID.(string)]
 	}
 	c.Outgoing[req.Recipient] <- *req.Content // enqueue message in outgoing buffer
 
 	// TODO: reply with error code in case there is an error. eg buffer full.
-	return &pb.AppSendResponse{Result: 0}, nil // TODO: use enum instead of 0
+	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
 }
 
 // When the middleware receives a message in its public interface, it must enqueue it so that

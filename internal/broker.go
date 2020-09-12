@@ -110,7 +110,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 			grpc.FailOnNonTempDialError(true),
 		)
 		if err != nil {
-			// TODO: discard this participant if it's not in presetParticipants
+			// TODO: discard this participant if it's not in presetParticipants by recursing into this func excluding this participant
 			unresponsiveParticipants[pname] = true
 			log.Fatalf("Couldn't contact participant")
 		}
@@ -121,7 +121,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		req := pb.InitChannelRequest{
 			ChannelId:    channelID.String(),
 			AppId:        p.AppId,
-			Participants: allParticipants,
+			Participants: allParticipants, // TODO: this should be a different map for each participant, using their local participants' names as keys
 		}
 		res, err := client.InitChannel(ctx, &req)
 		if err != nil {
