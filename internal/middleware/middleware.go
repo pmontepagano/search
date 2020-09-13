@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -287,28 +288,52 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 }
 
 // StartServer starts gRPC middleware server
-func StartServer(port *int, tls *bool, certFile *string, keyFile *string, brokerAddr string, brokerPort int){
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+func StartMiddlewareServer(publicPort int, privatePort int, tls bool, certFile string, keyFile string, brokerAddr string, brokerPort int){
+	lisPub, err := net.Listen("tcp", fmt.Sprintf(":%d", publicPort))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	lisPriv, err := net.Listen("tcp", fmt.Sprintf(":%d", privatePort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	var opts []grpc.ServerOption
-	if *tls {
-		if *certFile == "" {
-			*certFile = testdata.Path("server1.pem")
+	if tls {
+		if certFile == "" {
+			certFile = testdata.Path("server1.pem")
 		}
-		if *keyFile == "" {
-			*keyFile = testdata.Path("server1.key")
+		if keyFile == "" {
+			keyFile = testdata.Path("server1.key")
 		}
-		creds, err := credentials.NewServerTLSFromFile(*certFile, *keyFile)
+		creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 		if err != nil {
 			log.Fatalf("Failed to generate credentials %v", err)
 		}
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
-	grpcServer := grpc.NewServer(opts...)
+
+	publicGrpcServer := grpc.NewServer(opts...)
+	privateGrpcServer := grpc.NewServer(opts...)
 
 	pms := newMiddlewareServer(brokerAddr, brokerPort)
-	pb.RegisterPublicMiddlewareServer(grpcServer, pms)
-	grpcServer.Serve(lis)
+	pb.RegisterPublicMiddlewareServer(publicGrpcServer, pms)
+	pb.RegisterPrivateMiddlewareServer(privateGrpcServer, pms)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		// log.Println("Waiting for SIGINT or SIGTERM on public server.")
+		publicGrpcServer.Serve(lisPub)
+	}()
+
+	go func() {
+		defer wg.Done()
+		// log.Println("Waiting for SIGINT or SIGTERM on private server.")
+		privateGrpcServer.Serve(lisPriv)
+	}()
+
+	wg.Wait()
+	
 }

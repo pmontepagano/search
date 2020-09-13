@@ -11,12 +11,13 @@ var (
 	certFile   = flag.String("cert_file", "", "The TLS cert file")
 	keyFile    = flag.String("key_file", "", "The TLS key file")
 	caFile     = flag.String("ca_file", "", "The file containing the CA root cert file")
-	port       = flag.Int("port", 10000, "The server port")
+	publicPort       = flag.Int("public_port", 10000, "The port for public facing middleware")
+	privatePort      = flag.Int("private_port", 11000, "The port for private services")
 	brokerAddr = flag.String("broker_addr", "localhost", "The server address in the format of host:port")
 	brokerPort = flag.Int("broker_port", 10000, "The port in which the broker is listening")
 )
 
 func main() {
 	flag.Parse()
-	middleware.StartServer(port, tls, certFile, keyFile, *brokerAddr, *brokerPort)
+	middleware.StartMiddlewareServer(*publicPort, *privatePort,*tls, *certFile, *keyFile, *brokerAddr, *brokerPort)
 }
