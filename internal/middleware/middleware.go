@@ -45,7 +45,7 @@ type middlewareServer struct {
 	brokerPort int
 }
 
-func newMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
+func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
 	var s middlewareServer
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
@@ -288,7 +288,7 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 }
 
 // StartServer starts gRPC middleware server
-func StartMiddlewareServer(publicPort int, privatePort int, tls bool, certFile string, keyFile string, brokerAddr string, brokerPort int){
+func (s *middlewareServer) StartMiddlewareServer(publicPort int, privatePort int, tls bool, certFile string, keyFile string){
 	lisPub, err := net.Listen("tcp", fmt.Sprintf(":%d", publicPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -315,9 +315,9 @@ func StartMiddlewareServer(publicPort int, privatePort int, tls bool, certFile s
 	publicGrpcServer := grpc.NewServer(opts...)
 	privateGrpcServer := grpc.NewServer(opts...)
 
-	pms := newMiddlewareServer(brokerAddr, brokerPort)
-	pb.RegisterPublicMiddlewareServer(publicGrpcServer, pms)
-	pb.RegisterPrivateMiddlewareServer(privateGrpcServer, pms)
+	
+	pb.RegisterPublicMiddlewareServer(publicGrpcServer, s)
+	pb.RegisterPrivateMiddlewareServer(privateGrpcServer, s)
 
 	var wg sync.WaitGroup
 	wg.Add(2)

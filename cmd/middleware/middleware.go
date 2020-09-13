@@ -19,5 +19,6 @@ var (
 
 func main() {
 	flag.Parse()
-	middleware.StartMiddlewareServer(*publicPort, *privatePort,*tls, *certFile, *keyFile, *brokerAddr, *brokerPort)
+	mw := middleware.NewMiddlewareServer(*brokerAddr, *brokerPort)
+	mw.StartMiddlewareServer(*publicPort, *privatePort, *tls, *certFile, *keyFile)
 }

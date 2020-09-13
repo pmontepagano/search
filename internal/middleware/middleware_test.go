@@ -11,8 +11,12 @@ import (
 	"google.golang.org/grpc"
 )
 
+
+var mw = NewMiddlewareServer("broker", 7777)
+
+
 func init() {
-	go StartMiddlewareServer(4444, 5555, false, "", "", "", 0)
+	go mw.StartMiddlewareServer(4444, 5555, false, "", "")
 }
 func TestRegisterChannel(t *testing.T) {
 	log.Println("hello world")
