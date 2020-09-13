@@ -33,7 +33,16 @@ func TestBrokerChannel_Request(t *testing.T) {
 		Contract: "hola",
 		RemoteParticipants: []string{"self", "p1"},
 	}
-	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{Contract: &c})
+	req := pb.BrokerChannelRequest{
+		Contract: &c,
+		PresetParticipants: map[string]*pb.RemoteParticipant{
+			"self": &pb.RemoteParticipant{
+				Url: "fake",
+				AppId: "fake",
+			},
+		},
+	}
+	brokerresult, err := client.BrokerChannel(ctx, &req)
 	if err != nil {
 		t.Error("Received error from broker.")
 	}

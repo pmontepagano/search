@@ -174,7 +174,7 @@ func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterC
 
 // routine that actually sends messages to remote particpant on a channel
 func (r *SEARCHChannel) sender(participant string) {
-	log.Println("Started sender routine for channel %s, participant %s", r.ID, participant)
+	log.Printf("Started sender routine for channel %s, participant %s\n", r.ID, participant)
 	// TODO: there has to be a way to stop this goroutine
 	for {
 		// wait for first message
