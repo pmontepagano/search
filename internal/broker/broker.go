@@ -157,14 +157,15 @@ func (s *brokerServer) loadData(filePath string) {
 	}
 }
 
-func newServer(jsonDBFile string) *brokerServer {
+// NewBrokerServer brokerServer constructor
+func NewBrokerServer(jsonDBFile string) *brokerServer {
 	s := &brokerServer{}
 	s.loadData(jsonDBFile)
 	return s
 }
 
-func StartServer(port int, tls bool, jsonDBFile string, certFile string, keyFile string){
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string){
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host ,port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -183,7 +184,7 @@ func StartServer(port int, tls bool, jsonDBFile string, certFile string, keyFile
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterBrokerServer(grpcServer, newServer(jsonDBFile))
+	pb.RegisterBrokerServer(grpcServer, s)
 	fmt.Println("Broker server starting...")
 	grpcServer.Serve(lis)
 }

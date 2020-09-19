@@ -43,6 +43,10 @@ type middlewareServer struct {
 
 	brokerAddr string
 	brokerPort int
+
+	// pointers to gRPC servers
+	publicServer *grpc.Server
+	privateServer *grpc.Server
 }
 
 func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
@@ -288,12 +292,12 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 }
 
 // StartServer starts gRPC middleware server
-func (s *middlewareServer) StartMiddlewareServer(publicPort int, privatePort int, tls bool, certFile string, keyFile string){
-	lisPub, err := net.Listen("tcp", fmt.Sprintf(":%d", publicPort))
+func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string){
+	lisPub, err := net.Listen("tcp", fmt.Sprintf("%s:%d", publicHost, publicPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	lisPriv, err := net.Listen("tcp", fmt.Sprintf(":%d", privatePort))
+	lisPriv, err := net.Listen("tcp", fmt.Sprintf("%s:%d", privateHost, privatePort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -315,6 +319,8 @@ func (s *middlewareServer) StartMiddlewareServer(publicPort int, privatePort int
 	publicGrpcServer := grpc.NewServer(opts...)
 	privateGrpcServer := grpc.NewServer(opts...)
 
+	s.publicServer = publicGrpcServer
+	s.privateServer = privateGrpcServer
 	
 	pb.RegisterPublicMiddlewareServer(publicGrpcServer, s)
 	pb.RegisterPrivateMiddlewareServer(privateGrpcServer, s)
@@ -336,4 +342,13 @@ func (s *middlewareServer) StartMiddlewareServer(publicPort int, privatePort int
 
 	wg.Wait()
 	
+}
+
+func (s *middlewareServer) Stop(){
+	if s.publicServer != nil {
+		s.publicServer.Stop()
+	}
+	if s.privateServer != nil {
+		s.privateServer.Stop()
+	}
 }

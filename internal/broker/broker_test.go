@@ -12,7 +12,8 @@ import (
 )
 
 func init() {
-	go StartServer(3333, false, "", "", "")
+	b := NewBrokerServer("")
+	go b.StartServer("localhost", 3333, false, "", "")
 }
 
 func TestBrokerChannel_Request(t *testing.T) {
