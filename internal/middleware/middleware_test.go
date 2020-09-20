@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"context"
-	"testing"
-	"time"
 	"io"
 	"log"
+	"testing"
+	"time"
 
 	pb "github.com/clpombo/search/api"
 	"github.com/clpombo/search/internal/broker"
@@ -63,7 +63,7 @@ func TestRegisterChannel(t *testing.T) {
 // We should see brokering happen and message exchange between apps
 func Test1(t *testing.T) {
 	// start broker
-	bs := broker.NewBrokerServer("./testdata/test1.json")
+	bs := broker.NewBrokerServer()
 	go bs.StartServer("localhost", 7777, false, "", "")
 
 	// start provider middleware
@@ -120,6 +120,9 @@ func Test1(t *testing.T) {
 
 	}()
 
+	// wait a couple of seconds so that provider gets to register with broker
+	time.Sleep(2 * time.Second)
+
 
 	// connect to client middleware and register channel
 	conn, err := grpc.Dial("localhost:9999", opts...)
@@ -149,7 +152,7 @@ func Test1(t *testing.T) {
 		Content: &pb.MessageContent{Body: []byte("hello world")},
 	})
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(2 * time.Second)
 
 
 }

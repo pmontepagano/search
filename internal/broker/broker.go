@@ -2,12 +2,12 @@ package broker
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
+	"reflect"
 	"sort"
 	"time"
 
@@ -22,7 +22,6 @@ import (
 
 type brokerServer struct {
 	pb.UnimplementedBrokerServer
-	savedData []*pb.RemoteParticipant // read-only after initialized
 	server *grpc.Server
 	registeredProviders map[string]registeredProvider
 }
@@ -48,10 +47,16 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 	return result
 }
 
+func GetRandomKeyFromMap(mapI interface{}) interface{} {
+	keys := reflect.ValueOf(mapI).MapKeys()
+	rand.NewSource(time.Now().UnixNano())
+	return keys[rand.Intn(len(keys))].Interface()
+}
+
 // given a contract and a list of participants, get best possible candidates for those candidates
 // from all the candidates present in the registry
 // TODO: we probably need to add a parameter to EXCLUDE candidates from regitry
-func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []string) map[string]*pb.RemoteParticipant {
+func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []string) (map[string]*pb.RemoteParticipant, error) {
 	// sanity check: check that all elements of param `participants` are present as participants in param `contract`
 	contractParticipants := contract.GetRemoteParticipants()
 	sort.Strings(contractParticipants)
@@ -68,13 +73,18 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 	response := make(map[string]*pb.RemoteParticipant)
 
 	// TODO: for now, we choose participants at random
-	rand.Seed(time.Now().Unix())
+	if len(s.registeredProviders) < 1 {
+		return nil, errors.New("No providers registered.")
+	}
 	for _, v := range participants {
 		log.Println("Received requirements contract with participant", v)
-		response[v] = s.savedData[rand.Intn(len(s.savedData))]
+		
+		appid := GetRandomKeyFromMap(s.registeredProviders).(string)
+		participant := s.registeredProviders[appid].participant
+		response[v] = &participant
 	}
 
-	return response
+	return response, nil
 }
 
 // contract will always have a distinguished participant called "self" that corresponds to the initiator
@@ -82,8 +92,12 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 // this routine will find compatible candidates and notify them
 func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant) {
 	participantsToMatch := filterParticipants(contract.GetRemoteParticipants(), presetParticipants)
-	candidates := s.getBestCandidates(contract, participantsToMatch)
-	// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
+	candidates, err := s.getBestCandidates(contract, participantsToMatch)
+	if err != nil {
+		// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
+		log.Fatal("Could not get any provider candidates.")
+	}
+	
 
 	allParticipants := make(map[string]*pb.RemoteParticipant)
 	for pname, p := range candidates {
@@ -168,29 +182,10 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 	return &pb.RegisterProviderResponse{AppId: appID.String()}, nil
 }
 
-// loads data from a JSON file
-func (s *brokerServer) loadData(filePath string) {
-	var data []byte
-	if filePath != "" {
-		var err error
-		data, err = ioutil.ReadFile(filePath)
-		if err != nil {
-			log.Fatalf("Failed to load default data: %v", err)
-		}
-	} else {
-		data = exampleData
-	}
-	if err := json.Unmarshal(data, &s.savedData); err != nil {
-		log.Fatalf("Failed to load data: %v", err)
-	}
-}
-
 // NewBrokerServer brokerServer constructor
-func NewBrokerServer(jsonDBFile string) *brokerServer {
+func NewBrokerServer() *brokerServer {
 	s := &brokerServer{}
 	s.registeredProviders = make(map[string]registeredProvider)
-	s.loadData(jsonDBFile)
-	log.Printf("savedData: %v", s.savedData)
 	return s
 }
 
@@ -225,19 +220,3 @@ func (s *brokerServer) Stop(){
 		s.server.Stop()
 	}
 }
-
-var exampleData = []byte(`[{
-	"Url": "providermiddleware",
-	"AppId": "example1FAKEuuid",
-	"Contract": {
-		"Contract": "unparsed",
-		"RemoteParticipants": ["p2"]
-	}
-}, {
-	"Url": "providermiddleware",
-	"AppId": "example2FAKEuuid",
-	"Contract": {
-		"Contract": "unparsed",
-		"RemoteParticipants": ["p2", "p3"]
-	}
-}]`)

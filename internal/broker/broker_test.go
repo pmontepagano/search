@@ -12,7 +12,7 @@ import (
 )
 
 func TestBrokerChannel_Request(t *testing.T) {
-	b := NewBrokerServer("")
+	b := NewBrokerServer()
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -28,6 +28,19 @@ func TestBrokerChannel_Request(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// register dummy provider
+	_, err = client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
+		Contract: &pb.Contract{
+			Contract: "dummy",
+			RemoteParticipants: []string{"self", "p0"},
+		},
+		Url: "fakeurl",
+	})
+	if err != nil {
+		log.Fatalf("ERROR RegisterProvider: %v", err)
+	}
+
+	// ask for channel brokerage
 	c := pb.Contract{
 		Contract: "hola",
 		RemoteParticipants: []string{"self", "p1"},
