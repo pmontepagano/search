@@ -23,6 +23,7 @@ import (
 type brokerServer struct {
 	pb.UnimplementedBrokerServer
 	savedData []*pb.RemoteParticipant // read-only after initialized
+	server *grpc.Server
 }
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
@@ -186,9 +187,16 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
 	grpcServer := grpc.NewServer(opts...)
+	s.server = grpcServer
 	pb.RegisterBrokerServer(grpcServer, s)
 	log.Printf("Broker server starting...")
 	grpcServer.Serve(lis)
+}
+
+func (s *brokerServer) Stop(){
+	if s.server != nil {
+		s.server.Stop()
+	}
 }
 
 var exampleData = []byte(`[{

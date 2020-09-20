@@ -11,12 +11,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-func init() {
+func TestBrokerChannel_Request(t *testing.T) {
 	b := NewBrokerServer("")
 	go b.StartServer("localhost", 3333, false, "", "")
-}
 
-func TestBrokerChannel_Request(t *testing.T) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
 	opts = append(opts, grpc.WithBlock())
@@ -50,4 +48,6 @@ func TestBrokerChannel_Request(t *testing.T) {
 	if brokerresult.Result != pb.BrokerChannelResponse_ACK {
 		t.Error("Non ACK return code from broker")
 	}
+
+	b.Stop()
 }
