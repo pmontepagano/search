@@ -50,4 +50,5 @@ func TestBrokerChannel_Request(t *testing.T) {
 	}
 
 	b.Stop()
+	time.Sleep(5 * time.Second)	// FIXME
 }
