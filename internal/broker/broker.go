@@ -45,7 +45,7 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 // given a contract and a list of participants, get best possible candidates for those candidates
 // from all the candidates present in the registry
 // TODO: we probably need to add a parameter to EXCLUDE candidates from regitry
-func (s *brokerServer) getBestCandidates(contract pb.Contract, participants []string) map[string]*pb.RemoteParticipant {
+func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []string) map[string]*pb.RemoteParticipant {
 	// sanity check: check that all elements of param `participants` are present as participants in param `contract`
 	contractParticipants := contract.GetRemoteParticipants()
 	sort.Strings(contractParticipants)
@@ -76,7 +76,7 @@ func (s *brokerServer) getBestCandidates(contract pb.Contract, participants []st
 // this routine will find compatible candidates and notify them
 func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant) {
 	participantsToMatch := filterParticipants(contract.GetRemoteParticipants(), presetParticipants)
-	candidates := s.getBestCandidates(*contract, participantsToMatch)
+	candidates := s.getBestCandidates(contract, participantsToMatch)
 	// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
 
 	allParticipants := make(map[string]*pb.RemoteParticipant)
