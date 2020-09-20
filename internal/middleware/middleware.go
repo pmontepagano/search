@@ -47,6 +47,8 @@ type middlewareServer struct {
 	// pointers to gRPC servers
 	publicServer *grpc.Server
 	privateServer *grpc.Server
+	PublicUrl string
+	PrivateUrl string
 }
 
 func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
@@ -99,6 +101,7 @@ func newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
 
 // connect to the broker, send contract, wait for result and save data in the channel
 func (r *SEARCHChannel) broker(mw *middlewareServer) {
+	log.Println("middleware launching broker")
 	var opts []grpc.DialOption
 	// if *tls {
 	// 	if *caFile == "" {
@@ -122,7 +125,15 @@ func (r *SEARCHChannel) broker(mw *middlewareServer) {
 	client := pb.NewBrokerClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{Contract: &r.Contract})
+	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
+		Contract: &r.Contract,
+		PresetParticipants: map[string]*pb.RemoteParticipant{
+			"self": &pb.RemoteParticipant{
+				Url: mw.PublicUrl,	// TODO: what should we use here?
+				AppId: r.LocalID.String(),	// TODO: what should we use here?
+			},
+		},
+	})
 	if err != nil {
 		log.Fatalf("%v.BrokerChannel(_) = _, %v: ", client, err)
 	}
@@ -263,7 +274,7 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 
 // rpc invoked by broker to provider when initializing channel
 func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
-	log.Printf("Running InitChannel")
+	log.Printf("Running InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
@@ -293,11 +304,13 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 
 // StartServer starts gRPC middleware server
 func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string){
-	lisPub, err := net.Listen("tcp", fmt.Sprintf("%s:%d", publicHost, publicPort))
+	s.PublicUrl = fmt.Sprintf("%s:%d", publicHost, publicPort)
+	lisPub, err := net.Listen("tcp", s.PublicUrl)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	lisPriv, err := net.Listen("tcp", fmt.Sprintf("%s:%d", privateHost, privatePort))
+	s.PrivateUrl = fmt.Sprintf("%s:%d", privateHost, privatePort)
+	lisPriv, err := net.Listen("tcp", s.PrivateUrl)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

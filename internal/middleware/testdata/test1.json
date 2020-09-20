@@ -1,0 +1,12 @@
+[
+    {
+        "Url": "localhost:4444",
+        "AppId": "p2",
+        "Contract": {
+            "Contract": "unparsed",
+            "RemoteParticipants": [
+                "p1"
+            ]
+        }
+    }
+]

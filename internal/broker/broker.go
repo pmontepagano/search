@@ -94,8 +94,9 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 	// if any one of them did not respond, recurse into this func excluding unresponsive participants
 	unresponsiveParticipants := make(map[string]bool)
 	for pname, p := range allParticipants {
+		log.Printf("Brokering, first round. Contacting %s", p.AppId)
 		conn, err := grpc.Dial(
-			fmt.Sprintf("%s:10000", p.Url),
+			p.Url,
 			grpc.WithInsecure(), // TODO: use tls
 			grpc.WithBlock(),
 			grpc.FailOnNonTempDialError(true),
@@ -124,7 +125,6 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 			// TODO: ??
 			log.Fatalf("Received non-ACK response to InitChannel")
 		}
-
 	}
 
 	// second round: when all responded ACK, signal them all to start choreography
@@ -132,6 +132,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 }
 
 func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
+	log.Println("brokering...")
 	contract := request.GetContract()
 	presetParticipants := request.GetPresetParticipants()
 
@@ -185,7 +186,7 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 	}
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterBrokerServer(grpcServer, s)
-	fmt.Println("Broker server starting...")
+	log.Printf("Broker server starting...")
 	grpcServer.Serve(lis)
 }
 
