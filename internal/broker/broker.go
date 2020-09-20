@@ -104,7 +104,8 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		if err != nil {
 			// TODO: discard this participant if it's not in presetParticipants by recursing into this func excluding this participant
 			unresponsiveParticipants[pname] = true
-			log.Fatalf("Couldn't contact participant")
+			log.Printf("Couldn't contact participant")
+			// TODO: here we should increment sequence number for InitChannel and restart
 		}
 		defer conn.Close()
 		client := pb.NewPublicMiddlewareClient(conn)
@@ -119,11 +120,11 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		if err != nil {
 			// TODO: discard this participant if it's not in presetParticipants
 			unresponsiveParticipants[pname] = true
-			log.Fatalf("Error doing InitChannel")
+			log.Printf("Error doing InitChannel")
 		}
 		if res.Result != pb.InitChannelResponse_ACK {
 			// TODO: ??
-			log.Fatalf("Received non-ACK response to InitChannel")
+			log.Printf("Received non-ACK response to InitChannel")
 		}
 	}
 
