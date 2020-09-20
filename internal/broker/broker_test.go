@@ -35,7 +35,7 @@ func TestBrokerChannel_Request(t *testing.T) {
 	req := pb.BrokerChannelRequest{
 		Contract: &c,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
-			"self": &pb.RemoteParticipant{
+			"self": {
 				Url: "fake",
 				AppId: "fake",
 			},

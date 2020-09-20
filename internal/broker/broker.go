@@ -24,6 +24,12 @@ type brokerServer struct {
 	pb.UnimplementedBrokerServer
 	savedData []*pb.RemoteParticipant // read-only after initialized
 	server *grpc.Server
+	registeredProviders map[string]registeredProvider
+}
+
+type registeredProvider struct {
+	participant pb.RemoteParticipant
+	contract pb.Contract	// TODO: we'll need to use our LocalContract definition eventually
 }
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
@@ -87,7 +93,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		allParticipants[pname] = p
 	}
 
-	log.Println(candidates)
+	log.Println(allParticipants)
 
 	channelID := uuid.New()
 
@@ -137,13 +143,29 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 }
 
 func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
-	log.Println("brokering...")
+	log.Println("BROKER: brokering...")
 	contract := request.GetContract()
 	presetParticipants := request.GetPresetParticipants()
 
 	go s.brokerAndInitialize(contract, presetParticipants)
 
 	return &pb.BrokerChannelResponse{Result: pb.BrokerChannelResponse_ACK}, nil
+}
+
+// we receive a LocalContract and the url, and we assign an AppID to this provider
+func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterProviderRequest) (*pb.RegisterProviderResponse, error) {
+	log.Printf("BROKER: Registering provider from URL: %s", req.Url)
+
+	// TODO: parse and validate contract
+	appID := uuid.New()
+	s.registeredProviders[appID.String()] = registeredProvider{
+		participant: pb.RemoteParticipant{
+			Url: req.Url,
+			AppId: appID.String(),
+		},
+		contract: *req.GetContract(),
+	}
+	return &pb.RegisterProviderResponse{AppId: appID.String()}, nil
 }
 
 // loads data from a JSON file
@@ -166,7 +188,9 @@ func (s *brokerServer) loadData(filePath string) {
 // NewBrokerServer brokerServer constructor
 func NewBrokerServer(jsonDBFile string) *brokerServer {
 	s := &brokerServer{}
+	s.registeredProviders = make(map[string]registeredProvider)
 	s.loadData(jsonDBFile)
+	log.Printf("savedData: %v", s.savedData)
 	return s
 }
 
