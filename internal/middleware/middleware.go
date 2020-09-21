@@ -248,6 +248,27 @@ func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessa
 	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
 }
 
+func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.ApplicationMessageIn, error) {
+	c, ok := s.unBrokeredChannels[req.ChannelId]
+	if ok {
+		// channel has not been brokered
+		go c.broker(s)
+	} else {
+		channelID, ok := s.localChannels.Get(req.ChannelId)
+		if !ok {
+			log.Fatalf("AppRecv invoked on channel ID %s: there's no localChannel with that ID.", req.ChannelId)
+		}
+		c = s.brokeredChannels[channelID.(string)]
+	}
+	msg := <-c.Incoming[req.Participant]
+
+	return &pb.ApplicationMessageIn{
+		ChannelId: req.ChannelId,
+		Sender: req.Participant,
+		Content: &msg,
+	}, nil
+}
+
 // When the middleware receives a message in its public interface, it must enqueue it so that
 // the corresponding local app can receive it
 func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {

@@ -152,6 +152,16 @@ func Test1(t *testing.T) {
 		Content: &pb.MessageContent{Body: []byte("hello world")},
 	})
 
+	// receive echo from p2
+	resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+		ChannelId: regResult.ChannelId,
+		Participant: "p2",
+	})
+	if err != nil {
+		t.Error("Could not receive message from p2")
+	}
+	log.Printf("Received message from p2: %s", resp.Content)
+
 	time.Sleep(2 * time.Second)
 
 
