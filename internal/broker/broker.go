@@ -156,6 +156,39 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 	}
 
 	// second round: when all responded ACK, signal them all to start choreography
+	for pname, p := range allParticipants {
+		s.logger.Printf("Brokering, second round. Contacting %s", p.AppId)
+		// TODO: refactor this repeated code
+		conn, err := grpc.Dial(
+			p.Url,
+			grpc.WithInsecure(), // TODO: use tls
+			grpc.WithBlock(),
+			grpc.FailOnNonTempDialError(true),
+		)
+		if err != nil {
+			s.logger.Printf("Couldn't contact participant %s", pname)  // TODO: panic?
+			return
+		}
+		defer conn.Close()
+		client := pb.NewPublicMiddlewareClient(conn)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: remove hardcoded timeout
+		defer cancel()
+		req := pb.StartChannelRequest{
+			ChannelId:    channelID.String(),
+			AppId:        p.AppId,
+		}
+		res, err := client.StartChannel(ctx, &req)
+		if err != nil {
+			// TODO: panic?
+			s.logger.Printf("Error doing StartChannel")
+			return
+		}
+		if res.Result != pb.StartChannelResponse_ACK {
+			// TODO: ??
+			s.logger.Printf("Received non-ACK response to StartChannel")
+			return
+		}
+	}
 
 }
 

@@ -139,8 +139,8 @@ func (r *SEARCHChannel) broker() {
 		Contract: &r.Contract,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			"self": &pb.RemoteParticipant{
-				Url: r.mw.PublicURL,	// TODO: what should we use here?
-				AppId: r.LocalID.String(),	// TODO: what should we use here?
+				Url: r.mw.PublicURL,
+				AppId: r.LocalID.String(),  // we use channels LocalID as AppID for initiator apps
 			},
 		},
 	})
@@ -150,19 +150,6 @@ func (r *SEARCHChannel) broker() {
 	if brokerresult.Result != pb.BrokerChannelResponse_ACK {
 		r.mw.logger.Fatalf("Non ACK return code when trying to broker channel.")
 	}
-
-	// TODO: refactor this part into new function (also used on InitChannel)
-	// r.addresses = brokerresult.GetParticipants()
-	// r.ID = uuid.MustParse(brokerresult.GetChannelId())
-
-	// TODO: use mutex to handle maps
-	// mw.brokeredChannels[r.ID.String()] = r
-	// delete(mw.unBrokeredChannels, r.LocalID.String())
-	// mw.localChannels.Insert(r.LocalID.String(), r.ID.String())
-
-	// for _, p := range r.Contract.GetRemoteParticipants() {
-	// 	go r.sender(p)
-	// }
 }
 
 // invoked by local provider app with a provision contract
@@ -222,6 +209,7 @@ func (r *SEARCHChannel) sender(participant string) {
 			// if not connected, connect and save stream in r.streams
 			var opts []grpc.DialOption
 			opts = append(opts, grpc.WithBlock())
+			opts = append(opts, grpc.WithInsecure())
 			provconn, err := grpc.Dial(r.addresses[participant].GetUrl(), opts...)
 			if err != nil {
 				r.mw.logger.Fatalf("fail to dial: %v", err)
@@ -292,6 +280,7 @@ func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 // When the middleware receives a message in its public interface, it must enqueue it so that
 // the corresponding local app can receive it
 func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {
+	s.logger.Print("Starting MessageExchange")
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
@@ -318,34 +307,52 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 }
 
 // rpc invoked by broker when initializing channel
+// There are two options: a) the broker has matched one of our registered (provider) apps with a requirements contract
+// or b) the broker is responding to a brokerage request we sent to it. If this is the case, then AppID should
+// match the LocalID we generated for that channel of which we requested brokerage.
 func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
 	s.logger.Printf("Running InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
+	var r *SEARCHChannel
+	s.channelLock.Lock()
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
-		r := newSEARCHChannel(regapp.Contract, s)
-
-		// TODO: refactor this section (repeated in broker func)
-		r.addresses = icr.GetParticipants()
-		r.ID = uuid.MustParse(icr.GetChannelId())
-		r.LocalID = r.ID // in non locally initiated channels, there is a single channel_id
-
-		s.channelLock.Lock()
-		s.brokeredChannels[r.ID.String()] = r
-		s.localChannels.Insert(r.LocalID.String(), r.ID.String())
-		s.channelLock.Unlock()
-
-		for _, p := range r.Contract.GetRemoteParticipants() {
-			go r.sender(p)
-		}
+		r = newSEARCHChannel(regapp.Contract, s)
+		r.LocalID = uuid.MustParse(icr.GetChannelId()) // in non locally initiated channels, LocalID == ID
 
 		// notify local provider app
 		*regapp.NotifyChan <- pb.InitChannelNotification{ChannelId: icr.GetChannelId()}
 	} else {
-		s.logger.Printf("InitChannel with inexistent app_id: %s", icr.GetAppId())
-		// TODO: return error
+		r, ok = s.brokeringChannels[icr.AppId]
+		if !ok {
+			s.logger.Panicf("InitChannel with inexistent app_id: %s", icr.GetAppId())
+			// TODO: return error
+		}
+		delete(s.brokeringChannels, icr.AppId)
 	}
-	return &pb.InitChannelResponse{}, nil
+	r.addresses = icr.GetParticipants()
+	r.ID = uuid.MustParse(icr.GetChannelId())
+	s.brokeredChannels[icr.GetChannelId()] = r
+	s.localChannels.Insert(r.LocalID.String(), r.ID.String())
+	s.channelLock.Unlock()
+
+	return &pb.InitChannelResponse{Result: pb.InitChannelResponse_ACK}, nil
+}
+
+func (s *middlewareServer) StartChannel(ctx context.Context, req *pb.StartChannelRequest) (*pb.StartChannelResponse, error) {
+	s.logger.Printf("StartChannel. ChannelID: %s. AppID: %s", req.ChannelId, req.AppId)
+	s.channelLock.Lock()
+	c, ok := s.brokeredChannels[req.ChannelId]
+	s.channelLock.Unlock()
+	if !ok {
+		s.logger.Panicf("Received StartChannel on non brokered ChannelID: %s", req.ChannelId)
+	}
+	for _, p := range c.Contract.GetRemoteParticipants() {
+		if p != "self" {
+			go c.sender(p)
+		}
+	}
+	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_ACK}, nil
 }
 
 // StartServer starts gRPC middleware server

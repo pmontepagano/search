@@ -88,7 +88,7 @@ func Test1(t *testing.T) {
 		}
 		defer conn.Close()
 		client := pb.NewPrivateMiddlewareClient(conn)
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		// register dummy app with provider middleware
@@ -116,8 +116,13 @@ func Test1(t *testing.T) {
 			if err != nil {
 				t.Errorf("Error receiving notification from RegisterApp: %v", err)
 			}
-			log.Printf(new.GetNotification().ChannelId)
-			// TODO: handle new channel
+			log.Printf("[PROVIDER] - Received Notification. ChannelID: %s", new.GetNotification().ChannelId)
+
+			res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+				ChannelId: new.GetNotification().GetChannelId(),
+				Participant: "p1",
+			})
+			log.Printf("[PROVIDER] - Received message from p1: %s", res.Content.GetBody())
 		}
 
 	}()
@@ -155,14 +160,14 @@ func Test1(t *testing.T) {
 	})
 
 	// receive echo from p2
-	resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-		ChannelId: regResult.ChannelId,
-		Participant: "p2",
-	})
-	if err != nil {
-		t.Error("Could not receive message from p2")
-	}
-	log.Printf("Received message from p2: %s", resp.Content)
+	// resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+	// 	ChannelId: regResult.ChannelId,
+	// 	Participant: "p2",
+	// })
+	// if err != nil {
+	// 	t.Error("Could not receive message from p2")
+	// }
+	// log.Printf("Received message from p2: %s", resp.Content)
 
 	time.Sleep(2 * time.Second)
 
