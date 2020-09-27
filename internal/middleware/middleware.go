@@ -84,6 +84,7 @@ type SEARCHChannel struct {
 	LocalID  uuid.UUID // the identifier the local app uses to identify the channel
 	ID       uuid.UUID // channel identifier assigned by the broker
 	Contract pb.Contract
+	AppID    uuid.UUID
 
 	addresses map[string]*pb.RemoteParticipant                      // map participant names to remote URLs and AppIDs
 	streams   map[string]*pb.PublicMiddleware_MessageExchangeClient // map participant names to streams
@@ -190,6 +191,7 @@ func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 // invoked by local initiator app with a requirements contract
 func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
 	c := newSEARCHChannel(*in.GetRequirementsContract(), s)
+	c.AppID = c.LocalID
 	s.channelLock.Lock()
 	s.unBrokeredChannels[c.LocalID.String()] = c // this has to be changed when brokering
 	s.channelLock.Unlock()
@@ -199,37 +201,33 @@ func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterC
 // routine that actually sends messages to remote particpant on a channel
 func (r *SEARCHChannel) sender(participant string) {
 	r.mw.logger.Printf("Started sender routine for channel %s, participant %s\n", r.ID, participant)
-	// TODO: there has to be a way to stop this goroutine
-	for {
-		// wait for first message
-		msg := <-r.Outgoing[participant]
-		// check if connected to remote participant
-		stream, ok := r.streams[participant]
-		if !ok {
-			// if not connected, connect and save stream in r.streams
-			var opts []grpc.DialOption
-			opts = append(opts, grpc.WithBlock())
-			opts = append(opts, grpc.WithInsecure())
-			provconn, err := grpc.Dial(r.addresses[participant].GetUrl(), opts...)
-			if err != nil {
-				r.mw.logger.Fatalf("fail to dial: %v", err)
-			}
-			defer provconn.Close()
-			provClient := pb.NewPublicMiddlewareClient(provconn)
+	// wait for first message
+	msg := <-r.Outgoing[participant]
+	// connect and save stream in r.streams
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithBlock())
+	opts = append(opts, grpc.WithInsecure())	// TODO: use tls
+	provconn, err := grpc.Dial(r.addresses[participant].GetUrl(), opts...)
+	if err != nil {
+		r.mw.logger.Fatalf("fail to dial: %v", err)
+	}
+	defer provconn.Close()
+	provClient := pb.NewPublicMiddlewareClient(provconn)
 
-			stream, err := provClient.MessageExchange(context.Background())
-			if err != nil {
-				r.mw.logger.Fatalf("failed to establish MessageExchange")
-			}
-			r.streams[participant] = &stream
-		}
+	stream, err := provClient.MessageExchange(context.Background())
+	if err != nil {
+		r.mw.logger.Fatalf("failed to establish MessageExchange")
+	}
+	r.streams[participant] = &stream
+	for {
+		// TODO: there has to be a way to stop this goroutine
 		messageWithHeaders := pb.ApplicationMessageWithHeaders{
-			SenderId:    "initiator", // TODO: what should we use here? participant name in contract is enough
+			SenderId:    r.AppID.String(),
 			ChannelId:   r.ID.String(),
 			RecipientId: r.addresses[participant].AppId,
 			Content:     &msg}
-		s := *stream
-		s.Send(&messageWithHeaders)
+		stream.Send(&messageWithHeaders)
+		msg = <-r.Outgoing[participant]
 	}
 }
 
@@ -290,19 +288,19 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 			return err
 		}
 
-		fmt.Println("Received message from", in.SenderId, ":", string(in.Content.Body))
+		s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
 
 		// TODO: send to local app replacing sender name with local name
 
-		ack := pb.ApplicationMessageWithHeaders{
-			ChannelId:   in.ChannelId,
-			RecipientId: in.SenderId,
-			SenderId:    "provmwID-44",
-			Content:     &pb.MessageContent{Body: []byte("ack")}}
+		// ack := pb.ApplicationMessageWithHeaders{
+		// 	ChannelId:   in.ChannelId,
+		// 	RecipientId: in.SenderId,
+		// 	SenderId:    "provmwID-44",
+		// 	Content:     &pb.MessageContent{Body: []byte("ack")}}
 
-		if err := stream.Send(&ack); err != nil {
-			return err
-		}
+		// if err := stream.Send(&ack); err != nil {
+		// 	return err
+		// }
 	}
 }
 
@@ -318,6 +316,7 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
 		r = newSEARCHChannel(regapp.Contract, s)
+		r.AppID = uuid.MustParse(icr.GetAppId())
 		r.LocalID = uuid.MustParse(icr.GetChannelId()) // in non locally initiated channels, LocalID == ID
 
 		// notify local provider app
