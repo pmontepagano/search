@@ -39,6 +39,10 @@ type middlewareServer struct {
 	// channels registered by local apps that have not yet been brokered. key: LocalID
 	unBrokeredChannels map[string]*SEARCHChannel
 
+	// channels being brokered
+	brokeringChannels map[string]*SEARCHChannel
+	channelLock *sync.Mutex
+
 	// mapping of channels' LocalID <--> ID (global)
 	localChannels *bimap.BiMap
 
@@ -59,8 +63,11 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
 	var s middlewareServer
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
+
 	s.brokeredChannels = make(map[string]*SEARCHChannel)   // channels already brokered (locally initiated or not)
 	s.unBrokeredChannels = make(map[string]*SEARCHChannel) // channels locally registered but not yet brokered
+	s.brokeringChannels = make(map[string]*SEARCHChannel)  // channels being brokered
+	s.channelLock = &sync.Mutex{}
 
 	s.brokerAddr = brokerAddr
 	s.brokerPort = brokerPort
@@ -196,7 +203,9 @@ func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 // invoked by local initiator app with a requirements contract
 func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
 	c := newSEARCHChannel(*in.GetRequirementsContract(), s)
+	s.channelLock.Lock()
 	s.unBrokeredChannels[c.LocalID.String()] = c // this has to be changed when brokering
+	s.channelLock.Unlock()
 	return &pb.RegisterChannelResponse{ChannelId: c.LocalID.String()}, nil
 }
 
@@ -236,20 +245,33 @@ func (r *SEARCHChannel) sender(participant string) {
 	}
 }
 
-// simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
-func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
-	localID := req.ChannelId // when local app is initiator, localID != channelID (global, set by broker)
+func (s *middlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
+	s.channelLock.Lock()
 	c, ok := s.unBrokeredChannels[localID]
 	if ok {
 		// channel has not been brokered
+		s.brokeringChannels[localID] = c
+		delete(s.unBrokeredChannels, localID)
 		go c.broker()
 	} else {
-		channelID, ok := s.localChannels.Get(localID)
+		// check if channel is being brokered
+		c, ok = s.brokeringChannels[localID]
 		if !ok {
-			s.logger.Fatalf("AppSend invoked on channel ID %s: there's no localChannel with that ID.", localID)
+			// channel must already be brokered
+			channelID, ok := s.localChannels.Get(localID)
+			if !ok {
+				s.logger.Fatalf("getChannelForUsage invoked on channel ID %s: there's no localChannel with that ID.", localID)
+			}
+			c = s.brokeredChannels[channelID.(string)]
 		}
-		c = s.brokeredChannels[channelID.(string)]
 	}
+	s.channelLock.Unlock()
+	return c
+}
+
+// simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
+func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
+	c := s.getChannelForUsage(req.ChannelId)
 	c.Outgoing[req.Recipient] <- *req.Content // enqueue message in outgoing buffer
 
 	// TODO: reply with error code in case there is an error. eg buffer full.
@@ -257,17 +279,7 @@ func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessa
 }
 
 func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.ApplicationMessageIn, error) {
-	c, ok := s.unBrokeredChannels[req.ChannelId]
-	if ok {
-		// channel has not been brokered
-		go c.broker()
-	} else {
-		channelID, ok := s.localChannels.Get(req.ChannelId)
-		if !ok {
-			s.logger.Fatalf("AppRecv invoked on channel ID %s: there's no localChannel with that ID.", req.ChannelId)
-		}
-		c = s.brokeredChannels[channelID.(string)]
-	}
+	c := s.getChannelForUsage(req.ChannelId)
 	msg := <-c.Incoming[req.Participant]
 
 	return &pb.ApplicationMessageIn{
@@ -318,9 +330,10 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 		r.ID = uuid.MustParse(icr.GetChannelId())
 		r.LocalID = r.ID // in non locally initiated channels, there is a single channel_id
 
-		// TODO: use mutex to handle maps
+		s.channelLock.Lock()
 		s.brokeredChannels[r.ID.String()] = r
 		s.localChannels.Insert(r.LocalID.String(), r.ID.String())
+		s.channelLock.Unlock()
 
 		for _, p := range r.Contract.GetRemoteParticipants() {
 			go r.sender(p)
