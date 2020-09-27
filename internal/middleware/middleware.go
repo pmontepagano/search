@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -47,8 +48,11 @@ type middlewareServer struct {
 	// pointers to gRPC servers
 	publicServer *grpc.Server
 	privateServer *grpc.Server
-	PublicUrl string
-	PrivateUrl string
+	PublicURL string
+	PrivateURL string
+
+	// logger with prefix
+	logger *log.Logger
 }
 
 func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
@@ -60,6 +64,7 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
 
 	s.brokerAddr = brokerAddr
 	s.brokerPort = brokerPort
+	s.logger = log.New(os.Stderr, "[MIDDLEWARE] ", log.LstdFlags | log.Lmsgprefix)
 	return &s
 }
 
@@ -79,11 +84,15 @@ type SEARCHChannel struct {
 	// buffers for incoming/outgoing messages from/to each participant
 	Outgoing map[string]chan pb.MessageContent
 	Incoming map[string]chan pb.MessageContent
+
+	// pointer to middleware
+	mw *middlewareServer
 }
 
 // TODO: maybe refactor and make this function a middlewareServer method?
-func newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
+func newSEARCHChannel(contract pb.Contract, mw *middlewareServer) *SEARCHChannel {
 	var r SEARCHChannel
+	r.mw = mw
 	r.LocalID = uuid.New()
 	r.Contract = contract
 	r.addresses = make(map[string]*pb.RemoteParticipant)
@@ -105,7 +114,7 @@ func (s *middlewareServer) connectBroker() (pb.BrokerClient, *grpc.ClientConn) {
 	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", s.brokerAddr, s.brokerPort), opts...)
 	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
+		s.logger.Fatalf("fail to dial: %v", err)
 	}
 	client := pb.NewBrokerClient(conn)
 
@@ -113,9 +122,9 @@ func (s *middlewareServer) connectBroker() (pb.BrokerClient, *grpc.ClientConn) {
 }
 
 // connect to the broker, send contract, wait for result and save data in the channel
-func (r *SEARCHChannel) broker(mw *middlewareServer) {
-	log.Println("middleware launching broker")
-	client, conn := mw.connectBroker()
+func (r *SEARCHChannel) broker() {
+	r.mw.logger.Println("middleware launching broker")
+	client, conn := r.mw.connectBroker()
 	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -123,16 +132,16 @@ func (r *SEARCHChannel) broker(mw *middlewareServer) {
 		Contract: &r.Contract,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			"self": &pb.RemoteParticipant{
-				Url: mw.PublicUrl,	// TODO: what should we use here?
+				Url: r.mw.PublicURL,	// TODO: what should we use here?
 				AppId: r.LocalID.String(),	// TODO: what should we use here?
 			},
 		},
 	})
 	if err != nil {
-		log.Fatalf("%v.BrokerChannel(_) = _, %v: ", client, err)
+		r.mw.logger.Fatalf("%v.BrokerChannel(_) = _, %v: ", client, err)
 	}
 	if brokerresult.Result != pb.BrokerChannelResponse_ACK {
-		log.Fatalf("Non ACK return code when trying to broker channel.")
+		r.mw.logger.Fatalf("Non ACK return code when trying to broker channel.")
 	}
 
 	// TODO: refactor this part into new function (also used on InitChannel)
@@ -151,17 +160,16 @@ func (r *SEARCHChannel) broker(mw *middlewareServer) {
 
 // invoked by local provider app with a provision contract
 func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddleware_RegisterAppServer) error {
-	// TODO: talk to the Registry to get my app_id
 	client, conn := s.connectBroker()
 	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: req.ProviderContract,
-		Url: s.PublicUrl,
+		Url: s.PublicURL,
 	})
 	if err != nil {
-		log.Fatalf("ERROR RegisterApp: %v", err)
+		s.logger.Fatalf("ERROR RegisterApp: %v", err)
 	}
 	ack := pb.RegisterAppResponse{
 		AckOrNew: &pb.RegisterAppResponse_AppId{
@@ -187,14 +195,14 @@ func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 
 // invoked by local initiator app with a requirements contract
 func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
-	c := newSEARCHChannel(*in.GetRequirementsContract())
+	c := newSEARCHChannel(*in.GetRequirementsContract(), s)
 	s.unBrokeredChannels[c.LocalID.String()] = c // this has to be changed when brokering
 	return &pb.RegisterChannelResponse{ChannelId: c.LocalID.String()}, nil
 }
 
 // routine that actually sends messages to remote particpant on a channel
 func (r *SEARCHChannel) sender(participant string) {
-	log.Printf("Started sender routine for channel %s, participant %s\n", r.ID, participant)
+	r.mw.logger.Printf("Started sender routine for channel %s, participant %s\n", r.ID, participant)
 	// TODO: there has to be a way to stop this goroutine
 	for {
 		// wait for first message
@@ -207,14 +215,14 @@ func (r *SEARCHChannel) sender(participant string) {
 			opts = append(opts, grpc.WithBlock())
 			provconn, err := grpc.Dial(fmt.Sprintf("%s:10000", r.addresses[participant].GetUrl()), opts...)
 			if err != nil {
-				log.Fatalf("fail to dial: %v", err)
+				r.mw.logger.Fatalf("fail to dial: %v", err)
 			}
 			defer provconn.Close()
 			provClient := pb.NewPublicMiddlewareClient(provconn)
 
 			stream, err := provClient.MessageExchange(context.Background())
 			if err != nil {
-				log.Fatalf("failed to establish MessageExchange")
+				r.mw.logger.Fatalf("failed to establish MessageExchange")
 			}
 			r.streams[participant] = &stream
 		}
@@ -234,11 +242,11 @@ func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessa
 	c, ok := s.unBrokeredChannels[localID]
 	if ok {
 		// channel has not been brokered
-		go c.broker(s)
+		go c.broker()
 	} else {
 		channelID, ok := s.localChannels.Get(localID)
 		if !ok {
-			log.Fatalf("AppSend invoked on channel ID %s: there's no localChannel with that ID.", localID)
+			s.logger.Fatalf("AppSend invoked on channel ID %s: there's no localChannel with that ID.", localID)
 		}
 		c = s.brokeredChannels[channelID.(string)]
 	}
@@ -252,11 +260,11 @@ func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 	c, ok := s.unBrokeredChannels[req.ChannelId]
 	if ok {
 		// channel has not been brokered
-		go c.broker(s)
+		go c.broker()
 	} else {
 		channelID, ok := s.localChannels.Get(req.ChannelId)
 		if !ok {
-			log.Fatalf("AppRecv invoked on channel ID %s: there's no localChannel with that ID.", req.ChannelId)
+			s.logger.Fatalf("AppRecv invoked on channel ID %s: there's no localChannel with that ID.", req.ChannelId)
 		}
 		c = s.brokeredChannels[channelID.(string)]
 	}
@@ -299,11 +307,11 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 
 // rpc invoked by broker when initializing channel
 func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
-	log.Printf("Running InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
+	s.logger.Printf("Running InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
-		r := newSEARCHChannel(regapp.Contract)
+		r := newSEARCHChannel(regapp.Contract, s)
 
 		// TODO: refactor this section (repeated in broker func)
 		r.addresses = icr.GetParticipants()
@@ -321,7 +329,7 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 		// notify local provider app
 		*regapp.NotifyChan <- pb.InitChannelNotification{ChannelId: icr.GetChannelId()}
 	} else {
-		log.Printf("InitChannel with inexistent app_id: %s", icr.GetAppId())
+		s.logger.Printf("InitChannel with inexistent app_id: %s", icr.GetAppId())
 		// TODO: return error
 	}
 	return &pb.InitChannelResponse{}, nil
@@ -329,15 +337,16 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 
 // StartServer starts gRPC middleware server
 func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string){
-	s.PublicUrl = fmt.Sprintf("%s:%d", publicHost, publicPort)
-	lisPub, err := net.Listen("tcp", s.PublicUrl)
+	s.PublicURL = fmt.Sprintf("%s:%d", publicHost, publicPort)
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s ", s.PublicURL), log.LstdFlags | log.Lmsgprefix)
+	lisPub, err := net.Listen("tcp", s.PublicURL)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		s.logger.Fatalf("failed to listen: %v", err)
 	}
-	s.PrivateUrl = fmt.Sprintf("%s:%d", privateHost, privatePort)
-	lisPriv, err := net.Listen("tcp", s.PrivateUrl)
+	s.PrivateURL = fmt.Sprintf("%s:%d", privateHost, privatePort)
+	lisPriv, err := net.Listen("tcp", s.PrivateURL)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		s.logger.Fatalf("failed to listen: %v", err)
 	}
 	var opts []grpc.ServerOption
 	if tls {
@@ -349,7 +358,7 @@ func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort i
 		}
 		creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 		if err != nil {
-			log.Fatalf("Failed to generate credentials %v", err)
+			s.logger.Fatalf("Failed to generate credentials %v", err)
 		}
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
@@ -368,13 +377,13 @@ func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort i
 
 	go func() {
 		defer wg.Done()
-		// log.Println("Waiting for SIGINT or SIGTERM on public server.")
+		// s.logger.Println("Waiting for SIGINT or SIGTERM on public server.")
 		publicGrpcServer.Serve(lisPub)
 	}()
 
 	go func() {
 		defer wg.Done()
-		// log.Println("Waiting for SIGINT or SIGTERM on private server.")
+		// s.logger.Println("Waiting for SIGINT or SIGTERM on private server.")
 		privateGrpcServer.Serve(lisPriv)
 	}()
 

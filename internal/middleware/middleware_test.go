@@ -91,6 +91,7 @@ func Test1(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
+		// register dummy app with provider middleware
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
 				Contract: "dummy",
@@ -106,13 +107,14 @@ func Test1(t *testing.T) {
 			t.Error("Could not receive ACK from RegisterApp")
 		}
 
+		// loop on RegisterAppResponse stream to await for new channels
 		for {
 			new, err := stream.Recv()
 			if err == io.EOF {
 				t.Error("Broker unexpectedly ended connection with provider")
 			}
 			if err != nil {
-				t.Error("Error receiving notification from RegisterApp")
+				t.Errorf("Error receiving notification from RegisterApp: %v", err)
 			}
 			log.Printf(new.GetNotification().ChannelId)
 			// TODO: handle new channel
