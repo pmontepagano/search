@@ -222,7 +222,7 @@ func (r *SEARCHChannel) sender(participant string) {
 			// if not connected, connect and save stream in r.streams
 			var opts []grpc.DialOption
 			opts = append(opts, grpc.WithBlock())
-			provconn, err := grpc.Dial(fmt.Sprintf("%s:10000", r.addresses[participant].GetUrl()), opts...)
+			provconn, err := grpc.Dial(r.addresses[participant].GetUrl(), opts...)
 			if err != nil {
 				r.mw.logger.Fatalf("fail to dial: %v", err)
 			}
