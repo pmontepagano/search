@@ -94,7 +94,7 @@ func Test1(t *testing.T) {
 		// register dummy app with provider middleware
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
-				Contract: "dummy",
+				Contract: "dummy provider contract",
 				RemoteParticipants: []string{"self", "p1"},
 			},
 		}
@@ -138,7 +138,7 @@ func Test1(t *testing.T) {
 
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract: "hola",
+			Contract: "client example requirement contract",
 			RemoteParticipants: []string{"self", "p2"},
 		},
 	}

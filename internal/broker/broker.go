@@ -80,7 +80,7 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 		return nil, errors.New("No providers registered.")
 	}
 	for _, v := range participants {
-		s.logger.Println("Received requirements contract with participant", v)
+		// s.logger.Println("Received requirements contract with participant", v)
 		
 		appid := GetRandomKeyFromMap(s.registeredProviders).(string)
 		participant := s.registeredProviders[appid].participant
@@ -160,7 +160,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 }
 
 func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
-	s.logger.Println("Received broker request")
+	s.logger.Printf("Received broker request for contract: '%s'", request.Contract.Contract)
 	contract := request.GetContract()
 	presetParticipants := request.GetPresetParticipants()
 
@@ -171,7 +171,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 
 // we receive a LocalContract and the url, and we assign an AppID to this provider
 func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterProviderRequest) (*pb.RegisterProviderResponse, error) {
-	s.logger.Printf("Registering provider from URL: %s", req.Url)
+	s.logger.Printf("Registering provider from URL: %s, contract '%s'", req.Url, req.Contract.Contract)
 
 	// TODO: parse and validate contract
 	appID := uuid.New()
@@ -189,13 +189,13 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 func NewBrokerServer() *brokerServer {
 	s := &brokerServer{}
 	s.registeredProviders = make(map[string]registeredProvider)
-	s.logger = log.New(os.Stderr, "[BROKER] ", log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags | log.Lmsgprefix)
 	return s
 }
 
 func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string){
 	s.PublicURL = fmt.Sprintf("%s:%d", host, port)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s ", s.PublicURL), log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags | log.Lmsgprefix)
 	lis, err := net.Listen("tcp", s.PublicURL)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)

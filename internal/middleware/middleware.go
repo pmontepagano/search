@@ -64,7 +64,7 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
 
 	s.brokerAddr = brokerAddr
 	s.brokerPort = brokerPort
-	s.logger = log.New(os.Stderr, "[MIDDLEWARE] ", log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, "[MIDDLEWARE] - ", log.LstdFlags | log.Lmsgprefix)
 	return &s
 }
 
@@ -123,7 +123,7 @@ func (s *middlewareServer) connectBroker() (pb.BrokerClient, *grpc.ClientConn) {
 
 // connect to the broker, send contract, wait for result and save data in the channel
 func (r *SEARCHChannel) broker() {
-	r.mw.logger.Println("middleware launching broker")
+	r.mw.logger.Printf("Requesting brokerage of contract: '%v'", r.Contract.Contract)
 	client, conn := r.mw.connectBroker()
 	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -338,7 +338,7 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 // StartServer starts gRPC middleware server
 func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string){
 	s.PublicURL = fmt.Sprintf("%s:%d", publicHost, publicPort)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s ", s.PublicURL), log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags | log.Lmsgprefix)
 	lisPub, err := net.Listen("tcp", s.PublicURL)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)
