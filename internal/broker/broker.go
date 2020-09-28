@@ -110,15 +110,16 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		allParticipants[pname] = p
 	}
 
-	s.logger.Println(allParticipants)
+	// s.logger.Println(allParticipants)
 
 	channelID := uuid.New()
 
 	// first round: InitChannel to all candidates and presetParticipants and wait for response
 	// if any one of them did not respond, recurse into this func excluding unresponsive participants
 	unresponsiveParticipants := make(map[string]bool)
+	s.logger.Printf("Brokering: first round...")
 	for pname, p := range allParticipants {
-		s.logger.Printf("Brokering, first round. Contacting %s", p.AppId)
+		s.logger.Printf("Sending InitChannel to: %s", p.AppId)
 		conn, err := grpc.Dial(
 			p.Url,
 			grpc.WithInsecure(), // TODO: use tls
@@ -156,8 +157,9 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 	}
 
 	// second round: when all responded ACK, signal them all to start choreography
+	s.logger.Printf("Brokering: second round...")
 	for pname, p := range allParticipants {
-		s.logger.Printf("Brokering, second round. Contacting %s", p.AppId)
+		s.logger.Printf("Sending StartChannel to: %s", p.AppId)
 		// TODO: refactor this repeated code
 		conn, err := grpc.Dial(
 			p.Url,

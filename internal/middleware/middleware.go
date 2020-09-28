@@ -309,7 +309,7 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 // or b) the broker is responding to a brokerage request we sent to it. If this is the case, then AppID should
 // match the LocalID we generated for that channel of which we requested brokerage.
 func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
-	s.logger.Printf("Running InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
+	s.logger.Printf("Received InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
 	var r *SEARCHChannel
 	s.channelLock.Lock()
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
