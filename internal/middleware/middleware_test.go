@@ -96,9 +96,8 @@ func Test1(t *testing.T) {
 				RemoteParticipants: []string{"self", "p1"},
 			},
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		stream, err := client.RegisterApp(ctx, &req)
+
+		stream, err := client.RegisterApp(context.Background(), &req)
 		if err != nil {
 			t.Error("Could not Register App")
 		}
@@ -119,25 +118,34 @@ func Test1(t *testing.T) {
 			channelID := new.GetNotification().GetChannelId()
 			log.Printf("[PROVIDER] - Received Notification. ChannelID: %s", channelID)
 
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-			res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-				ChannelId: channelID,
-				Participant: "p1",
-			})
-			if err != nil {
-				t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
-			}
-			log.Printf("[PROVIDER] - Received message from p1: %s", res.Content.GetBody())
-			ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			client.AppSend(ctx, &pb.ApplicationMessageOut{
-				ChannelId: channelID,
-				Recipient: "p1",
-				Content: &pb.MessageContent{
-					Body: []byte("got it"),
-				},
-			})
+			// reply "ping!" messages with "pong!" until we receive a different message, then exit
+			go func(channelID string){
+				for {
+					ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+					defer cancel()
+					res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+						ChannelId: channelID,
+						Participant: "p1",
+					})
+					if err != nil {
+						t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
+					}
+					log.Printf("[PROVIDER] - Received message from p1: %s", res.Content.GetBody())
+					if string(res.Content.GetBody()) == "ping!" {
+						ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+						defer cancel()
+						client.AppSend(ctx, &pb.ApplicationMessageOut{
+							ChannelId: channelID,
+							Recipient: "p1",
+							Content: &pb.MessageContent{
+								Body: []byte("pong!"),
+							},
+						})
+					} else {
+						break
+					}
+				}
+			}(channelID)
 		}
 
 	}()
@@ -173,7 +181,7 @@ func Test1(t *testing.T) {
 	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
 		ChannelId: regResult.ChannelId,
 		Recipient: "p2",
-		Content: &pb.MessageContent{Body: []byte("hello world")},
+		Content: &pb.MessageContent{Body: []byte("ping!")},
 	})
 
 	// receive echo from p2
