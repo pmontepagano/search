@@ -80,14 +80,19 @@ type registeredApp struct {
 	NotifyChan *chan pb.InitChannelNotification
 }
 
+type messageExchangeStream interface {
+	Send(*pb.ApplicationMessageWithHeaders) error
+	Recv() (*pb.ApplicationMessageWithHeaders, error)
+}
+
 type SEARCHChannel struct {
 	LocalID  uuid.UUID // the identifier the local app uses to identify the channel
 	ID       uuid.UUID // channel identifier assigned by the broker
 	Contract pb.Contract
 	AppID    uuid.UUID
 
-	addresses map[string]*pb.RemoteParticipant                      // map participant names to remote URLs and AppIDs
-	streams   map[string]*pb.PublicMiddleware_MessageExchangeClient // map participant names to streams
+	addresses map[string]*pb.RemoteParticipant   // map participant names to remote URLs and AppIDs
+	streams   map[string]messageExchangeStream  // map participant names to streams
 
 	// buffers for incoming/outgoing messages from/to each participant
 	Outgoing map[string]chan pb.MessageContent
@@ -104,7 +109,7 @@ func newSEARCHChannel(contract pb.Contract, mw *middlewareServer) *SEARCHChannel
 	r.LocalID = uuid.New()
 	r.Contract = contract
 	r.addresses = make(map[string]*pb.RemoteParticipant)
-	r.streams = make(map[string]*pb.PublicMiddleware_MessageExchangeClient)
+	r.streams = make(map[string]messageExchangeStream)
 
 	r.Outgoing = make(map[string]chan pb.MessageContent)
 	r.Incoming = make(map[string]chan pb.MessageContent)
@@ -218,7 +223,7 @@ func (r *SEARCHChannel) sender(participant string) {
 	if err != nil {
 		r.mw.logger.Fatalf("failed to establish MessageExchange")
 	}
-	r.streams[participant] = &stream
+	r.streams[participant] = stream
 	for {
 		// TODO: there has to be a way to stop this goroutine
 		messageWithHeaders := pb.ApplicationMessageWithHeaders{
@@ -275,10 +280,28 @@ func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 	}, nil
 }
 
+// TODO: must send mapping in InitChannel AppID <--> Participant name according to app's contract
+
 // When the middleware receives a message in its public interface, it must enqueue it so that
 // the corresponding local app can receive it
 func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {
-	s.logger.Print("Starting MessageExchange")
+	s.logger.Print("Received MessageExchange...")
+	in, err := stream.Recv()
+	if err == io.EOF {
+		return nil
+	}
+	if err != nil {
+		return err // TODO: what should we do here?
+	}
+	s.channelLock.Lock()
+	_, ok := s.brokeredChannels[in.GetChannelId()]
+	if !ok {
+		s.logger.Printf("Received MessageExchange with ChannelID %s but it is not a brokered Channel in this middleware.", in.GetChannelId())
+	}
+	// TODO: must save stream un c.streams but we don't have participant's name
+	// c.streams[in.RecipientId]
+	s.channelLock.Unlock()
+	
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
