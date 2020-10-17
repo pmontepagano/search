@@ -24,6 +24,7 @@ import (
 type brokerServer struct {
 	pb.UnimplementedBrokerServer
 	server *grpc.Server
+	// mapping of AppIDs to registered providers
 	registeredProviders map[string]registeredProvider
 	PublicURL string
 	logger *log.Logger
@@ -90,6 +91,25 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 	return response, nil
 }
 
+// getParticipantMapping takes the mapping between participant's names and RemoteParticipants from the
+// initiator's perspective, and a participant name (also in the initiator's perspective), called receiver, 
+// and returns a mapping between participant names and RemoteParticipant's but using the receiver's
+// perspective for participant names. The receiver has to be present in the registry because
+// we need to parse its contract to get the mapping.
+func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.RemoteParticipant, receiver string) map[string]*pb.RemoteParticipant {
+	receiverRemoteParticipant, ok := initiatorMapping[receiver]
+	if !ok {
+		s.logger.Fatal("Receiver not present in initiatormapping")
+	}
+	// receiverProvider, ok := s.registeredProviders[receiverRemoteParticipant.AppId]
+	_, ok = s.registeredProviders[receiverRemoteParticipant.AppId]
+	if !ok {
+		s.logger.Fatal("Receiver not registered.")
+	}
+	// TODO: incomplete implementation
+	return initiatorMapping
+}
+
 // contract will always have a distinguished participant called "self" that corresponds to the initiator
 // self MUST be present in presetParticipants with its url and ID.
 // this routine will find compatible candidates and notify them
@@ -109,6 +129,9 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 	for pname, p := range presetParticipants {
 		allParticipants[pname] = p
 	}
+
+	// create mapping of each participant's contract name to RemoteParticipant
+	
 
 	// s.logger.Println(allParticipants)
 
