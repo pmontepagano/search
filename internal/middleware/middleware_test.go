@@ -81,6 +81,8 @@ func Test1(t *testing.T) {
 
 	// register dummy provider app and keep waiting for a notification
 	go func() {
+		// this function is for provider app
+
 		// connect to provider middleware
 		conn, err := grpc.Dial("localhost:5555", opts...)
 		if err != nil {

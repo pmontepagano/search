@@ -81,8 +81,6 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 		return nil, errors.New("No providers registered.")
 	}
 	for _, v := range participants {
-		// s.logger.Println("Received requirements contract with participant", v)
-		
 		appid := GetRandomKeyFromMap(s.registeredProviders).(string)
 		participant := s.registeredProviders[appid].participant
 		response[v] = &participant
@@ -97,17 +95,32 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 // perspective for participant names. The receiver has to be present in the registry because
 // we need to parse its contract to get the mapping.
 func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.RemoteParticipant, receiver string) map[string]*pb.RemoteParticipant {
+	if receiver == "self" {
+		return initiatorMapping
+	}
 	receiverRemoteParticipant, ok := initiatorMapping[receiver]
 	if !ok {
 		s.logger.Fatal("Receiver not present in initiatormapping")
 	}
-	// receiverProvider, ok := s.registeredProviders[receiverRemoteParticipant.AppId]
-	_, ok = s.registeredProviders[receiverRemoteParticipant.AppId]
+	receiverProvider, ok := s.registeredProviders[receiverRemoteParticipant.AppId]
 	if !ok {
 		s.logger.Fatal("Receiver not registered.")
 	}
-	// TODO: incomplete implementation
-	return initiatorMapping
+
+	// TODO: without parsing and understanding contracts, we can only translate mappings of
+	// contracts that have only two participants
+	if len(initiatorMapping) > 2 {
+		s.logger.Fatal("Cannot translate a mapping of more than two participants. Not yet implemented.")
+	}
+	if len(receiverProvider.contract.RemoteParticipants) > 2 {
+		s.logger.Fatal("Receiver has more than two participants in its contract. Cannot translate mapping, not yet implemented.")
+	}
+
+	res := make(map[string]*pb.RemoteParticipant)
+	res["self"] = receiverRemoteParticipant
+	otherParticipantName := receiverProvider.contract.RemoteParticipants[1]
+	res[otherParticipantName] = initiatorMapping["self"]
+	return res
 }
 
 // contract will always have a distinguished participant called "self" that corresponds to the initiator
@@ -129,9 +142,6 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 	for pname, p := range presetParticipants {
 		allParticipants[pname] = p
 	}
-
-	// create mapping of each participant's contract name to RemoteParticipant
-	
 
 	// s.logger.Println(allParticipants)
 
@@ -163,7 +173,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		req := pb.InitChannelRequest{
 			ChannelId:    channelID.String(),
 			AppId:        p.AppId,
-			Participants: allParticipants, // TODO: this should be a different map for each participant, using their local participants' names as keys
+			Participants: s.getParticipantMapping(allParticipants, pname),
 		}
 		res, err := client.InitChannel(ctx, &req)
 		if err != nil {
