@@ -59,6 +59,7 @@ type middlewareServer struct {
 	logger *log.Logger
 }
 
+// NewMiddlewareServer is middlewareServer's constructor
 func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
 	var s middlewareServer
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
@@ -85,18 +86,19 @@ type messageExchangeStream interface {
 	Recv() (*pb.ApplicationMessageWithHeaders, error)
 }
 
+// SEARCHChannel represents what we call a "channel" in SEARCH
 type SEARCHChannel struct {
 	LocalID  uuid.UUID // the identifier the local app uses to identify the channel
 	ID       uuid.UUID // channel identifier assigned by the broker
 	Contract pb.Contract
 	AppID    uuid.UUID
 
-	addresses map[string]*pb.RemoteParticipant   // map participant names to remote URLs and AppIDs
-	streams   map[string]messageExchangeStream  // map participant names to streams
+	addresses map[string]*pb.RemoteParticipant    // map participant names to remote URLs and AppIDs
+	streams   map[string]messageExchangeStream    // map participant names to streams
 
 	// buffers for incoming/outgoing messages from/to each participant
-	Outgoing map[string]chan pb.MessageContent
-	Incoming map[string]chan pb.MessageContent
+	Outgoing map[string]chan *pb.MessageContent
+	Incoming map[string]chan *pb.MessageContent
 
 	// pointer to middleware
 	mw *middlewareServer
@@ -111,11 +113,11 @@ func newSEARCHChannel(contract pb.Contract, mw *middlewareServer) *SEARCHChannel
 	r.addresses = make(map[string]*pb.RemoteParticipant)
 	r.streams = make(map[string]messageExchangeStream)
 
-	r.Outgoing = make(map[string]chan pb.MessageContent)
-	r.Incoming = make(map[string]chan pb.MessageContent)
+	r.Outgoing = make(map[string]chan *pb.MessageContent)
+	r.Incoming = make(map[string]chan *pb.MessageContent)
 	for _, p := range contract.GetRemoteParticipants() {
-		r.Outgoing[p] = make(chan pb.MessageContent, bufferSize)
-		r.Incoming[p] = make(chan pb.MessageContent, bufferSize)
+		r.Outgoing[p] = make(chan *pb.MessageContent, bufferSize)
+		r.Incoming[p] = make(chan *pb.MessageContent, bufferSize)
 	}
 
 	return &r
@@ -144,7 +146,7 @@ func (r *SEARCHChannel) broker() {
 	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
 		Contract: &r.Contract,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
-			"self": &pb.RemoteParticipant{
+			"self": {
 				Url: r.mw.PublicURL,
 				AppId: r.LocalID.String(),  // we use channels LocalID as AppID for initiator apps
 			},
@@ -230,12 +232,14 @@ func (r *SEARCHChannel) sender(participant string) {
 			SenderId:    r.AppID.String(),
 			ChannelId:   r.ID.String(),
 			RecipientId: r.addresses[participant].AppId,
-			Content:     &msg}
+			Content:     msg}
 		stream.Send(&messageWithHeaders)
 		msg = <-r.Outgoing[participant]
 	}
 }
 
+// if the SEARCHChannel is not yet brokered, we launch goroutine to do that
+// and also update middleware's internal structures to reflect that change
 func (s *middlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 	s.channelLock.Lock()
 	c, ok := s.unBrokeredChannels[localID]
@@ -263,7 +267,7 @@ func (s *middlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
 func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
 	c := s.getChannelForUsage(req.ChannelId)
-	c.Outgoing[req.Recipient] <- *req.Content // enqueue message in outgoing buffer
+	c.Outgoing[req.Recipient] <- req.Content // enqueue message in outgoing buffer
 
 	// TODO: reply with error code in case there is an error. eg buffer full.
 	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
@@ -276,7 +280,7 @@ func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 	return &pb.ApplicationMessageIn{
 		ChannelId: req.ChannelId,
 		Sender: req.Participant,
-		Content: &msg,
+		Content: msg,
 	}, nil
 }
 
