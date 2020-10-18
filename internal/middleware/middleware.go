@@ -93,8 +93,11 @@ type SEARCHChannel struct {
 	Contract pb.Contract
 	AppID    uuid.UUID
 
-	addresses map[string]*pb.RemoteParticipant    // map participant names to remote URLs and AppIDs
-	streams   map[string]messageExchangeStream    // map participant names to streams
+	addresses    map[string]*pb.RemoteParticipant    // map participant names to remote URLs and AppIDs, indexed by participant name
+	participants map[string]string					 // participant names indexed by AppID
+	
+	outStreams   map[string]messageExchangeStream    // map participant names to outgoing streams
+	inStreams    map[string]messageExchangeStream    // map participant names to incoming streams
 
 	// buffers for incoming/outgoing messages from/to each participant
 	Outgoing map[string]chan *pb.MessageContent
@@ -111,7 +114,9 @@ func newSEARCHChannel(contract pb.Contract, mw *middlewareServer) *SEARCHChannel
 	r.LocalID = uuid.New()
 	r.Contract = contract
 	r.addresses = make(map[string]*pb.RemoteParticipant)
-	r.streams = make(map[string]messageExchangeStream)
+	r.participants = make(map[string]string)
+	r.outStreams = make(map[string]messageExchangeStream)
+	r.inStreams = make(map[string]messageExchangeStream)
 
 	r.Outgoing = make(map[string]chan *pb.MessageContent)
 	r.Incoming = make(map[string]chan *pb.MessageContent)
@@ -210,7 +215,7 @@ func (r *SEARCHChannel) sender(participant string) {
 	r.mw.logger.Printf("Started sender routine for channel %s, participant %s\n", r.ID, participant)
 	// wait for first message
 	msg := <-r.Outgoing[participant]
-	// connect and save stream in r.streams
+	// connect and save stream in r.outStreams
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock())
 	opts = append(opts, grpc.WithInsecure())	// TODO: use tls
@@ -225,7 +230,7 @@ func (r *SEARCHChannel) sender(participant string) {
 	if err != nil {
 		r.mw.logger.Fatalf("failed to establish MessageExchange")
 	}
-	r.streams[participant] = stream
+	r.outStreams[participant] = stream
 	for {
 		// TODO: there has to be a way to stop this goroutine
 		messageWithHeaders := pb.ApplicationMessageWithHeaders{
@@ -298,13 +303,17 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 		return err // TODO: what should we do here?
 	}
 	s.channelLock.Lock()
-	_, ok := s.brokeredChannels[in.GetChannelId()]
+	c, ok := s.brokeredChannels[in.GetChannelId()]
 	if !ok {
 		s.logger.Printf("Received MessageExchange with ChannelID %s but it is not a brokered Channel in this middleware.", in.GetChannelId())
 	}
-	// TODO: must save stream un c.streams but we don't have participant's name
-	// c.streams[in.RecipientId]
+	// TODO: must check in.RecipientId... we could be hosting two different apps from same channel
+	participantName := c.participants[in.SenderId]
+	c.inStreams[participantName] = stream
 	s.channelLock.Unlock()
+
+	s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
+	c.Incoming[participantName] <-in.Content
 	
 	for {
 		in, err := stream.Recv()
@@ -316,6 +325,7 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 		}
 
 		s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
+		c.Incoming[participantName] <-in.Content
 
 		// TODO: send to local app replacing sender name with local name
 
@@ -357,6 +367,9 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 		delete(s.brokeringChannels, icr.AppId)
 	}
 	r.addresses = icr.GetParticipants()
+	for k, v := range r.addresses {
+		r.participants[v.AppId] = k
+	}
 	r.ID = uuid.MustParse(icr.GetChannelId())
 	s.brokeredChannels[icr.GetChannelId()] = r
 	s.localChannels.Insert(r.LocalID.String(), r.ID.String())

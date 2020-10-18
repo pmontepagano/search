@@ -9,8 +9,8 @@ message ApplicationMessageWithHeaders {
     
     // This is necessary because URLs don't univocally determine apps. There can be multiple applications
     // behind the same middleware (there is a 1:1 mapping between URLs and middlewares)
-    string sender_id = 2;    // identificador de participante
-    string recipient_id = 3; // identificador de participante
+    string sender_id = 2;    // appid de app emisora
+    string recipient_id = 3; // appid de app receptora
 
     // TODO: how to avoid spoofing?
 
