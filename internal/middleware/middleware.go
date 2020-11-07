@@ -327,8 +327,6 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 		s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
 		c.Incoming[participantName] <-in.Content
 
-		// TODO: send to local app replacing sender name with local name
-
 		// ack := pb.ApplicationMessageWithHeaders{
 		// 	ChannelId:   in.ChannelId,
 		// 	RecipientId: in.SenderId,
