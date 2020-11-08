@@ -33,7 +33,7 @@ func TestRegisterChannel(t *testing.T) {
 
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract: "hola",
+			Contract:           "hola",
 			RemoteParticipants: []string{"self", "p1", "p2"},
 		},
 	}
@@ -61,7 +61,7 @@ func TestRegisterChannel(t *testing.T) {
 // Start a Broker and two Middleware servers. One of the middleware servers shall have a
 // dummy provider registered, and the other will have an initiator app requesting a channel
 // We should see brokering happen and message exchange between apps
-func Test1(t *testing.T) {
+func TestPingPong(t *testing.T) {
 	// start broker
 	bs := broker.NewBrokerServer()
 	go bs.StartServer("localhost", 7777, false, "", "")
@@ -88,13 +88,13 @@ func Test1(t *testing.T) {
 		if err != nil {
 			t.Error("Could not contact local private middleware server.")
 		}
-		defer conn.Close()
+
 		client := pb.NewPrivateMiddlewareClient(conn)
 
 		// register dummy app with provider middleware
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
-				Contract: "dummy provider contract",
+				Contract:           "dummy provider contract",
 				RemoteParticipants: []string{"self", "p1"},
 			},
 		}
@@ -108,53 +108,52 @@ func Test1(t *testing.T) {
 			t.Error("Could not receive ACK from RegisterApp")
 		}
 
-		// loop on RegisterAppResponse stream to await for new channels
-		for {
-			new, err := stream.Recv()
-			if err == io.EOF {
-				t.Error("Broker unexpectedly ended connection with provider")
-			}
-			if err != nil {
-				t.Errorf("Error receiving notification from RegisterApp: %v", err)
-			}
-			channelID := new.GetNotification().GetChannelId()
-			log.Printf("[PROVIDER] - Received Notification. ChannelID: %s", channelID)
-
-			// reply "ping!" messages with "pong!" until we receive a different message, then exit
-			go func(channelID string){
-				for {
-					ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-					defer cancel()
-					res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-						ChannelId: channelID,
-						Participant: "p1",
-					})
-					if err != nil {
-						t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
-					}
-					log.Printf("[PROVIDER] - Received message from p1: %s", res.Content.GetBody())
-					if string(res.Content.GetBody()) == "ping!" {
-						ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-						defer cancel()
-						client.AppSend(ctx, &pb.ApplicationMessageOut{
-							ChannelId: channelID,
-							Recipient: "p1",
-							Content: &pb.MessageContent{
-								Body: []byte("pong!"),
-							},
-						})
-					} else {
-						break
-					}
-				}
-			}(channelID)
+		// wait on RegisterAppResponse stream to await for new channel (once only for this test)
+		new, err := stream.Recv()
+		if err == io.EOF {
+			t.Error("Broker unexpectedly ended connection with provider")
 		}
+		if err != nil {
+			t.Errorf("Error receiving notification from RegisterApp: %v", err)
+		}
+		channelID := new.GetNotification().GetChannelId()
+		log.Printf("[PROVIDER] - Received Notification. ChannelID: %s", channelID)
+
+		// reply "ping!" messages with "pong!" until we receive a different message, then exit
+		go func(channelID string, conn *grpc.ClientConn) {
+			defer conn.Close()
+			for {
+				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+				defer cancel()
+				res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+					ChannelId:   channelID,
+					Participant: "p1",
+				})
+				if err != nil {
+					t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
+				}
+				log.Printf("[PROVIDER] - Received message from p1: %s", res.Content.GetBody())
+				if string(res.Content.GetBody()) == "ping!" {
+					ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
+					client.AppSend(ctx, &pb.ApplicationMessageOut{
+						ChannelId: channelID,
+						Recipient: "p1",
+						Content: &pb.MessageContent{
+							Body: []byte("pong!"),
+						},
+					})
+				} else {
+					log.Printf("[PROVIDER] - Exiting...")
+					break
+				}
+			}
+		}(channelID, conn)
 
 	}()
 
 	// wait a couple of seconds so that provider gets to register with broker
 	// time.Sleep(2 * time.Second)
-
 
 	// connect to client middleware and register channel
 	conn, err := grpc.Dial("localhost:9999", opts...)
@@ -163,12 +162,12 @@ func Test1(t *testing.T) {
 	}
 	defer conn.Close()
 	client := pb.NewPrivateMiddlewareClient(conn)
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract: "client example requirement contract",
+			Contract:           "client example requirement contract",
 			RemoteParticipants: []string{"self", "p2"},
 		},
 	}
@@ -183,14 +182,14 @@ func Test1(t *testing.T) {
 	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
 		ChannelId: regResult.ChannelId,
 		Recipient: "p2",
-		Content: &pb.MessageContent{Body: []byte("ping!")},
+		Content:   &pb.MessageContent{Body: []byte("ping!")},
 	})
 
 	// receive echo from p2
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-		ChannelId: regResult.ChannelId,
+		ChannelId:   regResult.ChannelId,
 		Participant: "p2",
 	})
 	if err != nil {
@@ -198,7 +197,15 @@ func Test1(t *testing.T) {
 	}
 	log.Printf("Received message from p2: %s", resp.Content)
 
-	time.Sleep(5 * time.Second)
+	// AppSend goodbye to p2 so that it exits
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
+		ChannelId: regResult.ChannelId,
+		Recipient: "p2",
+		Content:   &pb.MessageContent{Body: []byte("goodbye!")},
+	})
 
+	time.Sleep(2 * time.Second)
 
 }

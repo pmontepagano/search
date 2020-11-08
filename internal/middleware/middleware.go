@@ -25,7 +25,7 @@ var (
 	bufferSize = 100
 )
 
-type middlewareServer struct {
+type MiddlewareServer struct {
 	pb.UnimplementedPublicMiddlewareServer
 	pb.UnimplementedPrivateMiddlewareServer
 
@@ -41,7 +41,7 @@ type middlewareServer struct {
 
 	// channels being brokered
 	brokeringChannels map[string]*SEARCHChannel
-	channelLock *sync.Mutex
+	channelLock       *sync.Mutex
 
 	// mapping of channels' LocalID <--> ID (global)
 	localChannels *bimap.BiMap
@@ -50,18 +50,18 @@ type middlewareServer struct {
 	brokerPort int
 
 	// pointers to gRPC servers
-	publicServer *grpc.Server
+	publicServer  *grpc.Server
 	privateServer *grpc.Server
-	PublicURL string
-	PrivateURL string
+	PublicURL     string
+	PrivateURL    string
 
 	// logger with prefix
 	logger *log.Logger
 }
 
-// NewMiddlewareServer is middlewareServer's constructor
-func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
-	var s middlewareServer
+// NewMiddlewareServer is MiddlewareServer's constructor
+func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
+	var s MiddlewareServer
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
 
@@ -72,7 +72,7 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *middlewareServer {
 
 	s.brokerAddr = brokerAddr
 	s.brokerPort = brokerPort
-	s.logger = log.New(os.Stderr, "[MIDDLEWARE] - ", log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, "[MIDDLEWARE] - ", log.LstdFlags|log.Lmsgprefix)
 	return &s
 }
 
@@ -93,22 +93,22 @@ type SEARCHChannel struct {
 	Contract pb.Contract
 	AppID    uuid.UUID
 
-	addresses    map[string]*pb.RemoteParticipant    // map participant names to remote URLs and AppIDs, indexed by participant name
-	participants map[string]string					 // participant names indexed by AppID
-	
-	outStreams   map[string]messageExchangeStream    // map participant names to outgoing streams
-	inStreams    map[string]messageExchangeStream    // map participant names to incoming streams
+	addresses    map[string]*pb.RemoteParticipant // map participant names to remote URLs and AppIDs, indexed by participant name
+	participants map[string]string                // participant names indexed by AppID
+
+	outStreams map[string]messageExchangeStream // map participant names to outgoing streams
+	inStreams  map[string]messageExchangeStream // map participant names to incoming streams
 
 	// buffers for incoming/outgoing messages from/to each participant
 	Outgoing map[string]chan *pb.MessageContent
 	Incoming map[string]chan *pb.MessageContent
 
 	// pointer to middleware
-	mw *middlewareServer
+	mw *MiddlewareServer
 }
 
-// TODO: maybe refactor and make this function a middlewareServer method?
-func newSEARCHChannel(contract pb.Contract, mw *middlewareServer) *SEARCHChannel {
+// TODO: maybe refactor and make this function a MiddlewareServer method?
+func newSEARCHChannel(contract pb.Contract, mw *MiddlewareServer) *SEARCHChannel {
 	var r SEARCHChannel
 	r.mw = mw
 	r.LocalID = uuid.New()
@@ -128,7 +128,7 @@ func newSEARCHChannel(contract pb.Contract, mw *middlewareServer) *SEARCHChannel
 	return &r
 }
 
-func (s *middlewareServer) connectBroker() (pb.BrokerClient, *grpc.ClientConn) {
+func (s *MiddlewareServer) connectBroker() (pb.BrokerClient, *grpc.ClientConn) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
 	opts = append(opts, grpc.WithBlock())
@@ -152,8 +152,8 @@ func (r *SEARCHChannel) broker() {
 		Contract: &r.Contract,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			"self": {
-				Url: r.mw.PublicURL,
-				AppId: r.LocalID.String(),  // we use channels LocalID as AppID for initiator apps
+				Url:   r.mw.PublicURL,
+				AppId: r.LocalID.String(), // we use channels LocalID as AppID for initiator apps
 			},
 		},
 	})
@@ -166,14 +166,14 @@ func (r *SEARCHChannel) broker() {
 }
 
 // invoked by local provider app with a provision contract
-func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddleware_RegisterAppServer) error {
+func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddleware_RegisterAppServer) error {
 	client, conn := s.connectBroker()
 	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: req.ProviderContract,
-		Url: s.PublicURL,
+		Url:      s.PublicURL,
 	})
 	if err != nil {
 		s.logger.Fatalf("ERROR RegisterApp: %v", err)
@@ -201,7 +201,7 @@ func (s *middlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 }
 
 // invoked by local initiator app with a requirements contract
-func (s *middlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
+func (s *MiddlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
 	c := newSEARCHChannel(*in.GetRequirementsContract(), s)
 	c.AppID = c.LocalID
 	s.channelLock.Lock()
@@ -218,7 +218,7 @@ func (r *SEARCHChannel) sender(participant string) {
 	// connect and save stream in r.outStreams
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock())
-	opts = append(opts, grpc.WithInsecure())	// TODO: use tls
+	opts = append(opts, grpc.WithInsecure()) // TODO: use tls
 	provconn, err := grpc.Dial(r.addresses[participant].GetUrl(), opts...)
 	if err != nil {
 		r.mw.logger.Fatalf("fail to dial: %v", err)
@@ -245,7 +245,7 @@ func (r *SEARCHChannel) sender(participant string) {
 
 // if the SEARCHChannel is not yet brokered, we launch goroutine to do that
 // and also update middleware's internal structures to reflect that change
-func (s *middlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
+func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 	s.channelLock.Lock()
 	c, ok := s.unBrokeredChannels[localID]
 	if ok {
@@ -270,7 +270,7 @@ func (s *middlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 }
 
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
-func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
+func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
 	c := s.getChannelForUsage(req.ChannelId)
 	c.Outgoing[req.Recipient] <- req.Content // enqueue message in outgoing buffer
 
@@ -278,14 +278,14 @@ func (s *middlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessa
 	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
 }
 
-func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.ApplicationMessageIn, error) {
+func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.ApplicationMessageIn, error) {
 	c := s.getChannelForUsage(req.ChannelId)
 	msg := <-c.Incoming[req.Participant]
 
 	return &pb.ApplicationMessageIn{
 		ChannelId: req.ChannelId,
-		Sender: req.Participant,
-		Content: msg,
+		Sender:    req.Participant,
+		Content:   msg,
 	}, nil
 }
 
@@ -293,7 +293,7 @@ func (s *middlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 
 // When the middleware receives a message in its public interface, it must enqueue it so that
 // the corresponding local app can receive it
-func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {
+func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {
 	s.logger.Print("Received MessageExchange...")
 	in, err := stream.Recv()
 	if err == io.EOF {
@@ -313,8 +313,8 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 	s.channelLock.Unlock()
 
 	s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
-	c.Incoming[participantName] <-in.Content
-	
+	c.Incoming[participantName] <- in.Content
+
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
@@ -325,7 +325,7 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 		}
 
 		s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
-		c.Incoming[participantName] <-in.Content
+		c.Incoming[participantName] <- in.Content
 
 		// ack := pb.ApplicationMessageWithHeaders{
 		// 	ChannelId:   in.ChannelId,
@@ -343,7 +343,7 @@ func (s *middlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 // There are two options: a) the broker has matched one of our registered (provider) apps with a requirements contract
 // or b) the broker is responding to a brokerage request we sent to it. If this is the case, then AppID should
 // match the LocalID we generated for that channel of which we requested brokerage.
-func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
+func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
 	s.logger.Printf("Received InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
 	var r *SEARCHChannel
 	s.channelLock.Lock()
@@ -376,7 +376,7 @@ func (s *middlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	return &pb.InitChannelResponse{Result: pb.InitChannelResponse_ACK}, nil
 }
 
-func (s *middlewareServer) StartChannel(ctx context.Context, req *pb.StartChannelRequest) (*pb.StartChannelResponse, error) {
+func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChannelRequest) (*pb.StartChannelResponse, error) {
 	s.logger.Printf("StartChannel. ChannelID: %s. AppID: %s", req.ChannelId, req.AppId)
 	s.channelLock.Lock()
 	c, ok := s.brokeredChannels[req.ChannelId]
@@ -393,9 +393,9 @@ func (s *middlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 }
 
 // StartServer starts gRPC middleware server
-func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string){
+func (s *MiddlewareServer) StartMiddlewareServer(publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string) {
 	s.PublicURL = fmt.Sprintf("%s:%d", publicHost, publicPort)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix)
 	lisPub, err := net.Listen("tcp", s.PublicURL)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)
@@ -425,7 +425,7 @@ func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort i
 
 	s.publicServer = publicGrpcServer
 	s.privateServer = privateGrpcServer
-	
+
 	pb.RegisterPublicMiddlewareServer(publicGrpcServer, s)
 	pb.RegisterPrivateMiddlewareServer(privateGrpcServer, s)
 
@@ -445,10 +445,10 @@ func (s *middlewareServer) StartMiddlewareServer(publicHost string, publicPort i
 	}()
 
 	wg.Wait()
-	
+
 }
 
-func (s *middlewareServer) Stop(){
+func (s *MiddlewareServer) Stop() {
 	if s.publicServer != nil {
 		s.publicServer.Stop()
 	}
