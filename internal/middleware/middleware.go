@@ -393,7 +393,7 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 }
 
 // StartServer starts gRPC middleware server
-func (s *MiddlewareServer) StartMiddlewareServer(publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string) {
+func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string) {
 	s.PublicURL = fmt.Sprintf("%s:%d", publicHost, publicPort)
 	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix)
 	lisPub, err := net.Listen("tcp", s.PublicURL)
@@ -429,7 +429,6 @@ func (s *MiddlewareServer) StartMiddlewareServer(publicHost string, publicPort i
 	pb.RegisterPublicMiddlewareServer(publicGrpcServer, s)
 	pb.RegisterPrivateMiddlewareServer(privateGrpcServer, s)
 
-	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
@@ -443,8 +442,6 @@ func (s *MiddlewareServer) StartMiddlewareServer(publicHost string, publicPort i
 		// s.logger.Println("Waiting for SIGINT or SIGTERM on private server.")
 		privateGrpcServer.Serve(lisPriv)
 	}()
-
-	wg.Wait()
 
 }
 

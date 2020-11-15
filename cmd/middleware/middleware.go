@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"sync"
 
 	"github.com/clpombo/search/internal/middleware"
 )
@@ -22,5 +23,7 @@ var (
 func main() {
 	flag.Parse()
 	mw := middleware.NewMiddlewareServer(*brokerAddr, *brokerPort)
-	mw.StartMiddlewareServer(*publicHost, *publicPort, *privateHost, *privatePort, *tls, *certFile, *keyFile)
+	var wg sync.WaitGroup
+	mw.StartMiddlewareServer(&wg, *publicHost, *publicPort, *privateHost, *privatePort, *tls, *certFile, *keyFile)
+	wg.Wait()
 }

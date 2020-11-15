@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"sync"
 	"testing"
 	"time"
 
@@ -17,7 +18,8 @@ import (
 // dummy RegisterChannel RPC with a dummy GlobalContract
 func TestRegisterChannel(t *testing.T) {
 	mw := NewMiddlewareServer("broker", 7777)
-	go mw.StartMiddlewareServer("localhost", 4444, "localhost", 5555, false, "", "")
+	var wg sync.WaitGroup
+	mw.StartMiddlewareServer(&wg, "localhost", 4444, "localhost", 5555, false, "", "")
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
@@ -56,6 +58,7 @@ func TestRegisterChannel(t *testing.T) {
 
 	// stop middleware to free-up port and resources after test run
 	mw.Stop()
+	wg.Wait()
 }
 
 // Start a Broker and two Middleware servers. One of the middleware servers shall have a
@@ -66,13 +69,14 @@ func TestPingPong(t *testing.T) {
 	bs := broker.NewBrokerServer()
 	go bs.StartServer("localhost", 7777, false, "", "")
 
+	var wg sync.WaitGroup
 	// start provider middleware
 	provMw := NewMiddlewareServer("localhost", 7777)
-	go provMw.StartMiddlewareServer("localhost", 4444, "localhost", 5555, false, "", "")
+	provMw.StartMiddlewareServer(&wg, "localhost", 4444, "localhost", 5555, false, "", "")
 
 	// start client middleware
 	clientMw := NewMiddlewareServer("localhost", 7777)
-	go clientMw.StartMiddlewareServer("localhost", 8888, "localhost", 9999, false, "", "")
+	clientMw.StartMiddlewareServer(&wg, "localhost", 8888, "localhost", 9999, false, "", "")
 
 	// common grpc.DialOption
 	var opts []grpc.DialOption
@@ -103,8 +107,8 @@ func TestPingPong(t *testing.T) {
 		if err != nil {
 			t.Error("Could not Register App")
 		}
-		_, err = stream.Recv()
-		if err != nil {
+		ack, err := stream.Recv()
+		if err != nil || ack.GetAppId() == "" {
 			t.Error("Could not receive ACK from RegisterApp")
 		}
 
@@ -151,9 +155,6 @@ func TestPingPong(t *testing.T) {
 		}(channelID, conn)
 
 	}()
-
-	// wait a couple of seconds so that provider gets to register with broker
-	// time.Sleep(2 * time.Second)
 
 	// connect to client middleware and register channel
 	conn, err := grpc.Dial("localhost:9999", opts...)
@@ -206,6 +207,7 @@ func TestPingPong(t *testing.T) {
 		Content:   &pb.MessageContent{Body: []byte("goodbye!")},
 	})
 
-	time.Sleep(2 * time.Second)
-
+	provMw.Stop()
+	clientMw.Stop()
+	wg.Wait()
 }
