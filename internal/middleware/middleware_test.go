@@ -126,6 +126,7 @@ func TestPingPong(t *testing.T) {
 		// reply "ping!" messages with "pong!" until we receive a different message, then exit
 		go func(channelID string, conn *grpc.ClientConn) {
 			defer conn.Close()
+			defer provMw.Stop()
 			for {
 				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 				defer cancel()
@@ -207,7 +208,6 @@ func TestPingPong(t *testing.T) {
 		Content:   &pb.MessageContent{Body: []byte("goodbye!")},
 	})
 
-	provMw.Stop()
 	clientMw.Stop()
 	wg.Wait()
 }
