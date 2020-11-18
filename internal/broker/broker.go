@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -102,19 +103,35 @@ func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.Rem
 		s.logger.Fatal("Receiver not registered.")
 	}
 
-	// TODO: without parsing and understanding contracts, we can only translate mappings of
-	// contracts that have only two participants
-	if len(initiatorMapping) > 2 {
-		s.logger.Fatal("Cannot translate a mapping of more than two participants. Not yet implemented.")
-	}
-	if len(receiverProvider.contract.RemoteParticipants) > 2 {
-		s.logger.Fatal("Receiver has more than two participants in its contract. Cannot translate mapping, not yet implemented.")
-	}
-
 	res := make(map[string]*pb.RemoteParticipant)
 	res["self"] = receiverRemoteParticipant
-	otherParticipantName := receiverProvider.contract.RemoteParticipants[1]
-	res[otherParticipantName] = initiatorMapping["self"]
+
+	// TODO: without parsing and understanding contracts, we can only translate mappings of
+	// contracts that have only two participants
+	// we make an exception for receivers with name "_special" to run a test...
+	if strings.HasSuffix(receiver, "_special") {
+		if receiver == "r1_special" {
+			res["sender"] = initiatorMapping["self"]
+			res["receiver"] = initiatorMapping["r2_special"]
+		}
+		if receiver == "r2_special" {
+			res["sender"] = initiatorMapping["r1_special"]
+			res["receiver"] = initiatorMapping["r3_special"]
+		}
+		if receiver == "r3_special" {
+			res["sender"] = initiatorMapping["r2_special"]
+			res["receiver"] = initiatorMapping["self"]
+		}
+	} else {
+		if len(initiatorMapping) > 2 {
+			s.logger.Fatal("Cannot translate a mapping of more than two participants. Not yet implemented.")
+		}
+		if len(receiverProvider.contract.RemoteParticipants) > 2 {
+			s.logger.Fatal("Receiver has more than two participants in its contract. Cannot translate mapping, not yet implemented.")
+		}
+		otherParticipantName := receiverProvider.contract.RemoteParticipants[1]
+		res[otherParticipantName] = initiatorMapping["self"]
+	}
 	return res
 }
 

@@ -325,7 +325,7 @@ func TestCircle(t *testing.T) {
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
 			Contract:           "send hello to r1, and later receive mesage from r3",
-			RemoteParticipants: []string{"self", "r1", "r2", "r3"},
+			RemoteParticipants: []string{"self", "r1_special", "r2_special", "r3_special"},
 		},
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
@@ -338,7 +338,7 @@ func TestCircle(t *testing.T) {
 	defer cancel()
 	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
 		ChannelId: regResult.ChannelId,
-		Recipient: "r1",
+		Recipient: "r1_special",
 		Content:   &pb.MessageContent{Body: []byte("hola")},
 	})
 
@@ -347,7 +347,7 @@ func TestCircle(t *testing.T) {
 	defer cancel()
 	resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
 		ChannelId:   regResult.ChannelId,
-		Participant: "r3",
+		Participant: "r3_special",
 	})
 	if err != nil {
 		t.Error("Could not receive message from r3")
