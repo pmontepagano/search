@@ -37,16 +37,11 @@ type registeredProvider struct {
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
 func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []string {
-	result := make([]string, len(orig)-len(r))
-	sort.Strings(orig)
-	nOrig := 0
-	nDest := 0
-	for p := range r {
-		if orig[nOrig] != p {
-			result[nDest] = orig[nOrig]
-			nDest++
+	result := make([]string, 0)
+	for _, o := range orig {
+		if _, ok := r[o]; !ok {
+			result = append(result, o)
 		}
-		nOrig++
 	}
 	return result
 }
