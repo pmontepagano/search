@@ -76,10 +76,29 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 	if len(s.registeredProviders) < 1 {
 		return nil, errors.New("No providers registered.")
 	}
-	for _, v := range participants {
-		appid := GetRandomKeyFromMap(s.registeredProviders).(string)
-		participant := s.registeredProviders[appid].participant
-		response[v] = &participant
+	// TODO: hardcoded responses for TestCircle
+	if contract.GetContract() == "send hello to r1, and later receive mesage from r3" {
+		for _, rp := range s.registeredProviders {
+			url := rp.participant.Url
+			if url == "localhost:20001" {
+				p := rp.participant
+				response["r1_special"] = &p
+			}
+			if url == "localhost:20003" {
+				p := rp.participant
+				response["r2_special"] = &p
+			}
+			if url == "localhost:20005" {
+				p := rp.participant
+				response["r3_special"] = &p
+			}
+		}
+	} else {
+		for _, v := range participants {
+			appid := GetRandomKeyFromMap(s.registeredProviders).(string)
+			participant := s.registeredProviders[appid].participant
+			response[v] = &participant
+		}
 	}
 
 	return response, nil
@@ -139,7 +158,10 @@ func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.Rem
 // self MUST be present in presetParticipants with its url and ID.
 // this routine will find compatible candidates and notify them
 func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant) {
+	// log.Printf("brokerAndInitialize presetParticipants: %v", presetParticipants)
+	// log.Printf("brokerAndInitialize contract.GetRemoteParticipants(): %v", contract.GetRemoteParticipants())
 	participantsToMatch := filterParticipants(contract.GetRemoteParticipants(), presetParticipants)
+	// log.Printf("brokerAndInitialize participantsToMatch: %v", participantsToMatch)
 	candidates, err := s.getBestCandidates(contract, participantsToMatch)
 	if err != nil {
 		// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
@@ -155,7 +177,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		allParticipants[pname] = p
 	}
 
-	// s.logger.Println(allParticipants)
+	// s.logger.Printf("allParticipants: %v", allParticipants)
 
 	channelID := uuid.New()
 

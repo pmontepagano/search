@@ -345,6 +345,7 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 // match the LocalID we generated for that channel of which we requested brokerage.
 func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
 	s.logger.Printf("Received InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
+	s.logger.Printf("InitChannel mapping received:%v",icr.GetParticipants())
 	var r *SEARCHChannel
 	s.channelLock.Lock()
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)

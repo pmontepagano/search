@@ -245,7 +245,6 @@ func TestCircle(t *testing.T) {
 			if err != nil {
 				t.Error("Could not contact local private middleware server.")
 			}
-			defer conn.Close()
 			client := pb.NewPrivateMiddlewareClient(conn)
 
 			// register dummy app with provider middleware
@@ -283,7 +282,7 @@ func TestCircle(t *testing.T) {
 			go func(channelID string, conn *grpc.ClientConn) {
 				defer conn.Close()
 				defer mw.Stop()
-				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 				defer cancel()
 				res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
 					ChannelId:   channelID,
@@ -334,7 +333,7 @@ func TestCircle(t *testing.T) {
 	}
 
 	// AppSend to r1
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
 		ChannelId: regResult.ChannelId,
