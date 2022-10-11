@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1-experimental
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.137.0/containers/go/.devcontainer/base.Dockerfile
-ARG VARIANT="1.14"
+ARG VARIANT="1.18"
 ARG USERNAME=search
 # You should use here your UID and GID
 ARG USER_UID=501

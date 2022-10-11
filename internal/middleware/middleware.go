@@ -289,8 +289,6 @@ func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 	}, nil
 }
 
-// TODO: must send mapping in InitChannel AppID <--> Participant name according to app's contract
-
 // When the middleware receives a message in its public interface, it must enqueue it so that
 // the corresponding local app can receive it
 func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {

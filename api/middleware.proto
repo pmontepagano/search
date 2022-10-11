@@ -83,6 +83,7 @@ message InitChannelRequest {
     string channel_id = 1;
     string app_id = 2; // which app behind the middleware is being notified
     map<string, RemoteParticipant> participants = 3;
+    // int32 seq = 4; // sequence number (used because we may need multiple rounds until all participants are ready)
 }
 
 message InitChannelResponse {
