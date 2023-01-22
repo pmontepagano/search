@@ -19,6 +19,8 @@ import (
 	"google.golang.org/grpc/testdata"
 
 	"github.com/vishalkuo/bimap"
+
+	"github.com/nickng/cfsm"
 )
 
 var (
@@ -88,10 +90,11 @@ type messageExchangeStream interface {
 
 // SEARCHChannel represents what we call a "channel" in SEARCH
 type SEARCHChannel struct {
-	LocalID  uuid.UUID // the identifier the local app uses to identify the channel
-	ID       uuid.UUID // channel identifier assigned by the broker
-	Contract pb.Contract
-	AppID    uuid.UUID
+	LocalID            uuid.UUID // the identifier the local app uses to identify the channel
+	ID                 uuid.UUID // channel identifier assigned by the broker
+	Contract           pb.Contract
+	ContractCFSMSystem *cfsm.System
+	AppID              uuid.UUID
 
 	addresses    map[string]*pb.RemoteParticipant // map participant names to remote URLs and AppIDs, indexed by participant name
 	participants map[string]string                // participant names indexed by AppID
@@ -124,6 +127,7 @@ func newSEARCHChannel(contract pb.Contract, mw *MiddlewareServer) *SEARCHChannel
 		r.Outgoing[p] = make(chan *pb.MessageContent, bufferSize)
 		r.Incoming[p] = make(chan *pb.MessageContent, bufferSize)
 	}
+	r.ContractCFSMSystem = cfsm.NewSystem()
 
 	return &r
 }
@@ -343,7 +347,7 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExc
 // match the LocalID we generated for that channel of which we requested brokerage.
 func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
 	s.logger.Printf("Received InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
-	s.logger.Printf("InitChannel mapping received:%v",icr.GetParticipants())
+	s.logger.Printf("InitChannel mapping received:%v", icr.GetParticipants())
 	var r *SEARCHChannel
 	s.channelLock.Lock()
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
