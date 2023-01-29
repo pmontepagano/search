@@ -1,12 +1,11 @@
 syntax = "proto3";
-package api;
+package search.v1;
+option go_package = "github.com/clpombo/search/gen/go/v1";
 
-import "api/contracts.proto";
-
-option go_package = "github.com/clpombo/search/api";
+import "search/v1/contracts.proto";
 
 
-service Broker {
+service BrokerService {
     rpc BrokerChannel (BrokerChannelRequest) returns (BrokerChannelResponse) {}
     rpc RegisterProvider (RegisterProviderRequest) returns (RegisterProviderResponse) {}
 }
@@ -21,8 +20,9 @@ message BrokerChannelRequest {
 
 message BrokerChannelResponse {
     enum Result {
-        ACK = 0;
-        ERR = 1;
+        RESULT_UNSPECIFIED = 0;
+        RESULT_ACK = 1;
+        RESULT_ERR = 2;
     }
     Result result = 1;
 }

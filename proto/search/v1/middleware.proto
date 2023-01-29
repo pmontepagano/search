@@ -1,17 +1,17 @@
 syntax = "proto3";
-package api;
+package search.v1;
+option go_package = "github.com/clpombo/search/gen/go/v1";
 
-import "api/app_message.proto";
-import "api/contracts.proto";
-import "api/broker.proto";
+import "search/v1/app_message.proto";
+import "search/v1/contracts.proto";
+import "search/v1/broker.proto";
 
-option go_package = "github.com/clpombo/search/api";
 
 
 /* 
     This service is what a Middleware exposes to its local users (not on the internet.)
 */
-service PrivateMiddleware {
+service PrivateMiddlewareService {
     // This is used by the initiator to register a new channel
     rpc RegisterChannel(RegisterChannelRequest) returns(RegisterChannelResponse) {}
 
@@ -70,7 +70,7 @@ message InitChannelNotification {
 /*
     This service is what a Middleware exposes to external components (other participants and the broker)
 */
-service PublicMiddleware {
+service PublicMiddlewareService {
     // The Broker, when a new channel is registered, signals all participants (except initiator) with this
     rpc InitChannel(InitChannelRequest) returns(InitChannelResponse) {}
     rpc StartChannel(StartChannelRequest) returns(StartChannelResponse) {}
