@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/clpombo/search/api"
+	pb "github.com/clpombo/search/gen/go/search/v1"
 	"google.golang.org/grpc"
 )
 
@@ -25,7 +25,7 @@ func TestBrokerChannel_Request(t *testing.T) {
 		log.Fatalf("fail to dial: %v", err)
 	}
 	defer conn.Close()
-	client := pb.NewBrokerClient(conn)
+	client := pb.NewBrokerServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -59,7 +59,7 @@ func TestBrokerChannel_Request(t *testing.T) {
 	if err != nil {
 		t.Error("Received error from broker.")
 	}
-	if brokerresult.Result != pb.BrokerChannelResponse_ACK {
+	if brokerresult.Result != pb.BrokerChannelResponse_RESULT_ACK {
 		t.Error("Non ACK return code from broker")
 	}
 
@@ -79,7 +79,7 @@ func TestGetParticipantMapping(t *testing.T) {
 		log.Fatalf("fail to dial: %v", err)
 	}
 	defer conn.Close()
-	client := pb.NewBrokerClient(conn)
+	client := pb.NewBrokerServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

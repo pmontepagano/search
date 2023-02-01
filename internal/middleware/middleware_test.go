@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/clpombo/search/api"
+	pb "github.com/clpombo/search/gen/go/search/v1"
 	"github.com/clpombo/search/internal/broker"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -29,7 +29,7 @@ func TestRegisterChannel(t *testing.T) {
 		t.Error("Could not contact local private middleware server.")
 	}
 	defer conn.Close()
-	client := pb.NewPrivateMiddlewareClient(conn)
+	client := pb.NewPrivateMiddlewareServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -93,7 +93,7 @@ func TestPingPong(t *testing.T) {
 			t.Error("Could not contact local private middleware server.")
 		}
 
-		client := pb.NewPrivateMiddlewareClient(conn)
+		client := pb.NewPrivateMiddlewareServiceClient(conn)
 
 		// register dummy app with provider middleware
 		req := pb.RegisterAppRequest{
@@ -163,7 +163,7 @@ func TestPingPong(t *testing.T) {
 		t.Error("Could not contact local private middleware server.")
 	}
 	defer conn.Close()
-	client := pb.NewPrivateMiddlewareClient(conn)
+	client := pb.NewPrivateMiddlewareServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -248,7 +248,7 @@ func TestCircle(t *testing.T) {
 			if err != nil {
 				t.Error("Could not contact local private middleware server.")
 			}
-			client := pb.NewPrivateMiddlewareClient(conn)
+			client := pb.NewPrivateMiddlewareServiceClient(conn)
 
 			// register dummy app with provider middleware
 			req := pb.RegisterAppRequest{
@@ -320,7 +320,7 @@ func TestCircle(t *testing.T) {
 		t.Error("Could not contact local private middleware server.")
 	}
 	defer conn.Close()
-	client := pb.NewPrivateMiddlewareClient(conn)
+	client := pb.NewPrivateMiddlewareServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

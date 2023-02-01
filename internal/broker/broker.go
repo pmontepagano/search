@@ -19,11 +19,11 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/testdata"
 
-	pb "github.com/clpombo/search/api"
+	pb "github.com/clpombo/search/gen/go/search/v1"
 )
 
 type brokerServer struct {
-	pb.UnimplementedBrokerServer
+	pb.UnimplementedBrokerServiceServer
 	server *grpc.Server
 	// mapping of AppIDs to registered providers
 	registeredProviders map[string]registeredProvider
@@ -201,7 +201,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 			// TODO: here we should increment sequence number for InitChannel and restart
 		}
 		defer conn.Close()
-		client := pb.NewPublicMiddlewareClient(conn)
+		client := pb.NewPublicMiddlewareServiceClient(conn)
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: remove hardcoded timeout
 		defer cancel()
 		req := pb.InitChannelRequest{
@@ -239,7 +239,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 			return
 		}
 		defer conn.Close()
-		client := pb.NewPublicMiddlewareClient(conn)
+		client := pb.NewPublicMiddlewareServiceClient(conn)
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: remove hardcoded timeout
 		defer cancel()
 		req := pb.StartChannelRequest{
@@ -268,7 +268,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 
 	go s.brokerAndInitialize(contract, presetParticipants)
 
-	return &pb.BrokerChannelResponse{Result: pb.BrokerChannelResponse_ACK}, nil
+	return &pb.BrokerChannelResponse{Result: pb.BrokerChannelResponse_RESULT_ACK}, nil
 }
 
 // we receive a LocalContract and the url, and we assign an AppID to this provider
@@ -318,7 +318,7 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 	}
 	grpcServer := grpc.NewServer(opts...)
 	s.server = grpcServer
-	pb.RegisterBrokerServer(grpcServer, s)
+	pb.RegisterBrokerServiceServer(grpcServer, s)
 	s.logger.Printf("Broker server starting...")
 	grpcServer.Serve(lis)
 }

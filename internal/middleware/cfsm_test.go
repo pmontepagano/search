@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	pb "github.com/clpombo/search/api"
+	pb "github.com/clpombo/search/gen/go/search/v1"
 	"github.com/clpombo/search/internal/broker"
 	"google.golang.org/grpc"
 
@@ -172,7 +172,7 @@ func TestTravelClient(t *testing.T) {
 		if err != nil {
 			t.Error("Could not connect to HotelService middleware.")
 		}
-		client := pb.NewPrivateMiddlewareClient(conn)
+		_ := pb.NewPrivateMiddlewareServiceClient(conn)
 
 		// Register the HostelService
 		req := pb.RegisterAppRequest{

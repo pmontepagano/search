@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/uuid"
 
-	pb "github.com/clpombo/search/api"
+	pb "github.com/clpombo/search/gen/go/search/v1"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
@@ -28,8 +28,8 @@ var (
 )
 
 type MiddlewareServer struct {
-	pb.UnimplementedPublicMiddlewareServer
-	pb.UnimplementedPrivateMiddlewareServer
+	pb.UnimplementedPublicMiddlewareServiceServer
+	pb.UnimplementedPrivateMiddlewareServiceServer
 
 	// local provider apps. key: appID, value: RegisterAppServer (connection is kept open
 	// with each local app so as to notify new channels)
@@ -132,7 +132,7 @@ func newSEARCHChannel(contract pb.Contract, mw *MiddlewareServer) *SEARCHChannel
 	return &r
 }
 
-func (s *MiddlewareServer) connectBroker() (pb.BrokerClient, *grpc.ClientConn) {
+func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.ClientConn) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
 	opts = append(opts, grpc.WithBlock())
@@ -140,7 +140,7 @@ func (s *MiddlewareServer) connectBroker() (pb.BrokerClient, *grpc.ClientConn) {
 	if err != nil {
 		s.logger.Fatalf("fail to dial: %v", err)
 	}
-	client := pb.NewBrokerClient(conn)
+	client := pb.NewBrokerServiceClient(conn)
 
 	return client, conn
 }
@@ -164,13 +164,13 @@ func (r *SEARCHChannel) broker() {
 	if err != nil {
 		r.mw.logger.Fatalf("%v.BrokerChannel(_) = _, %v: ", client, err)
 	}
-	if brokerresult.Result != pb.BrokerChannelResponse_ACK {
+	if brokerresult.Result != pb.BrokerChannelResponse_RESULT_ACK {
 		r.mw.logger.Fatalf("Non ACK return code when trying to broker channel.")
 	}
 }
 
 // invoked by local provider app with a provision contract
-func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddleware_RegisterAppServer) error {
+func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddlewareService_RegisterAppServer) error {
 	client, conn := s.connectBroker()
 	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -228,7 +228,7 @@ func (r *SEARCHChannel) sender(participant string) {
 		r.mw.logger.Fatalf("fail to dial: %v", err)
 	}
 	defer provconn.Close()
-	provClient := pb.NewPublicMiddlewareClient(provconn)
+	provClient := pb.NewPublicMiddlewareServiceClient(provconn)
 
 	stream, err := provClient.MessageExchange(context.Background())
 	if err != nil {
@@ -295,7 +295,7 @@ func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 
 // When the middleware receives a message in its public interface, it must enqueue it so that
 // the corresponding local app can receive it
-func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddleware_MessageExchangeServer) error {
+func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_MessageExchangeServer) error {
 	s.logger.Print("Received MessageExchange...")
 	in, err := stream.Recv()
 	if err == io.EOF {
@@ -429,8 +429,8 @@ func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicHost 
 	s.publicServer = publicGrpcServer
 	s.privateServer = privateGrpcServer
 
-	pb.RegisterPublicMiddlewareServer(publicGrpcServer, s)
-	pb.RegisterPrivateMiddlewareServer(privateGrpcServer, s)
+	pb.RegisterPublicMiddlewareServiceServer(publicGrpcServer, s)
+	pb.RegisterPrivateMiddlewareServiceServer(privateGrpcServer, s)
 
 	wg.Add(2)
 
