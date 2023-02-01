@@ -1,7 +1,13 @@
 package middleware
 
 import (
+	"fmt"
+	"sync"
 	"testing"
+
+	pb "github.com/clpombo/search/api"
+	"github.com/clpombo/search/internal/broker"
+	"google.golang.org/grpc"
 
 	"github.com/nickng/cfsm"
 )
@@ -132,4 +138,49 @@ func TestTravelClient(t *testing.T) {
 	tRejectedSend := cfsm.NewSend(HotelService, "rejected")
 	tRejectedSend.SetNext(ppsStart)
 	pps3.AddTransition(tRejectedSend)
+
+	// Now we'll start a broker, a middleware for each CFSM
+	// and try to get them to speak to each other.
+
+	var wg sync.WaitGroup
+	brokerPort := 7777
+	hotelServicePublicPort := 4444
+	hotelServicePrivatePort := 4445
+	paymentProcesorServicePublicPort := 4446
+	paymentProcesorServicePrivatePort := 4447
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
+
+
+	// Start broker
+	bs := broker.NewBrokerServer()
+	go bs.StartServer("localhost", brokerPort, false, "", "")
+	defer bs.Stop()
+
+	// Start HotelService middleware
+	hotelServiceMiddleware := NewMiddlewareServer("localhost", brokerPort)
+	hotelServiceMiddleware.StartMiddlewareServer(&wg, "localhost", hotelServicePublicPort, "localhost", hotelServicePrivatePort, false, "", "")
+
+	// Start PaymentProcessorService middleware
+	paymentProcessorMiddleware := NewMiddlewareServer("localhost", brokerPort)
+	paymentProcessorMiddleware.StartMiddlewareServer(&wg, "localhost", paymentProcesorServicePublicPort, "localhost", paymentProcesorServicePrivatePort, false, "", "")
+
+	go func() {
+		// This runs the HotelService
+		conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", hotelServicePrivatePort))
+		if err != nil {
+			t.Error("Could not connect to HotelService middleware.")
+		}
+		client := pb.NewPrivateMiddlewareClient(conn)
+
+		// Register the HostelService
+		req := pb.RegisterAppRequest{
+			ProviderContract: &pb.Contract{
+				Contract: "qué carajo pongo acá? Necesito serializar CFSMs.",
+				RemoteParticipants: []string{"self", "tc", "pps"},
+			},
+		}
+	}()
+
 }

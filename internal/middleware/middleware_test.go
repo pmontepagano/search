@@ -186,6 +186,9 @@ func TestPingPong(t *testing.T) {
 		Recipient: "p2",
 		Content:   &pb.MessageContent{Body: []byte("ping!")},
 	})
+	if err != nil {
+		t.Error(err)
+	}
 
 	// receive echo from p2
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
