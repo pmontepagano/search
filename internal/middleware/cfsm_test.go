@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"testing"
@@ -172,14 +173,22 @@ func TestTravelClient(t *testing.T) {
 		if err != nil {
 			t.Error("Could not connect to HotelService middleware.")
 		}
-		_ := pb.NewPrivateMiddlewareServiceClient(conn)
+		client := pb.NewPrivateMiddlewareServiceClient(conn)
 
-		// Register the HostelService
+		// Register the HotelService
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
-				Contract: "qué carajo pongo acá? Necesito serializar CFSMs.",
+				Contract: "Serialized HotelService CFSM.",
 				RemoteParticipants: []string{"self", "tc", "pps"},
 			},
+		}
+		stream, err := client.RegisterApp(context.Background(), &req)
+		if err != nil {
+			t.Error("Could not register HotelService with broker.")
+		}
+		ack, err := stream.Recv()
+		if err != nil || ack.GetAppId() == "" {
+			t.Error("Could not register HotelService with broker.")
 		}
 	}()
 
