@@ -8,6 +8,10 @@ Por ahora habrá estos componentes en la arquitectura:
 - client middleware (está en un requires point)
 - server middleware (está en un provides point)
 
+## Código generado (go protobufs y go-grpc)
+
+  buf generate proto
+
 
 
 ## Comunicación entre componentes
