@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"os"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -46,18 +46,18 @@ func (pc *PartialContract) IsSatisfiedBy(candidate LocalContract) bool {
 	return true
 }
 
-func ParseFSAFile(filename string) (*cfsm.System, error) {
-	f, err := os.Open("/tmp/dat")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
+func ParseFSAFile(reader io.Reader) (*cfsm.System, error) {
+	// f, err := os.Open("/tmp/dat")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer f.Close()
 
 	// Regular expressions for parser
 	lineCommentRe := regexp.MustCompile(`^--.*`)
-	machineStartRe := regexp.MustCompile(`^\.outputs\s+(\S)?$`)
-	startStateRe := regexp.MustCompile(`^\.marking\s+(\S)$`)
-	messageRe := regexp.MustCompile(`^(\S)\s(\S)\s([\?!])\s(\S)\s(\S)$`)
+	machineStartRe := regexp.MustCompile(`^\.outputs(\s+(\S+))?$`)
+	startStateRe := regexp.MustCompile(`^\.marking\s+(\S+)$`)
+	messageRe := regexp.MustCompile(`^(\S+)\s(\S+)\s([\?!])\s(\S+)\s(\S+)$`)
 
 	// Possible states of the parser while consuming input.
 	type FSAParserStatus byte
@@ -92,7 +92,7 @@ func ParseFSAFile(filename string) (*cfsm.System, error) {
 	var stateNames map[string]*cfsm.State
 	var currentMachine *cfsm.CFSM
 
-	scanner := bufio.NewScanner(f)
+	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 		currentLine = strings.TrimSpace(currentLine)
@@ -108,18 +108,19 @@ func ParseFSAFile(filename string) (*cfsm.System, error) {
 				return nil, errors.New("fsa file invalid. Expected .outputs")
 			}
 			currentMachineNumber := len(namesOfCFSMs)
-			if len(matches) == 2 {
-				num, err := strconv.Atoi(matches[1])
+			if matches[2] != "" {
+				num, err := strconv.Atoi(matches[2])
 				if err == nil && num != currentMachineNumber {
 					return nil, fmt.Errorf("fsa file invalid: machine number %d is named %d", currentMachineNumber, num)
 				}
-				namesOfCFSMs = append(namesOfCFSMs, matches[1])
-				numberOfCFSM[matches[1]] = currentMachineNumber
+				namesOfCFSMs = append(namesOfCFSMs, matches[2])
+				numberOfCFSM[matches[2]] = currentMachineNumber
 			} else {
 				namesOfCFSMs = append(namesOfCFSMs, strconv.Itoa(len(namesOfCFSMs)))
 				numberOfCFSM[strconv.Itoa(currentMachineNumber)] = currentMachineNumber
 			}
 			currentMachine = sys.NewMachine()
+			currentMachine.Comment = namesOfCFSMs[currentMachineNumber]
 			stateNames = make(map[string]*cfsm.State)
 			transitionsToBackfill[currentMachine] = make([]Transition, 0)
 			status = MachineStarting
@@ -129,12 +130,12 @@ func ParseFSAFile(filename string) (*cfsm.System, error) {
 				status = Transitions
 				continue
 			} else {
-				return nil, errors.New("fsa file invalid. Expected '.state graph' after CFSM declaration.")
+				return nil, errors.New("fsa file invalid: expected '.state graph' after CFSM declaration")
 			}
 		case Transitions:
 			// Here we can see transition lines or the start state marker.
 			startStateMatch := startStateRe.FindStringSubmatch(currentLine)
-			if startStateMatch != nil && len(startStateMatch) == 2 {
+			if len(startStateMatch) == 2 {
 				startStateName := startStateMatch[1]
 				val, ok := stateNames[startStateName]
 				if !ok {
@@ -154,7 +155,7 @@ func ParseFSAFile(filename string) (*cfsm.System, error) {
 			// Create fromState and nextState if they don't exist already.
 			val, ok := stateNames[transitionMatches[1]]
 			if !ok {
-				val := currentMachine.NewState()
+				val = currentMachine.NewState()
 				val.Label = transitionMatches[1]
 				stateNames[transitionMatches[1]] = val
 			}
@@ -162,7 +163,7 @@ func ParseFSAFile(filename string) (*cfsm.System, error) {
 
 			val, ok = stateNames[transitionMatches[5]]
 			if !ok {
-				val := currentMachine.NewState()
+				val = currentMachine.NewState()
 				val.Label = transitionMatches[5]
 				stateNames[transitionMatches[5]] = val
 			}
@@ -176,7 +177,7 @@ func ParseFSAFile(filename string) (*cfsm.System, error) {
 			case "!":
 				action = Send
 			default:
-				return nil, errors.New("Invalid action.")
+				return nil, errors.New("fsa file invalid: invalid action")
 			}
 
 			msg := transitionMatches[4]
@@ -206,10 +207,15 @@ func ParseFSAFile(filename string) (*cfsm.System, error) {
 
 	for _, transitions := range transitionsToBackfill {
 		for _, t := range transitions {
-			otherMachineNum, ok := numberOfCFSM[t.OtherMachine]
-			if !ok {
-				return nil, errors.New("non existant CFSM referenced")
+			otherMachineNum, err := strconv.Atoi(t.OtherMachine)
+			if err != nil {
+				var ok bool
+				otherMachineNum, ok = numberOfCFSM[t.OtherMachine]
+				if !ok {
+					return nil, errors.New("non existant CFSM referenced")
+				}
 			}
+
 			otherMachine := sys.CFSMs[otherMachineNum]
 			switch t.Action {
 			case Send:
