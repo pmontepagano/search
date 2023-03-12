@@ -2,8 +2,11 @@ package contract
 
 import (
 	"bufio"
+	"errors"
+	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/nickng/cfsm"
@@ -43,17 +46,17 @@ func (pc *PartialContract) IsSatisfiedBy(candidate LocalContract) bool {
 	return true
 }
 
-func ParseFSAFile(filename string) (cfsm.System, err error) {
+func ParseFSAFile(filename string) (*cfsm.System, error) {
 	f, err := os.Open("/tmp/dat")
 	if err != nil {
 		panic(err)
 	}
+	defer f.Close()
 
 	// Regular expressions for parser
 	lineCommentRe := regexp.MustCompile(`^--.*`)
 	machineStartRe := regexp.MustCompile(`^\.outputs\s+(\S)?$`)
 	startStateRe := regexp.MustCompile(`^\.marking\s+(\S)$`)
-	machineEndRe := regexp.MustCompile(`^\.end$`)
 	messageRe := regexp.MustCompile(`^(\S)\s(\S)\s([\?!])\s(\S)\s(\S)$`)
 
 	// Possible states of the parser while consuming input.
@@ -66,41 +69,34 @@ func ParseFSAFile(filename string) (cfsm.System, err error) {
 	)
 	type TransitionType byte
 	const (
-		Send	TransitionType = iota
+		Send TransitionType = iota
 		Recv
 	)
 	type Transition struct {
-		FromState *cfsm.State
-		OtherMachine	string
-		Action TransitionType
-		Message string
-		NextState *cfsm.State
+		FromState    *cfsm.State
+		OtherMachine string
+		Action       TransitionType
+		Message      string
+		NextState    *cfsm.State
 	}
 
-	var namesOfCFSMs []string  // array of names of CFSMs as we find in order. If they don't have name, we use str(int) of the machine order (starts with 0).
-	numberOfCFSM := make(map[string]int)  // inverse of the latter
+	var namesOfCFSMs []string            // array of names of CFSMs as we find in order. If they don't have name, we use str(int) of the machine order (starts with 0).
+	numberOfCFSM := make(map[string]int) // inverse of the latter
 	var status FSAParserStatus = Initial
-	sys := cfsm.NewSystem()  // This is what we'll return.
-	
-	// While parsing we may find transitions that refer to a CFSM that we haven't yet parsed.
-	// In that case, we add the machine name to this set. We'll have to check that this set is empty
-	// when we finish parsing.
-	machinesNotYetDeclared := make(map[string]struct{})
-	
+	sys := cfsm.NewSystem() // This is what we'll return.
+
 	// While reading transitions we can find transitions that refer to CFSMs that we haven't yet parsed.
-	// In that case, we add the transition to this set and backfill the transitions after reading the
-	// entire file.
+	// So we'll save all transitions we find in this map, and add them all after consuming the entire fsa file.
 	transitionsToBackfill := make(map[*cfsm.CFSM][]Transition)
 
 	var stateNames map[string]*cfsm.State
 	var currentMachine *cfsm.CFSM
 
-	
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 		currentLine = strings.TrimSpace(currentLine)
-		if lineCommentRe.MatchString(currentLine) || len(currentLine == 0) {
+		if lineCommentRe.MatchString(currentLine) || len(currentLine) == 0 {
 			// Skip comments or empty lines.
 			continue
 		}
@@ -115,21 +111,21 @@ func ParseFSAFile(filename string) (cfsm.System, err error) {
 			if len(matches) == 2 {
 				num, err := strconv.Atoi(matches[1])
 				if err == nil && num != currentMachineNumber {
-					return nil, errors.New(fmt.Sprintf("fsa file invalid. Machine number %d is named %d", currentMachineNumber, num))
+					return nil, fmt.Errorf("fsa file invalid: machine number %d is named %d", currentMachineNumber, num)
 				}
 				namesOfCFSMs = append(namesOfCFSMs, matches[1])
 				numberOfCFSM[matches[1]] = currentMachineNumber
 			} else {
-				namesOfCFSMs = append(namesOfCFSMs, len(namesOfCFSMs))
-				numberOfCFSM[currentMachineNumber] = currentMachineNumber
+				namesOfCFSMs = append(namesOfCFSMs, strconv.Itoa(len(namesOfCFSMs)))
+				numberOfCFSM[strconv.Itoa(currentMachineNumber)] = currentMachineNumber
 			}
 			currentMachine = sys.NewMachine()
 			stateNames = make(map[string]*cfsm.State)
-			transitionsToBackfill[&currentMachine] = make([]Transition)
+			transitionsToBackfill[currentMachine] = make([]Transition, 0)
 			status = MachineStarting
 		case MachineStarting:
 			// We can only expect now a (useless) ".state graph" line.
-			if currentLine == ".state graph"{
+			if currentLine == ".state graph" {
 				status = Transitions
 				continue
 			} else {
@@ -152,10 +148,9 @@ func ParseFSAFile(filename string) (cfsm.System, err error) {
 			}
 			transitionMatches := messageRe.FindStringSubmatch(currentLine)
 			if transitionMatches == nil {
-				return nil, errors.New("Expected transition.")
+				return nil, errors.New("expected transition")
 			}
-			// _, fromStateStr, otherCFSM, action, msg, nextStateStr := transitionMatches...
-			
+
 			// Create fromState and nextState if they don't exist already.
 			val, ok := stateNames[transitionMatches[1]]
 			if !ok {
@@ -164,7 +159,7 @@ func ParseFSAFile(filename string) (cfsm.System, err error) {
 				stateNames[transitionMatches[1]] = val
 			}
 			fromState := val
-			
+
 			val, ok = stateNames[transitionMatches[5]]
 			if !ok {
 				val := currentMachine.NewState()
@@ -183,53 +178,51 @@ func ParseFSAFile(filename string) (cfsm.System, err error) {
 			default:
 				return nil, errors.New("Invalid action.")
 			}
-			
+
 			msg := transitionMatches[4]
+			otherCFSM := transitionMatches[2]
 
 			// Add transition to be backfilled.
-
 			transitionsToBackfill[currentMachine] = append(transitionsToBackfill[currentMachine], Transition{
-				FromState: fromState,
+				FromState:    fromState,
 				OtherMachine: otherCFSM,
-				Action: action,
-				Message: msg,
-				NextState: nextState,
+				Action:       action,
+				Message:      msg,
+				NextState:    nextState,
 			})
 
 		case StartStateRead:
 			// Here we can only see the end marker.
 			// TODO: We could also see transitions?
-			if currentLine == ".end"{
+			if currentLine == ".end" {
 				status = Initial
 				continue
 			} else {
-				return nil, errors.New("fsa file invalid. Expected '.end'.")
+				return nil, errors.New("fsa file invalid. Expected '.end'")
 			}
 		}
 
-		
 	}
 
-	for machine, transitions := range transitionsToBackfill {
+	for _, transitions := range transitionsToBackfill {
 		for _, t := range transitions {
 			otherMachineNum, ok := numberOfCFSM[t.OtherMachine]
 			if !ok {
-				return nil, errors.New("Non existant CFSM referenced.")
+				return nil, errors.New("non existant CFSM referenced")
 			}
 			otherMachine := sys.CFSMs[otherMachineNum]
 			switch t.Action {
 			case Send:
 				e := cfsm.NewSend(otherMachine, t.Message)
+				e.SetNext(t.NextState)
+				t.FromState.AddTransition(e)
 			case Recv:
 				e := cfsm.NewRecv(otherMachine, t.Message)
+				e.SetNext(t.NextState)
+				t.FromState.AddTransition(e)
 			}
-			e.SetNext(t.NextState)
-			t.FromState.AddTransition(e)
-		}
-	}
 
-	if len(machinesNotYetDeclared) > 0 {
-		return nil, errors.New("Invalid fsa. Some transition refers to an undeclared CFSM.")
+		}
 	}
 
 	return sys, nil
