@@ -274,7 +274,7 @@ func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 }
 
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
-func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessageOut) (*pb.AppSendResponse, error) {
+func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.AppSendRequest) (*pb.AppSendResponse, error) {
 	c := s.getChannelForUsage(req.ChannelId)
 	c.Outgoing[req.Recipient] <- req.Content // enqueue message in outgoing buffer
 
@@ -282,11 +282,11 @@ func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.ApplicationMessa
 	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
 }
 
-func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.ApplicationMessageIn, error) {
+func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.AppRecvResponse, error) {
 	c := s.getChannelForUsage(req.ChannelId)
 	msg := <-c.Incoming[req.Participant]
 
-	return &pb.ApplicationMessageIn{
+	return &pb.AppRecvResponse{
 		ChannelId: req.ChannelId,
 		Sender:    req.Participant,
 		Content:   msg,

@@ -20,8 +20,8 @@ service PrivateMiddlewareService {
     
     // This is used by the local app to communicate with other participants in an already
     // initiated or registered channel
-    rpc AppSend(ApplicationMessageOut) returns (AppSendResponse) {}
-    rpc AppRecv(AppRecvRequest) returns (ApplicationMessageIn) {}
+    rpc AppSend(AppSendRequest) returns (AppSendResponse) {}
+    rpc AppRecv(AppRecvRequest) returns (AppRecvResponse) {}
 
     
 }

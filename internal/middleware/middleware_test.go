@@ -141,7 +141,7 @@ func TestPingPong(t *testing.T) {
 				if string(res.Content.GetBody()) == "ping!" {
 					ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 					defer cancel()
-					client.AppSend(ctx, &pb.ApplicationMessageOut{
+					client.AppSend(ctx, &pb.AppSendRequest{
 						ChannelId: channelID,
 						Recipient: "p1",
 						Content: &pb.MessageContent{
@@ -181,7 +181,7 @@ func TestPingPong(t *testing.T) {
 	// AppSend to p2
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
+	_, err = client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "p2",
 		Content:   &pb.MessageContent{Body: []byte("ping!")},
@@ -205,7 +205,7 @@ func TestPingPong(t *testing.T) {
 	// AppSend goodbye to p2 so that it exits
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
+	_, err = client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "p2",
 		Content:   &pb.MessageContent{Body: []byte("goodbye!")},
@@ -258,7 +258,7 @@ func TestCircle(t *testing.T) {
 				},
 			}
 
-			streamCtx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+			streamCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			stream, err := client.RegisterApp(streamCtx, &req)
 			if err != nil {
@@ -299,7 +299,7 @@ func TestCircle(t *testing.T) {
 				msg = msg + " dummy"
 				ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
 				defer cancel()
-				client.AppSend(ctx, &pb.ApplicationMessageOut{
+				client.AppSend(ctx, &pb.AppSendRequest{
 					ChannelId: channelID,
 					Recipient: "receiver",
 					Content: &pb.MessageContent{
@@ -338,7 +338,7 @@ func TestCircle(t *testing.T) {
 	// AppSend to r1
 	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	_, err = client.AppSend(ctx, &pb.ApplicationMessageOut{
+	_, err = client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "r1_special",
 		Content:   &pb.MessageContent{Body: []byte("hola")},

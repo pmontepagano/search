@@ -20,14 +20,14 @@ message ApplicationMessageWithHeaders {
 
 
 // This is what will be sent from an app to the middleware
-message ApplicationMessageOut {
+message AppSendRequest {
     string channel_id = 1;
     string recipient = 2; // name of the recipient in the local contract
     MessageContent content = 3;
 }
 
 // This is what will be sent from the middleware to a local app
-message ApplicationMessageIn {
+message AppRecvResponse {
     string channel_id = 1;
     string sender = 2; // name of the sender in the local contract
     MessageContent content = 3;

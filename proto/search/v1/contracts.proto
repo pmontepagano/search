@@ -19,7 +19,7 @@ message CFSMState {
 }
 
 message CFSMTransition {
-    string to_state = 1;
+    string to_state = 1;  // id of the CFSMState to which we transition
     
     enum TransitionType {
         TRANSITION_TYPE_UNSPECIFIED = 0;
