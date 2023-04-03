@@ -4,30 +4,12 @@ option go_package = "github.com/clpombo/search/gen/go/v1";
 
 
 message Contract {
-    string contract = 1; // local participant must be called "self" or some other distinguished name
-    repeated string remote_participants = 2; // participant identifiers (must be referenced in the contract)
+    bytes contract = 1;
+    ContractFormat format = 2;
 }
 
-message CFSM {
-    // The first state is the start state of the CFSM
-    repeated CFSMState states = 1;
-}
-
-message CFSMState {
-    string id = 1;
-    repeated CFSMTransition transitions = 2; // outbound transitions
-}
-
-message CFSMTransition {
-    string to_state = 1;  // id of the CFSMState to which we transition
-    
-    enum TransitionType {
-        TRANSITION_TYPE_UNSPECIFIED = 0;
-        TRANSITION_TYPE_SEND = 1;
-        TRANSITION_TYPE_RECV = 2;
-    }
-
-    TransitionType type = 2;
-    string interlocutor = 3;  // The CFSM with we exchange the message
-    string label = 4;  // The message that is sent
+enum ContractFormat {
+    CONTRACT_FORMAT_UNSPECIFIED = 0;
+    CONTRACT_FORMAT_FSA = 1;   // System of CFSMs in FSA file format.
+    CONTRACT_FORMAT_GC = 2;  // Global Choreography.
 }

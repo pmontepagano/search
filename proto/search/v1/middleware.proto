@@ -12,10 +12,10 @@ import "search/v1/broker.proto";
     This service is what a Middleware exposes to its local users (not on the internet.)
 */
 service PrivateMiddlewareService {
-    // This is used by the initiator to register a new channel
+    // This is used by a requires point to start a new channel with a requirement contract.
     rpc RegisterChannel(RegisterChannelRequest) returns(RegisterChannelResponse) {}
 
-    // This is used by the local app to register an app with the registry
+    // This is used by provider services to register their provision contract with the Registry/Broker.
     rpc RegisterApp(RegisterAppRequest) returns (stream RegisterAppResponse) {}
     
     // This is used by the local app to communicate with other participants in an already
@@ -42,6 +42,8 @@ message AppRecvRequest {
 
 message RegisterChannelRequest {
     Contract requirements_contract = 1;
+    string requester_id = 2; // The ID of the requester in the contract.
+    map<string, RemoteParticipant> preset_participants = 3;  // Mapping of participants that we don't want brokered.
 }
 
 message RegisterChannelResponse {

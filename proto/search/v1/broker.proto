@@ -38,6 +38,8 @@ message RegisterProviderResponse {
 }
 
 message RemoteParticipant {
-    string url = 1;
-    string app_id = 2;
+    string url = 1; // points to the middleware for this participant
+    string app_id = 2;  // points to the specific app that is served by the middleware
+    // TODO: we should have URLs that refer to the app, uncoupled with the middleware's location.
+    //   for example https://middleware-load-balancer.example.org/app-that-does-x/
 }

@@ -3,6 +3,8 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
 	"sync"
 	"testing"
 
@@ -153,7 +155,6 @@ func TestTravelClient(t *testing.T) {
 	opts = append(opts, grpc.WithInsecure())
 	opts = append(opts, grpc.WithBlock())
 
-
 	// Start broker
 	bs := broker.NewBrokerServer()
 	go bs.StartServer("localhost", brokerPort, false, "", "")
@@ -178,7 +179,7 @@ func TestTravelClient(t *testing.T) {
 		// Register the HotelService
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
-				Contract: "Serialized HotelService CFSM.",
+				Contract:           "Serialized HotelService CFSM.", // TODO: replace with fsa
 				RemoteParticipants: []string{"self", "tc", "pps"},
 			},
 		}
@@ -190,6 +191,25 @@ func TestTravelClient(t *testing.T) {
 		if err != nil || ack.GetAppId() == "" {
 			t.Error("Could not register HotelService with broker.")
 		}
+		appID := ack.GetAppId()
+
+		// wait on RegisterAppResponse stream to await for new channel (once only for this test)
+		new, err := stream.Recv()
+		if err == io.EOF {
+			t.Error("Broker unexpectedly ended connection with provider")
+		}
+		if err != nil {
+			t.Errorf("Error receiving notification from RegisterApp: %v", err)
+		}
+		channelID := new.GetNotification().GetChannelId()
+		log.Printf("[HotelService - AppID %s] - Received Notification. ChannelID: %s", appID, channelID)
+
+		// Start HotelService protocol
+		recvReq := pb.AppRecvRequest{
+			ChannelId:   channelID,
+			Participant: "tc",
+		}
+		client.AppRecv(context.Background(), &recvReq)
 	}()
 
 }

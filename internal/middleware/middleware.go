@@ -93,7 +93,7 @@ type SEARCHChannel struct {
 	LocalID            uuid.UUID // the identifier the local app uses to identify the channel
 	ID                 uuid.UUID // channel identifier assigned by the broker
 	Contract           pb.Contract
-	ContractCFSMSystem *cfsm.System
+	ContractCFSMSystem *cfsm.System // TODO: replace with a generic Contract
 	AppID              uuid.UUID
 
 	addresses    map[string]*pb.RemoteParticipant // map participant names to remote URLs and AppIDs, indexed by participant name

@@ -12,6 +12,7 @@ import (
 	"github.com/clpombo/search/internal/broker"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Start Middleware that listens on localhost and then send to it a
@@ -358,4 +359,107 @@ func TestCircle(t *testing.T) {
 
 	initiatorMw.Stop()
 	wg.Wait()
+}
+
+func TestPingPongFullExample(t *testing.T) {
+
+	// TODO: I don't think we can accept GC format in the middleware. Because if the conversion
+	// to FSA introduces new messages that are not present in the GC, then the programmer needs
+	// to explicitly send those messages to the middleware!
+
+	// In this section we'll create several entities that will interact in this example:
+	// 1. Middleware for Ping (initiator). Runs private and public middleware servers in gorotines.
+	// 2. goroutine for Ping.
+	// 3. Middleware for Pong (provider). Runs private and public middleware servers in gorotines.
+	// 4. goroutine for Pong.
+	// 5. Broker. Runs in gorotine.
+
+	brokerPort, pingPrivPort, pingPubPort, pongPrivPort, pongPubPort := 20000, 20001, 20002, 20003, 20004
+
+	// start broker
+	bs := broker.NewBrokerServer()
+	go bs.StartServer("localhost", brokerPort, false, "", "")
+	defer bs.Stop()
+
+	var wg sync.WaitGroup
+	// start middlewares
+	pingMiddleware := NewMiddlewareServer("localhost", brokerPort)
+	pingMiddleware.StartMiddlewareServer(&wg, "localhost", pingPrivPort, "localhost", pingPubPort, false, "", "")
+
+	pongMiddleware := NewMiddlewareServer("localhost", brokerPort)
+	pongMiddleware.StartMiddlewareServer(&wg, "localhost", pongPrivPort, "localhost", pongPubPort, false, "", "")
+
+	// common grpc.DialOption
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
+
+}
+
+func pingProgram(t *testing.T, middlewareURL string) {
+	// Auxiliary function for TestFullExample.
+
+	// First we create a Global Choreography for our requirement.
+	const pingPongGC = `
+Ping -> Pong : finished
+   +
+   *{
+      Ping -> Pong : ping ; Pong -> Ping : pong
+   } @ Ping ; Ping -> Pong : finished
+`
+	// Then we convert this to FSA format using Chorgram's gc2fsa
+	const pingPongFSA = `
+.outputs Ping
+.state graph
+0 1 ! ping 5
+2 1 ? bye 1
+3 1 ! bye 2
+3 1 ! finished 2
+4 1 ! *<1 0
+4 1 ! >*1 3
+5 1 ? pong 4
+.marking 0
+.end
+
+
+
+.outputs Pong
+.state graph
+0 0 ? ping 5
+2 0 ! bye 1
+3 0 ? bye 2
+3 0 ? finished 2
+4 0 ? *<1 0
+4 0 ? >*1 3
+5 0 ! pong 4
+.marking 0
+.end
+`
+
+	// Connect to the middleware and instantiate client.
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(middlewareURL, opts...)
+	if err != nil {
+		t.Errorf("Error in pingProgram connecting to middleware URL %s", middlewareURL)
+	}
+	defer conn.Close()
+	client := pb.NewPrivateMiddlewareServiceClient(conn)
+
+	// Register channel.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	req := pb.RegisterChannelRequest{
+		RequirementsContract: &pb.Contract{
+			Contract: []byte(pingPongFSA),
+			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		},
+		RequesterId: "Ping",
+	}
+	regResult, err := client.RegisterChannel(ctx, &req)
+	if err != nil {
+		t.Error("Received error from RegisterChannel")
+	}
+	channelID := regResult.ChannelId
+
 }

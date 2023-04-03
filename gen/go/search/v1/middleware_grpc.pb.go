@@ -29,9 +29,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PrivateMiddlewareServiceClient interface {
-	// This is used by the initiator to register a new channel
+	// This is used by a requires point to start a new channel with a requirement contract.
 	RegisterChannel(ctx context.Context, in *RegisterChannelRequest, opts ...grpc.CallOption) (*RegisterChannelResponse, error)
-	// This is used by the local app to register an app with the registry
+	// This is used by provider services to register their provision contract with the Registry/Broker.
 	RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (PrivateMiddlewareService_RegisterAppClient, error)
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel
@@ -110,9 +110,9 @@ func (c *privateMiddlewareServiceClient) AppRecv(ctx context.Context, in *AppRec
 // All implementations must embed UnimplementedPrivateMiddlewareServiceServer
 // for forward compatibility
 type PrivateMiddlewareServiceServer interface {
-	// This is used by the initiator to register a new channel
+	// This is used by a requires point to start a new channel with a requirement contract.
 	RegisterChannel(context.Context, *RegisterChannelRequest) (*RegisterChannelResponse, error)
-	// This is used by the local app to register an app with the registry
+	// This is used by provider services to register their provision contract with the Registry/Broker.
 	RegisterApp(*RegisterAppRequest, PrivateMiddlewareService_RegisterAppServer) error
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel

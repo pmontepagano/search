@@ -12,38 +12,25 @@ import (
 	"github.com/nickng/cfsm"
 )
 
-// GlobalContract represents a requirements contract that characterizes a channel
-type GlobalContract struct {
-	contract     string
-	participants []string
+type Contract interface {
+	GetParticipants() []string
+	// TODO: add GetNextState()
 }
 
-// PartialContract represents a projection of a GlobalContract to a participant
-type PartialContract struct {
-	contract     string
-	participants []string
+type CFSMContract struct {
+	*cfsm.System
 }
 
-// LocalContract represents a provides contract
-type LocalContract struct {
-	contract     string
-	participants []string
-}
-
-// Projects GC into PartialContract. For now, this is a dummy implementation that only
-// considers contracts of two participants, so we simply copy contract and participant fields
-func (gc *GlobalContract) ProjectPartialContract(participant string) PartialContract {
-	return PartialContract{
-		contract:     gc.contract,
-		participants: gc.participants,
+func (s *CFSMContract) GetParticipants() []string {
+	var participants []string
+	for _, m := range s.CFSMs {
+		if m.Comment != "" {
+			participants = append(participants, m.Comment)
+		} else {
+			participants = append(participants, strconv.Itoa(m.ID))
+		}
 	}
-}
-
-// Determines if candidate LocalContract satisfies the PartialContract. For now, this is
-// a dummy implementation that always returns TRUE
-// TODO: do the check, this is a dummy implementation
-func (pc *PartialContract) IsSatisfiedBy(candidate LocalContract) bool {
-	return true
+	return participants
 }
 
 func ParseFSAFile(reader io.Reader) (*cfsm.System, error) {
