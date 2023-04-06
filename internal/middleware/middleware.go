@@ -110,12 +110,11 @@ type SEARCHChannel struct {
 	mw *MiddlewareServer
 }
 
-// TODO: maybe refactor and make this function a MiddlewareServer method?
-func newSEARCHChannel(contract pb.Contract, mw *MiddlewareServer) *SEARCHChannel {
+func (mw *MiddlewareServer) newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
 	var r SEARCHChannel
 	r.mw = mw
 	r.LocalID = uuid.New()
-	r.Contract = contract
+	r.Contract = contract // TODO: replace this with a non-protobuf struct ? (something that implements Contract interface)
 	r.addresses = make(map[string]*pb.RemoteParticipant)
 	r.participants = make(map[string]string)
 	r.outStreams = make(map[string]messageExchangeStream)
@@ -127,7 +126,7 @@ func newSEARCHChannel(contract pb.Contract, mw *MiddlewareServer) *SEARCHChannel
 		r.Outgoing[p] = make(chan *pb.MessageContent, bufferSize)
 		r.Incoming[p] = make(chan *pb.MessageContent, bufferSize)
 	}
-	r.ContractCFSMSystem = cfsm.NewSystem()
+	r.ContractCFSMSystem = cfsm.NewSystem() // TODO: replace with CFSMContract ? Or with Contract?
 
 	return &r
 }
@@ -206,7 +205,8 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 
 // invoked by local initiator app with a requirements contract
 func (s *MiddlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
-	c := newSEARCHChannel(*in.GetRequirementsContract(), s)
+	// TODO: create a monitor for this channel.
+	c := s.newSEARCHChannel(*in.GetRequirementsContract())
 	c.AppID = c.LocalID
 	s.channelLock.Lock()
 	s.unBrokeredChannels[c.LocalID.String()] = c // this has to be changed when brokering
@@ -251,6 +251,7 @@ func (r *SEARCHChannel) sender(participant string) {
 // and also update middleware's internal structures to reflect that change
 func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 	s.channelLock.Lock()
+	defer s.channelLock.Unlock()
 	c, ok := s.unBrokeredChannels[localID]
 	if ok {
 		// channel has not been brokered
@@ -269,7 +270,6 @@ func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 			c = s.brokeredChannels[channelID.(string)]
 		}
 	}
-	s.channelLock.Unlock()
 	return c
 }
 
@@ -353,7 +353,7 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
-		r = newSEARCHChannel(regapp.Contract, s)
+		r = s.newSEARCHChannel(regapp.Contract)
 		r.AppID = uuid.MustParse(icr.GetAppId())
 		r.LocalID = uuid.MustParse(icr.GetChannelId()) // in non locally initiated channels, LocalID == ID
 

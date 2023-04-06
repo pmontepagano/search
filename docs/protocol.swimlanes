@@ -1,11 +1,17 @@
-ApplicationMessageOuttitle: Protocol for channel initialization
+title: SEARCH
 
 _: **1. Prerequisite: provider registration**
 
 Provider 1 -> Provider 1 Middleware: RegisterAppRequest
 
 note:
-provider_contract (contract and participants names)
+```
+message RegisterAppRequest {
+    Contract provider_contract = 1;
+}
+```
+
+
 
 Provider 1 Middleware -> Broker / Registry: RegisterProviderRequest
 
@@ -31,30 +37,71 @@ _: **2. Channel initialization**
 Client A -> Client A Middleware: RegisterChannelRequest
 
 note:
-* `Contract requirements_contract`
+```
+message RegisterChannelRequest {
+    Contract requirements_contract = 1;
+    string requester_id = 2; // The ID of the requester in the contract.
+    map<string, RemoteParticipant> preset_participants = 3;  // Mapping of participants that we don't want brokered.
+}
+```
+Example:
+- FSA with system of CFSMs
+- requester_id: "Ping"
+- preset_participants: none
 
 
 Client A Middleware -> Client A: RegisterChannelResponse
 
 note:
-* `string channel_id`
+```
+message RegisterChannelResponse {
+    string channel_id = 1;
+}
+```
+
 
 Client A -> Client A Middleware: AppSend
 
 note:
-ApplicationMessageOut
-* `string channel_id`
-* `string recipient`
-* `MessageContent content`
+```
+message AppSendRequest {
+    string channel_id = 1;
+    string recipient = 2; // name of the recipient in the local contract
+    MessageContent content = 3;
+}
+message MessageContent {
+    bytes body = 1;
+}
+```
 
 Client A Middleware -> Client A: AppSendResponse
 note:
-* Result (OK or ERR)
+```
+enum Result {
+    OK = 0;
+    ERR = 1;
+}
+message AppSendResponse {
+    Result result = 1;
+}
+```
 
 Client A Middleware -> Broker / Registry: BrokerChannelRequest
 
 note:
-requirements contract
+```
+message BrokerChannelRequest {
+    Contract contract = 1;  // requirements contract
+    string initiator_id = 2;  // The name of the initiator in the contract.
+    // subset of contract's participants that are already decided. This should at least
+    // include the initiator's RemoteParticpant data
+    map<string, RemoteParticipant> preset_participants = 3;
+}
+```
+
+Broker / Registry -> Client A Middleware: BrokerChannelResponse
+
+note: ACK
 
 Broker / Registry -> Provider 1 Middleware: InitChannelRequest
 note:
@@ -73,12 +120,23 @@ notify new channel with InitChannelNotification
 
 Provider 1 Middleware -> Broker / Registry: InitChannelResponse
 
-Broker / Registry -> Client A Middleware: BrokerChannelResponse
+Broker / Registry -> Client A Middleware: InitChannelRequest
 
 note:
 ChannelID
 
 map(participantID, URL + AppID): where to locate other participants
+
+Client A Middleware -> Broker / Registry: InitChannelResponse
+
+Broker / Registry -> Provider 1 Middleware: StartChannel
+
+Broker / Registry -> Client A Middleware: StartChannel
+
+Client A Middleware -> Broker / Registry: StartChannelResponse
+
+Provider 1 Middleware -> Broker / Registry: StartChannelResponse
+
 
 
 Client A Middleware <--> Provider 1 Middleware: MessageExchange
@@ -93,3 +151,5 @@ body: "hello"
 Provider 1 -> Provider 1 Middleware: AppRecv
 
 Provider 1 Middleware -> Provider 1: AppRecvResponse
+
+order: Provider 1, Provider 1 Middleware, Broker / Registry, Client A Middleware, Client A
