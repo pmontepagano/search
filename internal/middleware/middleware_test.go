@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log"
@@ -36,8 +37,7 @@ func TestRegisterChannel(t *testing.T) {
 
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract:           "hola",
-			RemoteParticipants: []string{"self", "p1", "p2"},
+			Contract: []byte("hola"), // TODO: fix and use proper contract.
 		},
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
@@ -53,7 +53,7 @@ func TestRegisterChannel(t *testing.T) {
 	// check that the contract is properly saved inside the MiddleWare Server
 	// in its "unbrokered" channels list.
 	schan := mw.unBrokeredChannels[regResult.ChannelId]
-	if schan.Contract.GetContract() != "hola" {
+	if !bytes.Equal(schan.Contract.GetContract(), []byte("hola")) {
 		t.Error("Contract from channel different from original")
 	}
 
@@ -446,7 +446,7 @@ Ping -> Pong : finished
 	defer conn.Close()
 	client := pb.NewPrivateMiddlewareServiceClient(conn)
 
-	// Register channel.
+	// Register channel and obtain channelID for the Channel.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	req := pb.RegisterChannelRequest{
@@ -461,5 +461,16 @@ Ping -> Pong : finished
 		t.Error("Received error from RegisterChannel")
 	}
 	channelID := regResult.ChannelId
+	log.Printf("Obtained channel with ID: %s", channelID)
+
+	// TODO: keep using the same ctx? Has time elapsed on this one?
+	client.AppSend(ctx, &pb.AppSendRequest{
+		ChannelId: channelID,
+		Recipient: "Pong",
+		Message: &pb.AppMessage{
+			Body: []byte("hello"), // we send whatever content and expect it reflected back to us.
+			Type: "ping",
+		},
+	})
 
 }

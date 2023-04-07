@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
+	"github.com/clpombo/search/internal/contract"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
@@ -92,7 +93,7 @@ type messageExchangeStream interface {
 type SEARCHChannel struct {
 	LocalID            uuid.UUID // the identifier the local app uses to identify the channel
 	ID                 uuid.UUID // channel identifier assigned by the broker
-	Contract           pb.Contract
+	Contract           contract.Contract
 	ContractCFSMSystem *cfsm.System // TODO: replace with a generic Contract
 	AppID              uuid.UUID
 
@@ -103,28 +104,33 @@ type SEARCHChannel struct {
 	inStreams  map[string]messageExchangeStream // map participant names to incoming streams
 
 	// buffers for incoming/outgoing messages from/to each participant
-	Outgoing map[string]chan *pb.MessageContent
-	Incoming map[string]chan *pb.MessageContent
+	Outgoing map[string]chan *pb.AppMessage
+	Incoming map[string]chan *pb.AppMessage
 
 	// pointer to middleware
 	mw *MiddlewareServer
 }
 
-func (mw *MiddlewareServer) newSEARCHChannel(contract pb.Contract) *SEARCHChannel {
+func (mw *MiddlewareServer) newSEARCHChannel(pbContract pb.Contract) *SEARCHChannel {
 	var r SEARCHChannel
 	r.mw = mw
 	r.LocalID = uuid.New()
-	r.Contract = contract // TODO: replace this with a non-protobuf struct ? (something that implements Contract interface)
+	c, err := contract.ConvertPBContract(&pbContract)
+	if err != nil {
+		// TODO: replace with proper error handling.
+		panic(err)
+	}
+	r.Contract = c
 	r.addresses = make(map[string]*pb.RemoteParticipant)
 	r.participants = make(map[string]string)
 	r.outStreams = make(map[string]messageExchangeStream)
 	r.inStreams = make(map[string]messageExchangeStream)
 
-	r.Outgoing = make(map[string]chan *pb.MessageContent)
-	r.Incoming = make(map[string]chan *pb.MessageContent)
-	for _, p := range contract.GetRemoteParticipants() {
-		r.Outgoing[p] = make(chan *pb.MessageContent, bufferSize)
-		r.Incoming[p] = make(chan *pb.MessageContent, bufferSize)
+	r.Outgoing = make(map[string]chan *pb.AppMessage)
+	r.Incoming = make(map[string]chan *pb.AppMessage)
+	for _, p := range c.GetParticipants() {
+		r.Outgoing[p] = make(chan *pb.AppMessage, bufferSize)
+		r.Incoming[p] = make(chan *pb.AppMessage, bufferSize)
 	}
 	r.ContractCFSMSystem = cfsm.NewSystem() // TODO: replace with CFSMContract ? Or with Contract?
 
@@ -146,13 +152,13 @@ func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.Client
 
 // connect to the broker, send contract, wait for result and save data in the channel
 func (r *SEARCHChannel) broker() {
-	r.mw.logger.Printf("Requesting brokerage of contract: '%v'", r.Contract.Contract)
+	r.mw.logger.Printf("Requesting brokerage of contract: '%v'", r.Contract)
 	client, conn := r.mw.connectBroker()
 	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
-		Contract: &r.Contract,
+		Contract: &r.Contract, // TODO: we need a converter from Contract to protobuf
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			"self": {
 				Url:   r.mw.PublicURL,

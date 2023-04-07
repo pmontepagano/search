@@ -179,8 +179,7 @@ func TestTravelClient(t *testing.T) {
 		// Register the HotelService
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
-				Contract:           "Serialized HotelService CFSM.", // TODO: replace with fsa
-				RemoteParticipants: []string{"self", "tc", "pps"},
+				Contract: []byte("Serialized HotelService CFSM."), // TODO: replace with fsa
 			},
 		}
 		stream, err := client.RegisterApp(context.Background(), &req)

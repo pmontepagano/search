@@ -3,6 +3,8 @@ package contract
 import (
 	"testing"
 	"testing/fstest"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHelloWorldFSAParse(t *testing.T) {
@@ -95,6 +97,8 @@ func TestPingPongFSAParser(t *testing.T) {
 	if len(sys.CFSMs) != 2 {
 		t.Errorf("Parsed FSA has %d CFSMs. Expected 2.", len(sys.CFSMs))
 	}
+	assert.ElementsMatch(t, []string{"Ping", "Pong"}, sys.GetParticipants())
+
 	firstCFSM := sys.CFSMs[0]
 	if firstCFSM.Comment != "Ping" {
 		t.Errorf("Expected fist CFSM to have Comment 'Ping' but instead had %s", firstCFSM.Comment)

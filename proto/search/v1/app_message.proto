@@ -14,7 +14,7 @@ message ApplicationMessageWithHeaders {
 
     // TODO: how to avoid spoofing?
 
-    MessageContent content = 4;
+    AppMessage content = 4;
 
 }
 
@@ -23,17 +23,20 @@ message ApplicationMessageWithHeaders {
 message AppSendRequest {
     string channel_id = 1;
     string recipient = 2; // name of the recipient in the local contract
-    MessageContent content = 3;
+    AppMessage message = 3;
 }
 
 // This is what will be sent from the middleware to a local app
 message AppRecvResponse {
     string channel_id = 1;
     string sender = 2; // name of the sender in the local contract
-    MessageContent content = 3;
+    AppMessage message = 3;
 }
 
 // This is the message content that is sent by the app (this is copied as-is by the middlewares)
-message MessageContent {
-    bytes body = 1;
+// TODO: we may want to use self-describing messages to have a rich type system for messages!
+// https://protobuf.dev/programming-guides/techniques/#self-description
+message AppMessage {
+    string type = 1;
+    bytes body = 2;
 }

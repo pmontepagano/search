@@ -2,6 +2,7 @@ package contract
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/nickng/cfsm"
+
+	pb "github.com/clpombo/search/gen/go/search/v1"
 )
 
 type Contract interface {
@@ -24,6 +27,7 @@ type CFSMContract struct {
 func (s *CFSMContract) GetParticipants() []string {
 	var participants []string
 	for _, m := range s.CFSMs {
+		// TODO: maybe instead of using Comment to save each CFSMs name, fork the library and change attribute.
 		if m.Comment != "" {
 			participants = append(participants, m.Comment)
 		} else {
@@ -33,7 +37,18 @@ func (s *CFSMContract) GetParticipants() []string {
 	return participants
 }
 
-func ParseFSAFile(reader io.Reader) (*cfsm.System, error) {
+func ConvertPBContract(pbContract *pb.Contract) (Contract, error) {
+	if pbContract.Format == pb.ContractFormat_CONTRACT_FORMAT_FSA {
+		contract, err := ParseFSAFile(bytes.NewReader(pbContract.Contract))
+		if err != nil {
+			return nil, err
+		}
+		return contract, nil
+	}
+	return nil, fmt.Errorf("not implemented")
+}
+
+func ParseFSAFile(reader io.Reader) (*CFSMContract, error) {
 	// f, err := os.Open("/tmp/dat")
 	// if err != nil {
 	// 	panic(err)
@@ -70,7 +85,7 @@ func ParseFSAFile(reader io.Reader) (*cfsm.System, error) {
 	var namesOfCFSMs []string            // array of names of CFSMs as we find in order. If they don't have name, we use str(int) of the machine order (starts with 0).
 	numberOfCFSM := make(map[string]int) // inverse of the latter
 	var status FSAParserStatus = Initial
-	sys := cfsm.NewSystem() // This is what we'll return.
+	sys := CFSMContract{System: cfsm.NewSystem()} // This is what we'll return.
 
 	// While reading transitions we can find transitions that refer to CFSMs that we haven't yet parsed.
 	// So we'll save all transitions we find in this map, and add them all after consuming the entire fsa file.
@@ -218,5 +233,5 @@ func ParseFSAFile(reader io.Reader) (*cfsm.System, error) {
 		}
 	}
 
-	return sys, nil
+	return &sys, nil
 }

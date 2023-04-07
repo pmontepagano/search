@@ -19,6 +19,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/testdata"
 
+	"github.com/clpombo/search/internal/contract"
+
 	pb "github.com/clpombo/search/gen/go/search/v1"
 )
 
@@ -27,13 +29,13 @@ type brokerServer struct {
 	server *grpc.Server
 	// mapping of AppIDs to registered providers
 	registeredProviders map[string]registeredProvider
-	PublicURL string
-	logger *log.Logger
+	PublicURL           string
+	logger              *log.Logger
 }
 
 type registeredProvider struct {
 	participant pb.RemoteParticipant
-	contract pb.Contract	// TODO: we'll need to use our LocalContract definition eventually
+	contract    contract.Contract
 }
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
@@ -56,9 +58,9 @@ func GetRandomKeyFromMap(mapI interface{}) interface{} {
 // given a contract and a list of participants, get best possible candidates for those candidates
 // from all the candidates present in the registry
 // TODO: we probably need to add a parameter to EXCLUDE candidates from regitry
-func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []string) (map[string]*pb.RemoteParticipant, error) {
+func (s *brokerServer) getBestCandidates(contract contract.Contract, participants []string) (map[string]*pb.RemoteParticipant, error) {
 	// sanity check: check that all elements of param `participants` are present as participants in param `contract`
-	contractParticipants := contract.GetRemoteParticipants()
+	contractParticipants := contract.GetParticipants()
 	sort.Strings(contractParticipants)
 	for _, p := range participants {
 		// https://golang.org/pkg/sort/#Search
@@ -77,35 +79,34 @@ func (s *brokerServer) getBestCandidates(contract *pb.Contract, participants []s
 		return nil, errors.New("No providers registered.")
 	}
 	// TODO: hardcoded responses for TestCircle
-	if contract.GetContract() == "send hello to r1, and later receive mesage from r3" {
-		for _, rp := range s.registeredProviders {
-			url := rp.participant.Url
-			if url == "localhost:20001" {
-				p := rp.participant
-				response["r1_special"] = &p
-			}
-			if url == "localhost:20003" {
-				p := rp.participant
-				response["r2_special"] = &p
-			}
-			if url == "localhost:20005" {
-				p := rp.participant
-				response["r3_special"] = &p
-			}
-		}
-	} else {
-		for _, v := range participants {
-			appid := GetRandomKeyFromMap(s.registeredProviders).(string)
-			participant := s.registeredProviders[appid].participant
-			response[v] = &participant
-		}
+	// if bytes.Equal(contract.GetContract(), []byte("send hello to r1, and later receive mesage from r3")) {
+	// 	for _, rp := range s.registeredProviders {
+	// 		url := rp.participant.Url
+	// 		if url == "localhost:20001" {
+	// 			p := rp.participant
+	// 			response["r1_special"] = &p
+	// 		}
+	// 		if url == "localhost:20003" {
+	// 			p := rp.participant
+	// 			response["r2_special"] = &p
+	// 		}
+	// 		if url == "localhost:20005" {
+	// 			p := rp.participant
+	// 			response["r3_special"] = &p
+	// 		}
+	// 	}
+	// } else {
+	for _, v := range participants {
+		appid := GetRandomKeyFromMap(s.registeredProviders).(string)
+		participant := s.registeredProviders[appid].participant
+		response[v] = &participant
 	}
 
 	return response, nil
 }
 
 // getParticipantMapping takes the mapping between participant's names and RemoteParticipants from the
-// initiator's perspective, and a participant name (also in the initiator's perspective), called receiver, 
+// initiator's perspective, and a participant name (also in the initiator's perspective), called receiver,
 // and returns a mapping between participant names and RemoteParticipant's but using the receiver's
 // perspective for participant names. The receiver has to be present in the registry because
 // we need to parse its contract to get the mapping.
@@ -145,10 +146,10 @@ func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.Rem
 		if len(initiatorMapping) > 2 {
 			s.logger.Fatal("Cannot translate a mapping of more than two participants. Not yet implemented.")
 		}
-		if len(receiverProvider.contract.RemoteParticipants) > 2 {
+		if len(receiverProvider.contract.GetParticipants()) > 2 {
 			s.logger.Fatal("Receiver has more than two participants in its contract. Cannot translate mapping, not yet implemented.")
 		}
-		otherParticipantName := receiverProvider.contract.RemoteParticipants[1]
+		otherParticipantName := receiverProvider.contract.GetParticipants()[1]
 		res[otherParticipantName] = initiatorMapping["self"]
 	}
 	return res
@@ -157,17 +158,16 @@ func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.Rem
 // contract will always have a distinguished participant called "self" that corresponds to the initiator
 // self MUST be present in presetParticipants with its url and ID.
 // this routine will find compatible candidates and notify them
-func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticipants map[string]*pb.RemoteParticipant) {
+func (s *brokerServer) brokerAndInitialize(contract contract.Contract, presetParticipants map[string]*pb.RemoteParticipant) {
 	// log.Printf("brokerAndInitialize presetParticipants: %v", presetParticipants)
 	// log.Printf("brokerAndInitialize contract.GetRemoteParticipants(): %v", contract.GetRemoteParticipants())
-	participantsToMatch := filterParticipants(contract.GetRemoteParticipants(), presetParticipants)
+	participantsToMatch := filterParticipants(contract.GetParticipants(), presetParticipants)
 	// log.Printf("brokerAndInitialize participantsToMatch: %v", participantsToMatch)
 	candidates, err := s.getBestCandidates(contract, participantsToMatch)
 	if err != nil {
 		// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
 		s.logger.Fatal("Could not get any provider candidates.")
 	}
-	
 
 	allParticipants := make(map[string]*pb.RemoteParticipant)
 	for pname, p := range candidates {
@@ -235,7 +235,7 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 			grpc.FailOnNonTempDialError(true),
 		)
 		if err != nil {
-			s.logger.Printf("Couldn't contact participant %s", pname)  // TODO: panic?
+			s.logger.Printf("Couldn't contact participant %s", pname) // TODO: panic?
 			return
 		}
 		defer conn.Close()
@@ -243,8 +243,8 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: remove hardcoded timeout
 		defer cancel()
 		req := pb.StartChannelRequest{
-			ChannelId:    channelID.String(),
-			AppId:        p.AppId,
+			ChannelId: channelID.String(),
+			AppId:     p.AppId,
 		}
 		res, err := client.StartChannel(ctx, &req)
 		if err != nil {
@@ -263,7 +263,10 @@ func (s *brokerServer) brokerAndInitialize(contract *pb.Contract, presetParticip
 
 func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
 	s.logger.Printf("Received broker request for contract: '%s'", request.Contract.Contract)
-	contract := request.GetContract()
+	contract, err := contract.ConvertPBContract(request.GetContract())
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse contract")
+	}
 	presetParticipants := request.GetPresetParticipants()
 
 	go s.brokerAndInitialize(contract, presetParticipants)
@@ -277,12 +280,16 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 
 	// TODO: parse and validate contract
 	appID := uuid.New()
+	contract, err := contract.ConvertPBContract(req.GetContract())
+	if err != nil {
+		return nil, err
+	}
 	s.registeredProviders[appID.String()] = registeredProvider{
 		participant: pb.RemoteParticipant{
-			Url: req.Url,
+			Url:   req.Url,
 			AppId: appID.String(),
 		},
-		contract: *req.GetContract(),
+		contract: contract,
 	}
 	return &pb.RegisterProviderResponse{AppId: appID.String()}, nil
 }
@@ -291,13 +298,13 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 func NewBrokerServer() *brokerServer {
 	s := &brokerServer{}
 	s.registeredProviders = make(map[string]registeredProvider)
-	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)
 	return s
 }
 
-func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string){
+func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string) {
 	s.PublicURL = fmt.Sprintf("%s:%d", host, port)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags | log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix)
 	lis, err := net.Listen("tcp", s.PublicURL)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)
@@ -305,7 +312,7 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 	var opts []grpc.ServerOption
 	if tls {
 		if certFile == "" {
-		    certFile = testdata.Path("server1.pem")
+			certFile = testdata.Path("server1.pem")
 		}
 		if keyFile == "" {
 			keyFile = testdata.Path("server1.key")
@@ -323,7 +330,7 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 	grpcServer.Serve(lis)
 }
 
-func (s *brokerServer) Stop(){
+func (s *brokerServer) Stop() {
 	if s.server != nil {
 		s.server.Stop()
 	}
