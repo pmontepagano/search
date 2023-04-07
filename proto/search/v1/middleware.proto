@@ -42,7 +42,7 @@ message AppRecvRequest {
 
 message RegisterChannelRequest {
     Contract requirements_contract = 1;
-    string requester_id = 2; // The ID of the requester in the contract.
+    string initiator_name = 2; // The name of the initiator in the contract.
     map<string, RemoteParticipant> preset_participants = 3;  // Mapping of participants that we don't want brokered.
 }
 
@@ -52,6 +52,7 @@ message RegisterChannelResponse {
 
 message RegisterAppRequest {
     Contract provider_contract = 1;
+    string provider_name = 2;  // The name of the provider in the contract.
 }
 
 // whenever a new channel that involves this app is started, the middleware needs to notify the local app

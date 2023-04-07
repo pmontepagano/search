@@ -12,7 +12,7 @@ service BrokerService {
 
 message BrokerChannelRequest {
     Contract contract = 1;  // requirements contract
-    string initiator_id = 2;  // The name of the initiator in the contract.
+    string initiator_name = 2;  // The name of the initiator in the contract.
     // subset of contract's participants that are already decided. This should at least
     // include the initiator's RemoteParticpant data
     map<string, RemoteParticipant> preset_participants = 3;
@@ -30,7 +30,8 @@ message BrokerChannelResponse {
 
 message RegisterProviderRequest {
     Contract contract = 1;
-    string url = 2;
+    string provider_name = 2;
+    string url = 3;
 }
 
 // The registry assigns the provider an ID

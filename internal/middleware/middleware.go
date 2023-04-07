@@ -20,8 +20,6 @@ import (
 	"google.golang.org/grpc/testdata"
 
 	"github.com/vishalkuo/bimap"
-
-	"github.com/nickng/cfsm"
 )
 
 var (
@@ -80,8 +78,9 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
 }
 
 type registeredApp struct {
-	Contract   pb.Contract
-	NotifyChan *chan pb.InitChannelNotification
+	Contract     pb.Contract // TODO: replace with Contract interface
+	ProviderName string      // Name of the provider in the contract.
+	NotifyChan   *chan pb.InitChannelNotification
 }
 
 type messageExchangeStream interface {
@@ -91,14 +90,15 @@ type messageExchangeStream interface {
 
 // SEARCHChannel represents what we call a "channel" in SEARCH
 type SEARCHChannel struct {
-	LocalID            uuid.UUID // the identifier the local app uses to identify the channel
-	ID                 uuid.UUID // channel identifier assigned by the broker
-	Contract           contract.Contract
-	ContractCFSMSystem *cfsm.System // TODO: replace with a generic Contract
-	AppID              uuid.UUID
+	LocalID    uuid.UUID // the identifier the local app uses to identify the channel
+	ID         uuid.UUID // channel identifier assigned by the broker
+	Contract   contract.Contract
+	ContractPB *pb.Contract
+	AppID      uuid.UUID
 
-	addresses    map[string]*pb.RemoteParticipant // map participant names to remote URLs and AppIDs, indexed by participant name
-	participants map[string]string                // participant names indexed by AppID
+	localParticipant string                           // Name of the local participant in the contract.
+	addresses        map[string]*pb.RemoteParticipant // map participant names to remote URLs and AppIDs, indexed by participant name
+	participants     map[string]string                // participant names indexed by AppID
 
 	outStreams map[string]messageExchangeStream // map participant names to outgoing streams
 	inStreams  map[string]messageExchangeStream // map participant names to incoming streams
@@ -111,16 +111,22 @@ type SEARCHChannel struct {
 	mw *MiddlewareServer
 }
 
-func (mw *MiddlewareServer) newSEARCHChannel(pbContract pb.Contract) *SEARCHChannel {
+// newSEARCHChannel returns a pointer to a new channel created for the MiddlewareServer.
+// localParticipant is the name of the local app in the contract.
+func (mw *MiddlewareServer) newSEARCHChannel(pbContract *pb.Contract, localParticipant string) *SEARCHChannel {
+	// TODO: review ContractPB. Instead of copying entire protobuf, maybe keep only a copy
+	// of the contract bytes?
 	var r SEARCHChannel
 	r.mw = mw
 	r.LocalID = uuid.New()
-	c, err := contract.ConvertPBContract(&pbContract)
+	c, err := contract.ConvertPBContract(pbContract)
 	if err != nil {
 		// TODO: replace with proper error handling.
 		panic(err)
 	}
 	r.Contract = c
+	r.ContractPB = pbContract
+	r.localParticipant = localParticipant
 	r.addresses = make(map[string]*pb.RemoteParticipant)
 	r.participants = make(map[string]string)
 	r.outStreams = make(map[string]messageExchangeStream)
@@ -129,10 +135,11 @@ func (mw *MiddlewareServer) newSEARCHChannel(pbContract pb.Contract) *SEARCHChan
 	r.Outgoing = make(map[string]chan *pb.AppMessage)
 	r.Incoming = make(map[string]chan *pb.AppMessage)
 	for _, p := range c.GetParticipants() {
-		r.Outgoing[p] = make(chan *pb.AppMessage, bufferSize)
-		r.Incoming[p] = make(chan *pb.AppMessage, bufferSize)
+		if p != localParticipant {
+			r.Outgoing[p] = make(chan *pb.AppMessage, bufferSize)
+			r.Incoming[p] = make(chan *pb.AppMessage, bufferSize)
+		}
 	}
-	r.ContractCFSMSystem = cfsm.NewSystem() // TODO: replace with CFSMContract ? Or with Contract?
 
 	return &r
 }
@@ -158,7 +165,7 @@ func (r *SEARCHChannel) broker() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
-		Contract: &r.Contract, // TODO: we need a converter from Contract to protobuf
+		Contract: r.ContractPB,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			"self": {
 				Url:   r.mw.PublicURL,
@@ -212,7 +219,7 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 // invoked by local initiator app with a requirements contract
 func (s *MiddlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
 	// TODO: create a monitor for this channel.
-	c := s.newSEARCHChannel(*in.GetRequirementsContract())
+	c := s.newSEARCHChannel(in.GetRequirementsContract(), in.GetInitiatorName())
 	c.AppID = c.LocalID
 	s.channelLock.Lock()
 	s.unBrokeredChannels[c.LocalID.String()] = c // this has to be changed when brokering
@@ -282,7 +289,7 @@ func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
 func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.AppSendRequest) (*pb.AppSendResponse, error) {
 	c := s.getChannelForUsage(req.ChannelId)
-	c.Outgoing[req.Recipient] <- req.Content // enqueue message in outgoing buffer
+	c.Outgoing[req.Recipient] <- req.GetMessage() // enqueue message in outgoing buffer
 
 	// TODO: reply with error code in case there is an error. eg buffer full.
 	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
@@ -295,7 +302,7 @@ func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 	return &pb.AppRecvResponse{
 		ChannelId: req.ChannelId,
 		Sender:    req.Participant,
-		Content:   msg,
+		Message:   msg,
 	}, nil
 }
 
@@ -359,8 +366,9 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
-		r = s.newSEARCHChannel(regapp.Contract)
+		r = s.newSEARCHChannel(&regapp.Contract, regapp.ProviderName)
 		r.AppID = uuid.MustParse(icr.GetAppId())
+
 		r.LocalID = uuid.MustParse(icr.GetChannelId()) // in non locally initiated channels, LocalID == ID
 
 		// notify local provider app
@@ -385,6 +393,8 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	return &pb.InitChannelResponse{Result: pb.InitChannelResponse_ACK}, nil
 }
 
+// StartChannel is fired by the broker and sent to all participants (initiator included) to signal that
+// all participants are ready and communication can start.
 func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChannelRequest) (*pb.StartChannelResponse, error) {
 	s.logger.Printf("StartChannel. ChannelID: %s. AppID: %s", req.ChannelId, req.AppId)
 	s.channelLock.Lock()
@@ -393,8 +403,8 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 	if !ok {
 		s.logger.Panicf("Received StartChannel on non brokered ChannelID: %s", req.ChannelId)
 	}
-	for _, p := range c.Contract.GetRemoteParticipants() {
-		if p != "self" {
+	for _, p := range c.Contract.GetParticipants() {
+		if p != c.localParticipant {
 			go c.sender(p)
 		}
 	}

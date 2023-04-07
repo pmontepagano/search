@@ -53,7 +53,7 @@ func TestRegisterChannel(t *testing.T) {
 	// check that the contract is properly saved inside the MiddleWare Server
 	// in its "unbrokered" channels list.
 	schan := mw.unBrokeredChannels[regResult.ChannelId]
-	if !bytes.Equal(schan.Contract.GetContract(), []byte("hola")) {
+	if !bytes.Equal(schan.ContractPB.GetContract(), []byte("hola")) {
 		t.Error("Contract from channel different from original")
 	}
 
@@ -99,8 +99,8 @@ func TestPingPong(t *testing.T) {
 		// register dummy app with provider middleware
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
-				Contract:           "dummy provider contract",
-				RemoteParticipants: []string{"self", "p1"},
+				Contract: []byte("dummy provider contract"), // TODO: replace with real contract.
+
 			},
 		}
 
@@ -138,15 +138,16 @@ func TestPingPong(t *testing.T) {
 				if err != nil {
 					t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
 				}
-				log.Printf("[PROVIDER] - Received message from p1: %s", res.Content.GetBody())
-				if string(res.Content.GetBody()) == "ping!" {
+				log.Printf("[PROVIDER] - Received message from p1: %s", res.Message.GetBody())
+				if string(res.Message.GetBody()) == "ping!" {
 					ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 					defer cancel()
 					client.AppSend(ctx, &pb.AppSendRequest{
 						ChannelId: channelID,
 						Recipient: "p1",
-						Content: &pb.MessageContent{
+						Message: &pb.AppMessage{
 							Body: []byte("pong!"),
+							// TODO: add Type
 						},
 					})
 				} else {
@@ -170,9 +171,9 @@ func TestPingPong(t *testing.T) {
 	defer cancel()
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract:           "client example requirement contract",
-			RemoteParticipants: []string{"self", "p2"},
+			Contract: []byte("client example requirement contract"),
 		},
+		// TODO: add Initiator name
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
@@ -185,7 +186,7 @@ func TestPingPong(t *testing.T) {
 	_, err = client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "p2",
-		Content:   &pb.MessageContent{Body: []byte("ping!")},
+		Message:   &pb.AppMessage{Body: []byte("ping!")}, // TODO: add message type
 	})
 	if err != nil {
 		t.Error(err)
@@ -201,7 +202,7 @@ func TestPingPong(t *testing.T) {
 	if err != nil {
 		t.Error("Could not receive message from p2")
 	}
-	log.Printf("Received message from p2: %s", resp.Content)
+	log.Printf("Received message from p2: %s", resp.Message.GetBody())
 
 	// AppSend goodbye to p2 so that it exits
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
@@ -209,7 +210,7 @@ func TestPingPong(t *testing.T) {
 	_, err = client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "p2",
-		Content:   &pb.MessageContent{Body: []byte("goodbye!")},
+		Message:   &pb.AppMessage{Body: []byte("goodbye!")},
 	})
 
 	clientMw.Stop()
@@ -254,9 +255,10 @@ func TestCircle(t *testing.T) {
 			// register dummy app with provider middleware
 			req := pb.RegisterAppRequest{
 				ProviderContract: &pb.Contract{
-					Contract:           "dummy provider contract",
-					RemoteParticipants: []string{"self", "sender", "receiver"},
+					Contract: []byte("dummy provider contract"),
+					// RemoteParticipants: []string{"self", "sender", "receiver"},
 				},
+				// TODO: set provider name.
 			}
 
 			streamCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -295,15 +297,15 @@ func TestCircle(t *testing.T) {
 				if err != nil {
 					t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
 				}
-				log.Printf("[PROVIDER] - Received message from sender: %s", res.Content.GetBody())
-				msg := string(res.Content.GetBody())
+				log.Printf("[PROVIDER] - Received message from sender: %s", res.Message.GetBody())
+				msg := string(res.Message.GetBody())
 				msg = msg + " dummy"
 				ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
 				defer cancel()
 				client.AppSend(ctx, &pb.AppSendRequest{
 					ChannelId: channelID,
 					Recipient: "receiver",
-					Content: &pb.MessageContent{
+					Message: &pb.AppMessage{
 						Body: []byte(msg),
 					},
 				})
@@ -327,8 +329,8 @@ func TestCircle(t *testing.T) {
 	defer cancel()
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract:           "send hello to r1, and later receive mesage from r3",
-			RemoteParticipants: []string{"self", "r1_special", "r2_special", "r3_special"},
+			Contract: []byte("send hello to r1, and later receive mesage from r3"),
+			// RemoteParticipants: []string{"self", "r1_special", "r2_special", "r3_special"},
 		},
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
@@ -342,7 +344,7 @@ func TestCircle(t *testing.T) {
 	_, err = client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "r1_special",
-		Content:   &pb.MessageContent{Body: []byte("hola")},
+		Message:   &pb.AppMessage{Body: []byte("hola")},
 	})
 
 	// receive from r3
@@ -355,7 +357,7 @@ func TestCircle(t *testing.T) {
 	if err != nil {
 		t.Error("Could not receive message from r3")
 	}
-	log.Printf("Received message from r3: %s", resp.Content)
+	log.Printf("Received message from r3: %s", resp.Message)
 
 	initiatorMw.Stop()
 	wg.Wait()
@@ -454,7 +456,7 @@ Ping -> Pong : finished
 			Contract: []byte(pingPongFSA),
 			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
-		RequesterId: "Ping",
+		InitiatorName: "Ping",
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
