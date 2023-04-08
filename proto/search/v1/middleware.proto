@@ -74,7 +74,7 @@ message InitChannelNotification {
     This service is what a Middleware exposes to external components (other participants and the broker)
 */
 service PublicMiddlewareService {
-    // The Broker, when a new channel is registered, signals all participants (except initiator) with this
+    // The Broker, when a new channel is registered, signals all participants with this
     rpc InitChannel(InitChannelRequest) returns(InitChannelResponse) {}
     rpc StartChannel(StartChannelRequest) returns(StartChannelResponse) {}
     rpc MessageExchange (stream ApplicationMessageWithHeaders) returns (stream ApplicationMessageWithHeaders) {}

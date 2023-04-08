@@ -116,6 +116,10 @@ type SEARCHChannel struct {
 func (mw *MiddlewareServer) newSEARCHChannel(pbContract *pb.Contract, localParticipant string) *SEARCHChannel {
 	// TODO: review ContractPB. Instead of copying entire protobuf, maybe keep only a copy
 	// of the contract bytes?
+	if localParticipant == "" {
+		mw.logger.Fatal("ERROR: localParticipant empty")
+	}
+	mw.logger.Printf("newSEARCHChannel for localParticipant %v", localParticipant)
 	var r SEARCHChannel
 	r.mw = mw
 	r.LocalID = uuid.New()
@@ -165,9 +169,10 @@ func (r *SEARCHChannel) broker() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
-		Contract: r.ContractPB,
+		Contract:      r.ContractPB,
+		InitiatorName: r.localParticipant,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
-			"self": {
+			r.localParticipant: {
 				Url:   r.mw.PublicURL,
 				AppId: r.LocalID.String(), // we use channels LocalID as AppID for initiator apps
 			},
@@ -188,8 +193,9 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
-		Contract: req.ProviderContract,
-		Url:      s.PublicURL,
+		Contract:     req.ProviderContract,
+		Url:          s.PublicURL,
+		ProviderName: req.GetProviderName(),
 	})
 	if err != nil {
 		s.logger.Fatalf("ERROR RegisterApp: %v", err)
@@ -202,7 +208,11 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 	}
 
 	notifyInitChannel := make(chan pb.InitChannelNotification, bufferSize)
-	s.registeredApps[res.GetAppId()] = registeredApp{Contract: *req.ProviderContract, NotifyChan: &notifyInitChannel}
+	s.registeredApps[res.GetAppId()] = registeredApp{
+		Contract:     *req.ProviderContract,
+		NotifyChan:   &notifyInitChannel,
+		ProviderName: req.ProviderName,
+	}
 	for {
 		newChan := <-notifyInitChannel
 		msg := pb.RegisterAppResponse{
@@ -211,7 +221,7 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 		if err := stream.Send(&msg); err != nil {
 			return err
 		}
-		// TODO: in which case do I break the loop?
+		// TODO: in which case do I break the loop? We need to listen for disconnects from the provider app and/or add a msg to unregister.
 	}
 	return nil
 }
@@ -379,6 +389,7 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 			s.logger.Panicf("InitChannel with inexistent app_id: %s", icr.GetAppId())
 			// TODO: return error
 		}
+		s.logger.Printf("Received InitChannel for channel being brokered. %v", r.ID)
 		delete(s.brokeringChannels, icr.AppId)
 	}
 	r.addresses = icr.GetParticipants()
@@ -414,7 +425,7 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 // StartServer starts gRPC middleware server
 func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string) {
 	s.PublicURL = fmt.Sprintf("%s:%d", publicHost, publicPort)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix)
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	lisPub, err := net.Listen("tcp", s.PublicURL)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)
@@ -465,6 +476,7 @@ func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicHost 
 }
 
 func (s *MiddlewareServer) Stop() {
+	// TODO: flush all buffers before stopping!
 	if s.publicServer != nil {
 		s.publicServer.Stop()
 	}

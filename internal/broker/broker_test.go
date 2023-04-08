@@ -32,10 +32,10 @@ func TestBrokerChannel_Request(t *testing.T) {
 	// register dummy provider
 	_, err = client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: &pb.Contract{
-			Contract: "dummy",
-			RemoteParticipants: []string{"self", "p0"},
+			Contract: []byte("dummy"),
 		},
-		Url: "fakeurl",
+		ProviderName: "foo",
+		Url:          "fakeurl",
 	})
 	if err != nil {
 		log.Fatalf("ERROR RegisterProvider: %v", err)
@@ -43,14 +43,13 @@ func TestBrokerChannel_Request(t *testing.T) {
 
 	// ask for channel brokerage
 	c := pb.Contract{
-		Contract: "hola",
-		RemoteParticipants: []string{"self", "p1"},
+		Contract: []byte("hola"),
 	}
 	req := pb.BrokerChannelRequest{
 		Contract: &c,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			"self": {
-				Url: "fake",
+				Url:   "fake",
 				AppId: "fake",
 			},
 		},
@@ -86,8 +85,8 @@ func TestGetParticipantMapping(t *testing.T) {
 	// register dummy provider
 	registrationResponse, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: &pb.Contract{
-			Contract: "dummy",
-			RemoteParticipants: []string{"self", "p0"},
+			Contract: []byte("dummy"),
+			// RemoteParticipants: []string{"self", "p0"},
 		},
 		Url: "fakeurl",
 	})
@@ -98,26 +97,26 @@ func TestGetParticipantMapping(t *testing.T) {
 	// test initiator mapping
 	initiatorMapping := map[string]*pb.RemoteParticipant{
 		"self": {
-			Url: "initiator_fake_url",
+			Url:   "initiator_fake_url",
 			AppId: "initiator_fake_appid",
 		},
 		"other": {
-			Url: "fakeurl",
+			Url:   "fakeurl",
 			AppId: registrationResponse.GetAppId(),
 		},
 	}
-	mapping := b.getParticipantMapping(initiatorMapping, "other")
+	mapping := b.getParticipantMapping(initiatorMapping, "other", "")
 	expected := map[string]*pb.RemoteParticipant{
 		"self": {
-			Url: "fakeurl",
+			Url:   "fakeurl",
 			AppId: registrationResponse.GetAppId(),
 		},
 		"p0": {
-			Url: "initiator_fake_url",
+			Url:   "initiator_fake_url",
 			AppId: "initiator_fake_appid",
 		},
 	}
-	if !reflect.DeepEqual(mapping, expected){
+	if !reflect.DeepEqual(mapping, expected) {
 		t.Errorf("Received erroneous response from getParticipantMapping: %v", mapping)
 	}
 

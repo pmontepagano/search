@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 // Start Middleware that listens on localhost and then send to it a
@@ -285,31 +286,29 @@ func TestCircle(t *testing.T) {
 			log.Printf("[PROVIDER %s] - Received Notification. ChannelID: %s", appID, channelID)
 
 			// await message from sender, then add a word to the message and relay it to receiver
-			go func(channelID string, conn *grpc.ClientConn) {
-				defer conn.Close()
-				defer mw.Stop()
-				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-				defer cancel()
-				res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-					ChannelId:   channelID,
-					Participant: "sender",
-				})
-				if err != nil {
-					t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
-				}
-				log.Printf("[PROVIDER] - Received message from sender: %s", res.Message.GetBody())
-				msg := string(res.Message.GetBody())
-				msg = msg + " dummy"
-				ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
-				defer cancel()
-				client.AppSend(ctx, &pb.AppSendRequest{
-					ChannelId: channelID,
-					Recipient: "receiver",
-					Message: &pb.AppMessage{
-						Body: []byte(msg),
-					},
-				})
-			}(channelID, conn)
+			defer conn.Close()
+			defer mw.Stop()
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+				ChannelId:   channelID,
+				Participant: "sender",
+			})
+			if err != nil {
+				t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
+			}
+			log.Printf("[PROVIDER] - Received message from sender: %s", res.Message.GetBody())
+			msg := string(res.Message.GetBody())
+			msg = msg + " dummy"
+			ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			client.AppSend(ctx, &pb.AppSendRequest{
+				ChannelId: channelID,
+				Recipient: "receiver",
+				Message: &pb.AppMessage{
+					Body: []byte(msg),
+				},
+			})
 
 		}(mw)
 	}
@@ -391,49 +390,203 @@ func TestPingPongFullExample(t *testing.T) {
 	pongMiddleware := NewMiddlewareServer("localhost", brokerPort)
 	pongMiddleware.StartMiddlewareServer(&wg, "localhost", pongPrivPort, "localhost", pongPubPort, false, "", "")
 
-	// common grpc.DialOption
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithBlock())
+	defer pingMiddleware.Stop()
+	defer pongMiddleware.Stop()
 
+	pongRegistered := make(chan bool, 1) // used to signal that Pong has already registered with broker.
+	exitPong := make(chan bool, 1)       // used to signal Pong to gracefully exit.
+	go pongProgram(t, pongMiddleware.PrivateURL, pongRegistered, exitPong)
+	pingProgram(t, pingMiddleware.PrivateURL, pongRegistered)
+
+	// Signal pongProgram to exit.
+	exitPong <- true
+
+	// Signal both middlewares to exit.
+	pingMiddleware.Stop()
+	pongMiddleware.Stop()
+
+	// Signal broker to exit.
+	bs.Stop()
 }
 
-func pingProgram(t *testing.T, middlewareURL string) {
-	// Auxiliary function for TestFullExample.
+func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool, exitPong chan bool) {
+	// Auxiliary function for TestPingPongFullExample.
+	// TODO: we need a channel or other way to notify this program to stop and exit gracefully.
 
-	// First we create a Global Choreography for our requirement.
-	const pingPongGC = `
-Ping -> Pong : finished
-   +
-   *{
-      Ping -> Pong : ping ; Pong -> Ping : pong
-   } @ Ping ; Ping -> Pong : finished
-`
-	// Then we convert this to FSA format using Chorgram's gc2fsa
-	const pingPongFSA = `
-.outputs Ping
+	// TODO: is it valid to send a single CFSM? The 'Other' machine is undefined in this example.
+	// For now, I'll send both CFSMs, because otherwise the FSA parser fails.
+	const pongContractFSA = `
+.outputs Pong
 .state graph
-0 1 ! ping 5
-2 1 ? bye 1
-3 1 ! bye 2
-3 1 ! finished 2
-4 1 ! *<1 0
-4 1 ! >*1 3
-5 1 ? pong 4
+0 Other ? ping 1
+1 Other ! pong 0
+0 Other ? bye 2
+2 Other ! bye 3
+0 Other ? finished 3
 .marking 0
 .end
 
+.outputs Other
+.state graph
+0 Other ! ping 1
+0 Other ! bye 2
+0 Other ! finished 3
+2 Other ? bye 3
+1 Other ? pong 0
+.marking 0
+.end
+`
+	// Connect to the middleware and instantiate client.
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(middlewareURL, opts...)
+	if err != nil {
+		t.Errorf("Error in pongProgram connecting to middleware URL %s", middlewareURL)
+	}
+	defer conn.Close()
+	client := pb.NewPrivateMiddlewareServiceClient(conn)
 
+	// Register provider contract with registry.
+	req := pb.RegisterAppRequest{
+		ProviderContract: &pb.Contract{
+			Contract: []byte(pongContractFSA),
+			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		},
+		ProviderName: "Pong", // TODO: Is this really necessary? If we only send one CFSM as a provider contract, then it would be unnecesary.
+	}
+	streamCtx, streamCtxCancel := context.WithCancel(context.Background())
+	defer streamCtxCancel()
+	stream, err := client.RegisterApp(streamCtx, &req)
+	if err != nil {
+		t.Error("Could not Register App")
+	}
+	ack, err := stream.Recv()
+	if err != nil || ack.GetAppId() == "" {
+		t.Error("Could not receive ACK from RegisterApp")
+	}
+	appID := ack.GetAppId()
+	registeredNotify <- true
+
+	// wait on RegisterAppResponse stream to await for new channel
+	type NewSessionNotification struct {
+		regappResp *pb.RegisterAppResponse
+		err        error
+	}
+	recvChan := make(chan NewSessionNotification)
+	go func(stream pb.PrivateMiddlewareService_RegisterAppClient, recvChan chan NewSessionNotification) {
+		// We make a goroutine to have a channel interface instead of a blocking Recv()
+		// https://github.com/grpc/grpc-go/issues/465#issuecomment-179414474
+		for {
+			newResponse, err := stream.Recv()
+			recvChan <- NewSessionNotification{
+				regappResp: newResponse,
+				err:        err,
+			}
+		}
+	}(stream, recvChan)
+	for mainloop := true; mainloop; {
+		select {
+		case <-exitPong:
+			mainloop = false
+			log.Printf("Exiting pongProgram...")
+		case newSess := <-recvChan:
+			err := newSess.err
+			if err == io.EOF {
+				t.Error("Broker unexpectedly ended connection with provider?")
+				mainloop = false
+				break
+			}
+			if err != nil {
+				st, ok := status.FromError(err)
+				if !ok {
+					t.Errorf("Unknown error attempting to receive RegisterApp notification: %v", err)
+					mainloop = false
+					break
+				}
+				t.Errorf("Error receiving notification from RegisterApp: %v", st)
+				mainloop = false
+				break
+			}
+
+			channelID := newSess.regappResp.GetNotification().GetChannelId()
+			log.Printf("[PROVIDER %s] - Received Notification. ChannelID: %s", appID, channelID)
+			go func(channelID string, client pb.PrivateMiddlewareServiceClient) {
+				// This is the actual program for pong (the part that implements the contract).
+
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+
+				for loop := true; loop; {
+					// Receive ping, finished or bye request.
+					recvResponse, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+						ChannelId:   channelID,
+						Participant: "Other",
+					})
+					if err != nil {
+						t.Error("Failed to receive ping/bye/finished from Other.")
+					}
+					switch recvResponse.Message.Type {
+					case "ping":
+						// Send back pong response.
+						sendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
+							ChannelId: channelID,
+							Recipient: "Other",
+							Message: &pb.AppMessage{
+								Body: recvResponse.Message.Body,
+								Type: "pong",
+							},
+						})
+						if err != nil || sendResponse.Result != pb.Result_OK {
+							t.Errorf("Failed to AppSend")
+						}
+					case "bye":
+						// Send back bye response and break out of the loop.
+						sendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
+							ChannelId: channelID,
+							Recipient: "Other",
+							Message: &pb.AppMessage{
+								Type: "bye",
+								Body: []byte("exiting..."),
+							},
+						})
+						if err != nil || sendResponse.Result != pb.Result_OK {
+							t.Errorf("Failed to AppSend")
+						}
+						loop = false
+					case "finished":
+						loop = false
+					default:
+						t.Errorf("Received invalid message of type %v", recvResponse.Message.Type)
+					}
+				}
+
+			}(channelID, client)
+		}
+
+	}
+
+}
+
+func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
+	// Auxiliary function for TestPingPongFullExample.
+	const pingPongFSA = `
+.outputs Ping
+.state graph
+0 Pong ! ping 1
+1 Pong ? pong 0
+0 Pong ! bye 2
+0 Pong ! finished 3
+2 Pong ? bye 3
+.marking 0
+.end
 
 .outputs Pong
 .state graph
-0 0 ? ping 5
-2 0 ! bye 1
-3 0 ? bye 2
-3 0 ? finished 2
-4 0 ? *<1 0
-4 0 ? >*1 3
-5 0 ! pong 4
+0 Ping ? ping 1
+1 Ping ! pong 0
+0 Ping ? bye 2
+2 Ping ! bye 3
+0 Ping ? finished 3
 .marking 0
 .end
 `
@@ -463,10 +616,14 @@ Ping -> Pong : finished
 		t.Error("Received error from RegisterChannel")
 	}
 	channelID := regResult.ChannelId
-	log.Printf("Obtained channel with ID: %s", channelID)
+	log.Printf("[pingProgram]: Obtained channel with ID: %s", channelID)
+
+	// We need to wait until Pong has finished registering with the broker.
+	<-registeredPong
 
 	// TODO: keep using the same ctx? Has time elapsed on this one?
-	client.AppSend(ctx, &pb.AppSendRequest{
+	// Send a ping message.
+	sendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: channelID,
 		Recipient: "Pong",
 		Message: &pb.AppMessage{
@@ -474,5 +631,49 @@ Ping -> Pong : finished
 			Type: "ping",
 		},
 	})
+	if err != nil || sendResponse.Result != pb.Result_OK {
+		t.Errorf("Failed to AppSend")
+	}
 
+	// Receive a pong message.
+	recvResponse, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+		ChannelId:   channelID,
+		Participant: "Pong",
+	})
+	if err != nil {
+		t.Error("Failed to AppRecv")
+	}
+	if recvResponse.Message.Type != "pong" {
+		t.Errorf("Received unexpected message of type %v", recvResponse.Message.Type)
+	}
+	if !bytes.Equal(recvResponse.Message.GetBody(), []byte("hello")) {
+		t.Error("Received different pong body that what we originally sent.")
+	}
+
+	// Send bye message.
+	sendResponse, err = client.AppSend(ctx, &pb.AppSendRequest{
+		ChannelId: channelID,
+		Recipient: "Pong",
+		Message: &pb.AppMessage{
+			Body: []byte("Hasta la vista, baby."), // body is unimportant.
+			Type: "bye",
+		},
+	})
+	if err != nil || sendResponse.Result != pb.Result_OK {
+		t.Errorf("Failed to AppSend")
+	}
+
+	// Recieve bye response.
+	recvResponse, err = client.AppRecv(ctx, &pb.AppRecvRequest{
+		ChannelId:   channelID,
+		Participant: "Pong",
+	})
+	if err != nil {
+		t.Error("Failed to AppRecv")
+	}
+	if recvResponse.Message.Type != "bye" {
+		t.Errorf("Received unexpected message of type %v", recvResponse.Message.Type)
+	}
+
+	// Tell pong program to stop
 }

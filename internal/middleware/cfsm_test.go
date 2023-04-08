@@ -212,3 +212,45 @@ func TestTravelClient(t *testing.T) {
 	}()
 
 }
+
+func TestChorgramConversion(t *testing.T) {
+	// First we create a Global Choreography for our requirement.
+	const pingPongGC = `
+Ping -> Pong : finished
+   +
+   *{
+      Ping -> Pong : ping ; Pong -> Ping : pong
+   } @ Ping ; Ping -> Pong : finished
+`
+	// Then we convert this to FSA format using Chorgram's gc2fsa
+	const expectedPingPongFSA = `
+.outputs Ping
+.state graph
+0 1 ! ping 5
+2 1 ? bye 1
+3 1 ! bye 2
+3 1 ! finished 2
+4 1 ! *<1 0
+4 1 ! >*1 3
+5 1 ? pong 4
+.marking 0
+.end
+
+
+
+.outputs Pong
+.state graph
+0 0 ? ping 5
+2 0 ! bye 1
+3 0 ? bye 2
+3 0 ? finished 2
+4 0 ? *<1 0
+4 0 ? >*1 3
+5 0 ! pong 4
+.marking 0
+.end
+`
+	// TODO: call to Chorgram. Something like this:
+	// convertedPingPongFSA := gc2fsa(pingPongGC)
+	// if convertedPingPongFSA != expectedPingPongFSA { t.Error("Failed") }
+}
