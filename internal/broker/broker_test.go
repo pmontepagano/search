@@ -14,6 +14,7 @@ import (
 )
 
 func TestBrokerChannel_Request(t *testing.T) {
+	// TODO: change this test and mock provider?
 	b := NewBrokerServer()
 	go b.StartServer("localhost", 3333, false, "", "")
 
@@ -33,9 +34,22 @@ func TestBrokerChannel_Request(t *testing.T) {
 	// register dummy provider
 	_, err = client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: &pb.Contract{
-			Contract: []byte("dummy"),
+			Contract: []byte(`--
+.outputs
+.state graph
+q0 1 ! hello q0
+.marking q0
+.end
+
+.outputs FooBar
+.state graph
+q0 0 ? hello q0
+.marking q0
+.end
+`),
+			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
-		ProviderName: "foo",
+		ProviderName: "FooBar",
 		Url:          "fakeurl",
 	})
 	if err != nil {
@@ -44,12 +58,25 @@ func TestBrokerChannel_Request(t *testing.T) {
 
 	// ask for channel brokerage
 	c := pb.Contract{
-		Contract: []byte("hola"),
+		Contract: []byte(`--
+		.outputs
+		.state graph
+		q0 1 ! hello q0
+		.marking q0
+		.end
+
+		.outputs FooBar
+		.state graph
+		q0 0 ? hello q0
+		.marking q0
+		.end
+		`),
+		Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 	}
 	req := pb.BrokerChannelRequest{
 		Contract: &c,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
-			"self": {
+			"0": {
 				Url:   "fake",
 				AppId: "fake",
 			},
