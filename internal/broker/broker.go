@@ -16,7 +16,9 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/testdata"
 
 	"github.com/clpombo/search/internal/contract"
@@ -295,7 +297,8 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 	appID := uuid.New()
 	contract, err := contract.ConvertPBContract(req.GetContract())
 	if err != nil {
-		return nil, err
+		st := status.New(codes.InvalidArgument, "invalid contract or format")
+		return nil, st.Err()
 	}
 	s.registeredProviders[appID.String()] = registeredProvider{
 		participant: pb.RemoteParticipant{

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHelloWorldFSAParse(t *testing.T) {
@@ -97,7 +97,7 @@ func TestPingPongFSAParser(t *testing.T) {
 	if len(sys.CFSMs) != 2 {
 		t.Errorf("Parsed FSA has %d CFSMs. Expected 2.", len(sys.CFSMs))
 	}
-	assert.ElementsMatch(t, []string{"Ping", "Pong"}, sys.GetParticipants())
+	require.ElementsMatch(t, []string{"Ping", "Pong"}, sys.GetParticipants())
 
 	firstCFSM := sys.CFSMs[0]
 	if firstCFSM.Comment != "Ping" {

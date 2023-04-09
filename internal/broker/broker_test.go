@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"reflect"
 	"testing"
 	"time"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/testing/protocmp"
 )
 
 func TestBrokerChannel_Request(t *testing.T) {
@@ -79,16 +80,29 @@ func TestGetParticipantMapping(t *testing.T) {
 	}
 	defer conn.Close()
 	client := pb.NewBrokerServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	// register dummy provider
 	registrationResponse, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: &pb.Contract{
-			Contract: []byte("dummy"),
-			// RemoteParticipants: []string{"self", "p0"},
+			Contract: []byte(`--
+.outputs
+.state graph
+q0 1 ! hello q0
+.marking q0
+.end
+
+.outputs FooBar
+.state graph
+q0 0 ? hello q0
+.marking q0
+.end
+`),
+			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
-		Url: "fakeurl",
+		ProviderName: "0",
+		Url:          "fakeurl",
 	})
 	if err != nil {
 		log.Fatalf("ERROR RegisterProvider: %v", err)
@@ -105,19 +119,23 @@ func TestGetParticipantMapping(t *testing.T) {
 			AppId: registrationResponse.GetAppId(),
 		},
 	}
-	mapping := b.getParticipantMapping(initiatorMapping, "other", "")
+	mapping := b.getParticipantMapping(initiatorMapping, "other", "self")
 	expected := map[string]*pb.RemoteParticipant{
-		"self": {
+		"0": {
 			Url:   "fakeurl",
 			AppId: registrationResponse.GetAppId(),
 		},
-		"p0": {
+		"FooBar": {
 			Url:   "initiator_fake_url",
 			AppId: "initiator_fake_appid",
 		},
 	}
-	if !reflect.DeepEqual(mapping, expected) {
+
+	cmpOpts := []cmp.Option{
+		protocmp.Transform(),
+	}
+	if !cmp.Equal(mapping, expected, cmpOpts...) {
 		t.Errorf("Received erroneous response from getParticipantMapping: %v", mapping)
 	}
-
+	b.Stop()
 }
