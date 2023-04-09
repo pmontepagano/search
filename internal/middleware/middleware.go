@@ -16,7 +16,9 @@ import (
 	"github.com/clpombo/search/internal/contract"
 	"google.golang.org/grpc"
 
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/testdata"
 
 	"github.com/vishalkuo/bimap"
@@ -113,7 +115,7 @@ type SEARCHChannel struct {
 
 // newSEARCHChannel returns a pointer to a new channel created for the MiddlewareServer.
 // localParticipant is the name of the local app in the contract.
-func (mw *MiddlewareServer) newSEARCHChannel(pbContract *pb.Contract, localParticipant string) *SEARCHChannel {
+func (mw *MiddlewareServer) newSEARCHChannel(pbContract *pb.Contract, localParticipant string) (*SEARCHChannel, error) {
 	// TODO: review ContractPB. Instead of copying entire protobuf, maybe keep only a copy
 	// of the contract bytes?
 	if localParticipant == "" {
@@ -125,8 +127,8 @@ func (mw *MiddlewareServer) newSEARCHChannel(pbContract *pb.Contract, localParti
 	r.LocalID = uuid.New()
 	c, err := contract.ConvertPBContract(pbContract)
 	if err != nil {
-		// TODO: replace with proper error handling.
-		panic(err)
+		mw.logger.Printf("Error parsing protobuf contract. %v", err)
+		return nil, err
 	}
 	r.Contract = c
 	r.ContractPB = pbContract
@@ -145,7 +147,7 @@ func (mw *MiddlewareServer) newSEARCHChannel(pbContract *pb.Contract, localParti
 		}
 	}
 
-	return &r
+	return &r, nil
 }
 
 func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.ClientConn) {
@@ -229,7 +231,12 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 // invoked by local initiator app with a requirements contract
 func (s *MiddlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterChannelRequest) (*pb.RegisterChannelResponse, error) {
 	// TODO: create a monitor for this channel.
-	c := s.newSEARCHChannel(in.GetRequirementsContract(), in.GetInitiatorName())
+	c, err := s.newSEARCHChannel(in.GetRequirementsContract(), in.GetInitiatorName())
+	if err != nil {
+		// TODO: newSEARCHChannel may fail because of other kinds of errors in the future.
+		err := status.Error(codes.InvalidArgument, "invalid contract")
+		return nil, err
+	}
 	c.AppID = c.LocalID
 	s.channelLock.Lock()
 	s.unBrokeredChannels[c.LocalID.String()] = c // this has to be changed when brokering
@@ -376,7 +383,11 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
-		r = s.newSEARCHChannel(&regapp.Contract, regapp.ProviderName)
+		r, err := s.newSEARCHChannel(&regapp.Contract, regapp.ProviderName)
+		if err != nil {
+			// TODO: return proper gRPC error
+			return nil, err
+		}
 		r.AppID = uuid.MustParse(icr.GetAppId())
 
 		r.LocalID = uuid.MustParse(icr.GetChannelId()) // in non locally initiated channels, LocalID == ID

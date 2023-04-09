@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,8 +30,9 @@ import (
 type brokerServer struct {
 	pb.UnimplementedBrokerServiceServer
 	server *grpc.Server
-	// mapping of AppIDs to registered providers
-	registeredProviders map[string]registeredProvider
+
+	registryMutex       *sync.Mutex
+	registeredProviders map[string]*registeredProvider // mapping of AppIDs to registered providers
 	PublicURL           string
 	logger              *log.Logger
 }
@@ -50,6 +52,12 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 		}
 	}
 	return result
+}
+
+func (s *brokerServer) registerNewProvider(appID string, provider *registeredProvider) {
+	s.registryMutex.Lock()
+	defer s.registryMutex.Unlock()
+	s.registeredProviders[appID] := provider
 }
 
 func GetRandomKeyFromMap(mapI interface{}) interface{} {

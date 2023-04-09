@@ -36,14 +36,30 @@ func TestRegisterChannel(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	dummyContract := []byte(`--
+	.outputs
+	.state graph
+	q0 1 ! hello q0
+	.marking q0
+	.end
+
+	.outputs FooBar
+	.state graph
+	q0 0 ? hello q0
+	.marking q0
+	.end
+	`)
+
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract: []byte("hola"), // TODO: fix and use proper contract.
+			Contract: dummyContract,
+			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
+		InitiatorName: "pepito",
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
-		t.Error("Received error from RegisterChannel")
+		t.Errorf("Received error from RegisterChannel: %v", err)
 	}
 	_, err = uuid.Parse(regResult.ChannelId)
 	if err != nil {
@@ -54,7 +70,7 @@ func TestRegisterChannel(t *testing.T) {
 	// check that the contract is properly saved inside the MiddleWare Server
 	// in its "unbrokered" channels list.
 	schan := mw.unBrokeredChannels[regResult.ChannelId]
-	if !bytes.Equal(schan.ContractPB.GetContract(), []byte("hola")) {
+	if !bytes.Equal(schan.ContractPB.GetContract(), dummyContract) {
 		t.Error("Contract from channel different from original")
 	}
 
@@ -101,8 +117,8 @@ func TestPingPong(t *testing.T) {
 		req := pb.RegisterAppRequest{
 			ProviderContract: &pb.Contract{
 				Contract: []byte("dummy provider contract"), // TODO: replace with real contract.
-
 			},
+			ProviderName: "dummy",
 		}
 
 		stream, err := client.RegisterApp(context.Background(), &req)
@@ -173,12 +189,13 @@ func TestPingPong(t *testing.T) {
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
 			Contract: []byte("client example requirement contract"),
+			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
-		// TODO: add Initiator name
+		InitiatorName: "client",
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
-		t.Error("Received error from RegisterChannel")
+		t.Errorf("Received error from RegisterChannel: %v", err)
 	}
 
 	// AppSend to p2
@@ -235,6 +252,10 @@ func TestCircle(t *testing.T) {
 	p3Mw.StartMiddlewareServer(&wg, "localhost", p3Port, "localhost", p3Port+1, false, "", "")
 	initiatorMw := NewMiddlewareServer("localhost", brokerPort)
 	initiatorMw.StartMiddlewareServer(&wg, "localhost", initiatorPort, "localhost", initiatorPort+1, false, "", "")
+	defer p1Mw.Stop()
+	defer p2Mw.Stop()
+	defer p3Mw.Stop()
+	defer initiatorMw.Stop()
 
 	// common grpc.DialOption
 	var opts []grpc.DialOption
@@ -256,10 +277,28 @@ func TestCircle(t *testing.T) {
 			// register dummy app with provider middleware
 			req := pb.RegisterAppRequest{
 				ProviderContract: &pb.Contract{
-					Contract: []byte("dummy provider contract"),
-					// RemoteParticipants: []string{"self", "sender", "receiver"},
+					Contract: []byte(`
+.outputs self
+.state graph
+q0 sender ? word q1
+q1 receiver ! word q0
+.marking q0
+.end
+
+.outputs sender
+.state graph
+q0 self ! word q0
+.marking q0
+.end
+
+.outputs receiver
+.state graph
+q0 self ? word q0
+.marking q0
+.end`),
+					Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 				},
-				// TODO: set provider name.
+				ProviderName: "self",
 			}
 
 			streamCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -328,9 +367,38 @@ func TestCircle(t *testing.T) {
 	defer cancel()
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract: []byte("send hello to r1, and later receive mesage from r3"),
-			// RemoteParticipants: []string{"self", "r1_special", "r2_special", "r3_special"},
+			Contract: []byte(`
+			.outputs self
+			.state graph
+			q0 r1_special ! word q1
+			q1 r3_special ? word q2
+			.marking q0
+			.end
+
+			.outputs r1_special
+			.state graph
+			q0 self ? word q1
+			q1 r2_special ! word qf
+			.marking q0
+			.end
+
+			.outputs r2_special
+			.state graph
+			q0 r1_special ? word q1
+			q1 r3_special ! word qf
+			.marking q0
+			.end
+
+			.outputs r3_special
+			.state graph
+			q0 r2_special ? word q1
+			q1 self ! word qf
+			.marking q0
+			.end
+			`),
+			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
+		InitiatorName: "sender",
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
