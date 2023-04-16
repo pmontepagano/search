@@ -17,38 +17,74 @@ import (
 
 type Contract interface {
 	GetParticipants() []string
+	GetRemoteParticipantNames() []string
+	GetLocalParticipantName() string // This returns the name of the local participant of this contract.
 	// TODO: add GetNextState()
 }
 
 type CFSMContract struct {
 	*cfsm.System
+	localParticipant *cfsm.CFSM
 }
 
 func (s *CFSMContract) GetParticipants() []string {
-	var participants []string
-	for _, m := range s.CFSMs {
+	return s.getParticipants(true)
+}
+
+func (c *CFSMContract) GetLocalParticipantName() string {
+	return strings.Clone(c.localParticipant.Comment)
+}
+
+func (c *CFSMContract) GetRemoteParticipantNames() (ret []string) {
+	return c.getParticipants(false)
+}
+
+func (c *CFSMContract) getParticipants(includeLocal bool) (ret []string) {
+	for _, m := range c.CFSMs {
+		if !includeLocal && m == c.localParticipant {
+			continue
+		}
 		// TODO: maybe instead of using Comment to save each CFSMs name, fork the library and change attribute.
 		if m.Comment != "" {
-			participants = append(participants, m.Comment)
+			ret = append(ret, m.Comment)
 		} else {
-			participants = append(participants, strconv.Itoa(m.ID))
+			ret = append(ret, strconv.Itoa(m.ID))
 		}
 	}
-	return participants
+	return
 }
 
 func ConvertPBContract(pbContract *pb.Contract) (Contract, error) {
 	if pbContract.Format == pb.ContractFormat_CONTRACT_FORMAT_FSA {
-		contract, err := ParseFSAFile(bytes.NewReader(pbContract.Contract))
+		cfsmSystem, err := ParseFSAFile(bytes.NewReader(pbContract.Contract))
 		if err != nil {
 			return nil, err
 		}
-		return contract, nil
+		var localCFSM *cfsm.CFSM
+		for _, m := range cfsmSystem.CFSMs {
+			if m.Comment != "" && m.Comment == pbContract.LocalParticipant {
+				localCFSM = m
+				break
+			} else {
+				if strconv.Itoa(m.ID) == pbContract.LocalParticipant {
+					localCFSM = m
+					break
+				}
+			}
+		}
+		if localCFSM == nil {
+			return nil, fmt.Errorf("invalid contract. local_participant not present in FSA.")
+		}
+		contract := CFSMContract{
+			System:           cfsmSystem,
+			localParticipant: localCFSM,
+		}
+		return &contract, nil
 	}
 	return nil, fmt.Errorf("not implemented")
 }
 
-func ParseFSAFile(reader io.Reader) (*CFSMContract, error) {
+func ParseFSAFile(reader io.Reader) (*cfsm.System, error) {
 	// f, err := os.Open("/tmp/dat")
 	// if err != nil {
 	// 	panic(err)
@@ -85,7 +121,7 @@ func ParseFSAFile(reader io.Reader) (*CFSMContract, error) {
 	var namesOfCFSMs []string            // array of names of CFSMs as we find in order. If they don't have name, we use str(int) of the machine order (starts with 0).
 	numberOfCFSM := make(map[string]int) // inverse of the latter
 	var status FSAParserStatus = Initial
-	sys := CFSMContract{System: cfsm.NewSystem()} // This is what we'll return.
+	sys := cfsm.NewSystem() // This is what we'll return.
 
 	// While reading transitions we can find transitions that refer to CFSMs that we haven't yet parsed.
 	// So we'll save all transitions we find in this map, and add them all after consuming the entire fsa file.
@@ -233,5 +269,5 @@ func ParseFSAFile(reader io.Reader) (*CFSMContract, error) {
 		}
 	}
 
-	return &sys, nil
+	return sys, nil
 }

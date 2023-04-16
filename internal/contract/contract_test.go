@@ -97,7 +97,11 @@ func TestPingPongFSAParser(t *testing.T) {
 	if len(sys.CFSMs) != 2 {
 		t.Errorf("Parsed FSA has %d CFSMs. Expected 2.", len(sys.CFSMs))
 	}
-	require.ElementsMatch(t, []string{"Ping", "Pong"}, sys.GetParticipants())
+	contract := CFSMContract{
+		System:           sys,
+		localParticipant: sys.CFSMs[0],
+	}
+	require.ElementsMatch(t, []string{"Ping", "Pong"}, contract.GetParticipants())
 
 	firstCFSM := sys.CFSMs[0]
 	if firstCFSM.Comment != "Ping" {

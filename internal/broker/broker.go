@@ -57,10 +57,28 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 func (s *brokerServer) registerNewProvider(appID string, provider *registeredProvider) {
 	s.registryMutex.Lock()
 	defer s.registryMutex.Unlock()
-	s.registeredProviders[appID] := provider
+	s.registeredProviders[appID] = provider
 }
 
-func GetRandomKeyFromMap(mapI interface{}) interface{} {
+func (s *brokerServer) getRegisteredProvider(appID string) (*registeredProvider, error) {
+	s.registryMutex.Lock()
+	defer s.registryMutex.Unlock()
+	prov, ok := s.registeredProviders[appID]
+	if !ok {
+		return nil, fmt.Errorf("non registered appID %v", appID)
+	}
+	return prov, nil
+}
+
+func (s *brokerServer) getRandomRegisteredProvider() *registeredProvider {
+	// TODO: this should actually have the number of participants as a parameter
+	s.registryMutex.Lock()
+	defer s.registryMutex.Unlock()
+	appID := getRandomKeyFromMap(s.registeredProviders).(string)
+	return s.registeredProviders[appID]
+}
+
+func getRandomKeyFromMap(mapI interface{}) interface{} {
 	keys := reflect.ValueOf(mapI).MapKeys()
 	rand.NewSource(time.Now().UnixNano())
 	return keys[rand.Intn(len(keys))].Interface()
@@ -108,9 +126,8 @@ func (s *brokerServer) getBestCandidates(contract contract.Contract, participant
 	// 	}
 	// } else {
 	for _, v := range participants {
-		appid := GetRandomKeyFromMap(s.registeredProviders).(string)
-		participant := s.registeredProviders[appid].participant
-		response[v] = &participant
+		prov := s.getRandomRegisteredProvider()
+		response[v] = &prov.participant
 	}
 
 	return response, nil
@@ -127,8 +144,8 @@ func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.Rem
 	if !ok {
 		s.logger.Fatal("Receiver not present in initiatormapping")
 	}
-	receiverProvider, ok := s.registeredProviders[receiverRemoteParticipant.AppId]
-	if !ok {
+	receiverProvider, err := s.getRegisteredProvider(receiverRemoteParticipant.AppId)
+	if err != nil {
 		s.logger.Fatal("Receiver not registered.")
 	}
 
@@ -308,21 +325,22 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 		st := status.New(codes.InvalidArgument, "invalid contract or format")
 		return nil, st.Err()
 	}
-	s.registeredProviders[appID.String()] = registeredProvider{
+	s.registerNewProvider(appID.String(), &registeredProvider{
 		participant: pb.RemoteParticipant{
 			Url:   req.Url,
 			AppId: appID.String(),
 		},
 		contract:     contract,
 		providerName: req.GetProviderName(),
-	}
+	})
 	return &pb.RegisterProviderResponse{AppId: appID.String()}, nil
 }
 
 // NewBrokerServer brokerServer constructor
 func NewBrokerServer() *brokerServer {
 	s := &brokerServer{}
-	s.registeredProviders = make(map[string]registeredProvider)
+	s.registryMutex = &sync.Mutex{}
+	s.registeredProviders = make(map[string]*registeredProvider)
 	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)
 	return s
 }

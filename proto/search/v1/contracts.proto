@@ -6,6 +6,7 @@ option go_package = "github.com/clpombo/search/gen/go/v1";
 message Contract {
     bytes contract = 1;
     ContractFormat format = 2;
+    string local_participant = 3;
 }
 
 enum ContractFormat {
