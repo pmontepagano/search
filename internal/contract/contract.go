@@ -32,7 +32,7 @@ func (s *CFSMContract) GetParticipants() []string {
 }
 
 func (c *CFSMContract) GetLocalParticipantName() string {
-	return strings.Clone(c.localParticipant.Comment)
+	return c.localParticipant.Comment
 }
 
 func (c *CFSMContract) GetRemoteParticipantNames() (ret []string) {
