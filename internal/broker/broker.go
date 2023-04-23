@@ -2,6 +2,7 @@ package broker
 
 import (
 	"context"
+	"crypto/sha512"
 	"errors"
 	"fmt"
 	"log"
@@ -11,8 +12,10 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-	"sync"
 	"time"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -31,16 +34,49 @@ type brokerServer struct {
 	pb.UnimplementedBrokerServiceServer
 	server *grpc.Server
 
-	registryMutex       *sync.Mutex
-	registeredProviders map[string]*registeredProvider // mapping of AppIDs to registered providers
-	PublicURL           string
-	logger              *log.Logger
+	db *gorm.DB
+
+	PublicURL string
+	logger    *log.Logger
 }
 
 type registeredProvider struct {
-	participant  pb.RemoteParticipant // TODO: replace with non pb struct? Or fix lock copy issue.
-	contract     contract.Contract
+	AppId     string `gorm:"primaryKey;type:varchar(36)"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	Url          string
+	contractID   string
+	contract     registeredContract
 	providerName string // Name of the provider in the contract.
+}
+
+type registeredContract struct {
+	ID        string `gorm:"primaryKey;type:varchar(128)"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	format   pb.ContractFormat
+	contract []byte
+}
+
+func (r *registeredProvider) GetRemoteParticipant() (res *pb.RemoteParticipant) {
+	res.AppId = r.AppId
+	res.Url = r.Url
+	return res
+}
+
+func (r *registeredProvider) GetContract() (contract.Contract, error) {
+	return r.contract.GetContract()
+}
+
+func (c *registeredContract) GetContract() (contract.Contract, error) {
+	return contract.ConvertPBContract(&pb.Contract{
+		Contract: c.contract,
+		Format:   c.format,
+	})
 }
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
@@ -54,30 +90,23 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 	return result
 }
 
-func (s *brokerServer) registerNewProvider(appID string, provider *registeredProvider) {
-	s.registryMutex.Lock()
-	defer s.registryMutex.Unlock()
-	s.registeredProviders[appID] = provider
-}
-
 func (s *brokerServer) getRegisteredProvider(appID string) (*registeredProvider, error) {
-	s.registryMutex.Lock()
-	defer s.registryMutex.Unlock()
-	prov, ok := s.registeredProviders[appID]
-	if !ok {
+	var prov registeredProvider
+	err := s.db.First(&prov, appID).Error
+	if err != nil {
 		return nil, fmt.Errorf("non registered appID %v", appID)
 	}
-	return prov, nil
+	return &prov, nil
 }
 
 func (s *brokerServer) getRandomRegisteredProvider() *registeredProvider {
 	// TODO: this should actually have the number of participants as a parameter
-	s.registryMutex.Lock()
-	defer s.registryMutex.Unlock()
-	appID := getRandomKeyFromMap(s.registeredProviders).(string)
-	return s.registeredProviders[appID]
+	var r registeredProvider
+	s.db.Take(&r)
+	return &r
 }
 
+// TODO: use generics!
 func getRandomKeyFromMap(mapI interface{}) interface{} {
 	keys := reflect.ValueOf(mapI).MapKeys()
 	rand.NewSource(time.Now().UnixNano())
@@ -103,10 +132,6 @@ func (s *brokerServer) getBestCandidates(contract contract.Contract, participant
 
 	response := make(map[string]*pb.RemoteParticipant)
 
-	// TODO: for now, we choose participants at random
-	if len(s.registeredProviders) < 1 {
-		return nil, errors.New("No providers registered.")
-	}
 	// TODO: hardcoded responses for TestCircle
 	// if bytes.Equal(contract.GetContract(), []byte("send hello to r1, and later receive mesage from r3")) {
 	// 	for _, rp := range s.registeredProviders {
@@ -125,13 +150,24 @@ func (s *brokerServer) getBestCandidates(contract contract.Contract, participant
 	// 		}
 	// 	}
 	// } else {
+
+	// TODO: for now, we choose participants at random
 	for _, v := range participants {
 		prov := s.getRandomRegisteredProvider()
-		response[v] = &prov.participant
+		// prov, err := s.getBestProvider(contract, v)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("could not find provider for %s", v)
+		// }
+		response[v] = prov.GetRemoteParticipant()
 	}
 
 	return response, nil
 }
+
+// func (s *brokerServer) getBestProvider(requirementContract contract.Contract, participant string) (*registeredProvider, error) {
+// 	// Search in the cache?
+// 	for
+// }
 
 // getParticipantMapping takes the mapping between participant's names and RemoteParticipants from the
 // initiator's perspective, and a participant name (also in the initiator's perspective), called receiver,
@@ -172,11 +208,12 @@ func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.Rem
 		if len(initiatorMapping) > 2 {
 			s.logger.Fatal("Cannot translate a mapping of more than two participants. Not yet implemented.")
 		}
-		if len(receiverProvider.contract.GetParticipants()) > 2 {
+		receiverContract, _ := receiverProvider.GetContract()
+		if len(receiverContract.GetParticipants()) > 2 {
 			s.logger.Fatal("Receiver has more than two participants in its contract. Cannot translate mapping, not yet implemented.")
 		}
 		var initiatorNameInReceiverContract string
-		for _, p := range receiverProvider.contract.GetParticipants() {
+		for _, p := range receiverContract.GetParticipants() {
 			if p != receiverProvider.providerName {
 				initiatorNameInReceiverContract = p
 				break
@@ -320,27 +357,56 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 	s.logger.Printf("Registering provider from URL: %s, contract '%s'", req.Url, req.Contract.Contract)
 
 	appID := uuid.New()
-	contract, err := contract.ConvertPBContract(req.GetContract())
+	_, err := contract.ConvertPBContract(req.GetContract())
 	if err != nil {
 		st := status.New(codes.InvalidArgument, "invalid contract or format")
 		return nil, st.Err()
 	}
-	s.registerNewProvider(appID.String(), &registeredProvider{
-		participant: pb.RemoteParticipant{
-			Url:   req.Url,
-			AppId: appID.String(),
-		},
-		contract:     contract,
+	contractHash := sha512.Sum512(req.Contract.Contract)
+	contractID := fmt.Sprintf("%x", contractHash[:])
+
+	var contract registeredContract
+	err = s.db.First(&contract, contractID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		c := registeredContract{
+			ID:       contractID,
+			format:   req.Contract.Format,
+			contract: req.Contract.GetContract(),
+		}
+		result := s.db.Create(&c)
+		if result.Error != nil {
+			return nil, status.New(codes.Internal, "database error registering contract").Err()
+		}
+	} else if err != nil {
+		return nil, status.New(codes.Internal, "database error looking up contract").Err()
+	}
+
+	r := registeredProvider{
+		Url:          req.Url,
+		AppId:        appID.String(),
+		contractID:   contractID,
 		providerName: req.GetProviderName(),
-	})
+	}
+	result := s.db.Create(&r)
+	if result.Error != nil {
+		return nil, status.New(codes.Internal, "database error registering provider").Err()
+	}
+
 	return &pb.RegisterProviderResponse{AppId: appID.String()}, nil
 }
 
 // NewBrokerServer brokerServer constructor
-func NewBrokerServer() *brokerServer {
+func NewBrokerServer(databasePath string) *brokerServer {
 	s := &brokerServer{}
-	s.registryMutex = &sync.Mutex{}
-	s.registeredProviders = make(map[string]*registeredProvider)
+
+	db, err := gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	db.AutoMigrate(&registeredProvider{})
+	db.AutoMigrate(&registeredContract{})
+	s.db = db
+
 	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)
 	return s
 }

@@ -84,7 +84,7 @@ func TestRegisterChannel(t *testing.T) {
 // We should see brokering happen and message exchange between apps
 func TestPingPong(t *testing.T) {
 	// start broker
-	bs := broker.NewBrokerServer()
+	bs := broker.NewBrokerServer("file::memory:?cache=shared")
 	go bs.StartServer("localhost", 7777, false, "", "")
 
 	var wg sync.WaitGroup
@@ -239,7 +239,7 @@ func TestCircle(t *testing.T) {
 	brokerPort, p1Port, p2Port, p3Port, initiatorPort := 20000, 20001, 20003, 20005, 20007
 
 	// start broker
-	bs := broker.NewBrokerServer()
+	bs := broker.NewBrokerServer("file::memory:?cache=shared")
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 
 	var wg sync.WaitGroup
@@ -446,7 +446,7 @@ func TestPingPongFullExample(t *testing.T) {
 	brokerPort, pingPrivPort, pingPubPort, pongPrivPort, pongPubPort := 20000, 20001, 20002, 20003, 20004
 
 	// start broker
-	bs := broker.NewBrokerServer()
+	bs := broker.NewBrokerServer("file::memory:?cache=shared")
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 	defer bs.Stop()
 

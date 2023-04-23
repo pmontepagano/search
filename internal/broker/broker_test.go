@@ -15,7 +15,7 @@ import (
 
 func TestBrokerChannel_Request(t *testing.T) {
 	// TODO: change this test and mock provider?
-	b := NewBrokerServer()
+	b := NewBrokerServer("file::memory:?cache=shared")
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -28,7 +28,7 @@ func TestBrokerChannel_Request(t *testing.T) {
 	}
 	defer conn.Close()
 	client := pb.NewBrokerServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	// register dummy provider
@@ -47,7 +47,8 @@ q0 0 ? hello q0
 .marking q0
 .end
 `),
-			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+			Format:           pb.ContractFormat_CONTRACT_FORMAT_FSA,
+			LocalParticipant: "FooBar",
 		},
 		ProviderName: "FooBar",
 		Url:          "fakeurl",
@@ -71,7 +72,8 @@ q0 0 ? hello q0
 		.marking q0
 		.end
 		`),
-		Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		Format:           pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		LocalParticipant: "0",
 	}
 	req := pb.BrokerChannelRequest{
 		Contract: &c,
@@ -94,7 +96,7 @@ q0 0 ? hello q0
 }
 
 func TestGetParticipantMapping(t *testing.T) {
-	b := NewBrokerServer()
+	b := NewBrokerServer("file::memory:?cache=shared")
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -126,7 +128,8 @@ q0 0 ? hello q0
 .marking q0
 .end
 `),
-			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+			Format:           pb.ContractFormat_CONTRACT_FORMAT_FSA,
+			LocalParticipant: "0",
 		},
 		ProviderName: "0",
 		Url:          "fakeurl",
