@@ -156,7 +156,7 @@ func TestTravelClient(t *testing.T) {
 	opts = append(opts, grpc.WithBlock())
 
 	// Start broker
-	bs := broker.NewBrokerServer("file::memory:?cache=shared")
+	bs := broker.NewBrokerServer("file:ent?mode=memory&_fk=1")
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 	defer bs.Stop()
 

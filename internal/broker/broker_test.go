@@ -15,7 +15,7 @@ import (
 
 func TestBrokerChannel_Request(t *testing.T) {
 	// TODO: change this test and mock provider?
-	b := NewBrokerServer("file::memory:?cache=shared")
+	b := NewBrokerServer("file:ent?mode=memory&_fk=1")
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -96,7 +96,7 @@ q0 0 ? hello q0
 }
 
 func TestGetParticipantMapping(t *testing.T) {
-	b := NewBrokerServer("file::memory:?cache=shared")
+	b := NewBrokerServer("file:ent?mode=memory&_fk=1")
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
