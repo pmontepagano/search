@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
 )
@@ -74,8 +75,9 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			registeredcontract.Table: registeredcontract.ValidColumn,
-			registeredprovider.Table: registeredprovider.ValidColumn,
+			compatibilityresult.Table: compatibilityresult.ValidColumn,
+			registeredcontract.Table:  registeredcontract.ValidColumn,
+			registeredprovider.Table:  registeredprovider.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

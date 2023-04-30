@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
 )
@@ -24,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// CompatibilityResult is the client for interacting with the CompatibilityResult builders.
+	CompatibilityResult *CompatibilityResultClient
 	// RegisteredContract is the client for interacting with the RegisteredContract builders.
 	RegisteredContract *RegisteredContractClient
 	// RegisteredProvider is the client for interacting with the RegisteredProvider builders.
@@ -41,6 +44,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.CompatibilityResult = NewCompatibilityResultClient(c.config)
 	c.RegisteredContract = NewRegisteredContractClient(c.config)
 	c.RegisteredProvider = NewRegisteredProviderClient(c.config)
 }
@@ -123,10 +127,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                ctx,
-		config:             cfg,
-		RegisteredContract: NewRegisteredContractClient(cfg),
-		RegisteredProvider: NewRegisteredProviderClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		CompatibilityResult: NewCompatibilityResultClient(cfg),
+		RegisteredContract:  NewRegisteredContractClient(cfg),
+		RegisteredProvider:  NewRegisteredProviderClient(cfg),
 	}, nil
 }
 
@@ -144,17 +149,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                ctx,
-		config:             cfg,
-		RegisteredContract: NewRegisteredContractClient(cfg),
-		RegisteredProvider: NewRegisteredProviderClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		CompatibilityResult: NewCompatibilityResultClient(cfg),
+		RegisteredContract:  NewRegisteredContractClient(cfg),
+		RegisteredProvider:  NewRegisteredProviderClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		RegisteredContract.
+//		CompatibilityResult.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -176,6 +182,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.CompatibilityResult.Use(hooks...)
 	c.RegisteredContract.Use(hooks...)
 	c.RegisteredProvider.Use(hooks...)
 }
@@ -183,6 +190,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.CompatibilityResult.Intercept(interceptors...)
 	c.RegisteredContract.Intercept(interceptors...)
 	c.RegisteredProvider.Intercept(interceptors...)
 }
@@ -190,12 +198,164 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CompatibilityResultMutation:
+		return c.CompatibilityResult.mutate(ctx, m)
 	case *RegisteredContractMutation:
 		return c.RegisteredContract.mutate(ctx, m)
 	case *RegisteredProviderMutation:
 		return c.RegisteredProvider.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CompatibilityResultClient is a client for the CompatibilityResult schema.
+type CompatibilityResultClient struct {
+	config
+}
+
+// NewCompatibilityResultClient returns a client for the CompatibilityResult from the given config.
+func NewCompatibilityResultClient(c config) *CompatibilityResultClient {
+	return &CompatibilityResultClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `compatibilityresult.Hooks(f(g(h())))`.
+func (c *CompatibilityResultClient) Use(hooks ...Hook) {
+	c.hooks.CompatibilityResult = append(c.hooks.CompatibilityResult, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `compatibilityresult.Intercept(f(g(h())))`.
+func (c *CompatibilityResultClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CompatibilityResult = append(c.inters.CompatibilityResult, interceptors...)
+}
+
+// Create returns a builder for creating a CompatibilityResult entity.
+func (c *CompatibilityResultClient) Create() *CompatibilityResultCreate {
+	mutation := newCompatibilityResultMutation(c.config, OpCreate)
+	return &CompatibilityResultCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CompatibilityResult entities.
+func (c *CompatibilityResultClient) CreateBulk(builders ...*CompatibilityResultCreate) *CompatibilityResultCreateBulk {
+	return &CompatibilityResultCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CompatibilityResult.
+func (c *CompatibilityResultClient) Update() *CompatibilityResultUpdate {
+	mutation := newCompatibilityResultMutation(c.config, OpUpdate)
+	return &CompatibilityResultUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CompatibilityResultClient) UpdateOne(cr *CompatibilityResult) *CompatibilityResultUpdateOne {
+	mutation := newCompatibilityResultMutation(c.config, OpUpdateOne, withCompatibilityResult(cr))
+	return &CompatibilityResultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CompatibilityResultClient) UpdateOneID(id int) *CompatibilityResultUpdateOne {
+	mutation := newCompatibilityResultMutation(c.config, OpUpdateOne, withCompatibilityResultID(id))
+	return &CompatibilityResultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CompatibilityResult.
+func (c *CompatibilityResultClient) Delete() *CompatibilityResultDelete {
+	mutation := newCompatibilityResultMutation(c.config, OpDelete)
+	return &CompatibilityResultDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CompatibilityResultClient) DeleteOne(cr *CompatibilityResult) *CompatibilityResultDeleteOne {
+	return c.DeleteOneID(cr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CompatibilityResultClient) DeleteOneID(id int) *CompatibilityResultDeleteOne {
+	builder := c.Delete().Where(compatibilityresult.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CompatibilityResultDeleteOne{builder}
+}
+
+// Query returns a query builder for CompatibilityResult.
+func (c *CompatibilityResultClient) Query() *CompatibilityResultQuery {
+	return &CompatibilityResultQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCompatibilityResult},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CompatibilityResult entity by its id.
+func (c *CompatibilityResultClient) Get(ctx context.Context, id int) (*CompatibilityResult, error) {
+	return c.Query().Where(compatibilityresult.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CompatibilityResultClient) GetX(ctx context.Context, id int) *CompatibilityResult {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRequirementContract queries the requirement_contract edge of a CompatibilityResult.
+func (c *CompatibilityResultClient) QueryRequirementContract(cr *CompatibilityResult) *RegisteredContractQuery {
+	query := (&RegisteredContractClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(compatibilityresult.Table, compatibilityresult.FieldID, id),
+			sqlgraph.To(registeredcontract.Table, registeredcontract.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, compatibilityresult.RequirementContractTable, compatibilityresult.RequirementContractColumn),
+		)
+		fromV = sqlgraph.Neighbors(cr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProviderContract queries the provider_contract edge of a CompatibilityResult.
+func (c *CompatibilityResultClient) QueryProviderContract(cr *CompatibilityResult) *RegisteredContractQuery {
+	query := (&RegisteredContractClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(compatibilityresult.Table, compatibilityresult.FieldID, id),
+			sqlgraph.To(registeredcontract.Table, registeredcontract.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, compatibilityresult.ProviderContractTable, compatibilityresult.ProviderContractColumn),
+		)
+		fromV = sqlgraph.Neighbors(cr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CompatibilityResultClient) Hooks() []Hook {
+	return c.hooks.CompatibilityResult
+}
+
+// Interceptors returns the client interceptors.
+func (c *CompatibilityResultClient) Interceptors() []Interceptor {
+	return c.inters.CompatibilityResult
+}
+
+func (c *CompatibilityResultClient) mutate(ctx context.Context, m *CompatibilityResultMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CompatibilityResultCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CompatibilityResultUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CompatibilityResultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CompatibilityResultDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CompatibilityResult mutation op: %q", m.Op())
 	}
 }
 
@@ -470,9 +630,9 @@ func (c *RegisteredProviderClient) mutate(ctx context.Context, m *RegisteredProv
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		RegisteredContract, RegisteredProvider []ent.Hook
+		CompatibilityResult, RegisteredContract, RegisteredProvider []ent.Hook
 	}
 	inters struct {
-		RegisteredContract, RegisteredProvider []ent.Interceptor
+		CompatibilityResult, RegisteredContract, RegisteredProvider []ent.Interceptor
 	}
 )

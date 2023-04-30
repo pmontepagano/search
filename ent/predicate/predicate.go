@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// CompatibilityResult is the predicate function for compatibilityresult builders.
+type CompatibilityResult func(*sql.Selector)
+
 // RegisteredContract is the predicate function for registeredcontract builders.
 type RegisteredContract func(*sql.Selector)
 

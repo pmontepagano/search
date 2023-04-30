@@ -8,6 +8,44 @@ import (
 )
 
 var (
+	// CompatibilityResultsColumns holds the columns for the "compatibility_results" table.
+	CompatibilityResultsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "participant_name_req", Type: field.TypeString},
+		{Name: "participant_name_prov", Type: field.TypeString},
+		{Name: "result", Type: field.TypeBool},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "req_contract_id", Type: field.TypeString, Size: 128},
+		{Name: "prov_contract_id", Type: field.TypeString, Size: 128},
+	}
+	// CompatibilityResultsTable holds the schema information for the "compatibility_results" table.
+	CompatibilityResultsTable = &schema.Table{
+		Name:       "compatibility_results",
+		Columns:    CompatibilityResultsColumns,
+		PrimaryKey: []*schema.Column{CompatibilityResultsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "compatibility_results_registered_contracts_requirement_contract",
+				Columns:    []*schema.Column{CompatibilityResultsColumns[6]},
+				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "compatibility_results_registered_contracts_provider_contract",
+				Columns:    []*schema.Column{CompatibilityResultsColumns[7]},
+				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "compatibilityresult_participant_name_req_participant_name_prov_req_contract_id_prov_contract_id",
+				Unique:  true,
+				Columns: []*schema.Column{CompatibilityResultsColumns[1], CompatibilityResultsColumns[2], CompatibilityResultsColumns[6], CompatibilityResultsColumns[7]},
+			},
+		},
+	}
 	// RegisteredContractsColumns holds the columns for the "registered_contracts" table.
 	RegisteredContractsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 128},
@@ -46,11 +84,14 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CompatibilityResultsTable,
 		RegisteredContractsTable,
 		RegisteredProvidersTable,
 	}
 )
 
 func init() {
+	CompatibilityResultsTable.ForeignKeys[0].RefTable = RegisteredContractsTable
+	CompatibilityResultsTable.ForeignKeys[1].RefTable = RegisteredContractsTable
 	RegisteredProvidersTable.ForeignKeys[0].RefTable = RegisteredContractsTable
 }

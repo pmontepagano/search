@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// CompatibilityResult is the client for interacting with the CompatibilityResult builders.
+	CompatibilityResult *CompatibilityResultClient
 	// RegisteredContract is the client for interacting with the RegisteredContract builders.
 	RegisteredContract *RegisteredContractClient
 	// RegisteredProvider is the client for interacting with the RegisteredProvider builders.
@@ -147,6 +149,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.CompatibilityResult = NewCompatibilityResultClient(tx.config)
 	tx.RegisteredContract = NewRegisteredContractClient(tx.config)
 	tx.RegisteredProvider = NewRegisteredProviderClient(tx.config)
 }
@@ -158,7 +161,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: RegisteredContract.QueryXXX(), the query will be executed
+// applies a query, for example: CompatibilityResult.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

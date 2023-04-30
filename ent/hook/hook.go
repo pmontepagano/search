@@ -9,6 +9,18 @@ import (
 	"github.com/clpombo/search/ent"
 )
 
+// The CompatibilityResultFunc type is an adapter to allow the use of ordinary
+// function as CompatibilityResult mutator.
+type CompatibilityResultFunc func(context.Context, *ent.CompatibilityResultMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CompatibilityResultFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CompatibilityResultMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CompatibilityResultMutation", m)
+}
+
 // The RegisteredContractFunc type is an adapter to allow the use of ordinary
 // function as RegisteredContract mutator.
 type RegisteredContractFunc func(context.Context, *ent.RegisteredContractMutation) (ent.Value, error)

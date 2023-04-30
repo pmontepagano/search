@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
 	"github.com/clpombo/search/ent/schema"
@@ -15,6 +16,64 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	compatibilityresultFields := schema.CompatibilityResult{}.Fields()
+	_ = compatibilityresultFields
+	// compatibilityresultDescReqContractID is the schema descriptor for req_contract_id field.
+	compatibilityresultDescReqContractID := compatibilityresultFields[0].Descriptor()
+	// compatibilityresult.ReqContractIDValidator is a validator for the "req_contract_id" field. It is called by the builders before save.
+	compatibilityresult.ReqContractIDValidator = func() func(string) error {
+		validators := compatibilityresultDescReqContractID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+			validators[2].(func(string) error),
+		}
+		return func(requirement_contract string) error {
+			for _, fn := range fns {
+				if err := fn(requirement_contract); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// compatibilityresultDescProvContractID is the schema descriptor for prov_contract_id field.
+	compatibilityresultDescProvContractID := compatibilityresultFields[1].Descriptor()
+	// compatibilityresult.ProvContractIDValidator is a validator for the "prov_contract_id" field. It is called by the builders before save.
+	compatibilityresult.ProvContractIDValidator = func() func(string) error {
+		validators := compatibilityresultDescProvContractID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+			validators[2].(func(string) error),
+		}
+		return func(provider_contract string) error {
+			for _, fn := range fns {
+				if err := fn(provider_contract); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// compatibilityresultDescParticipantNameReq is the schema descriptor for participant_name_req field.
+	compatibilityresultDescParticipantNameReq := compatibilityresultFields[2].Descriptor()
+	// compatibilityresult.ParticipantNameReqValidator is a validator for the "participant_name_req" field. It is called by the builders before save.
+	compatibilityresult.ParticipantNameReqValidator = compatibilityresultDescParticipantNameReq.Validators[0].(func(string) error)
+	// compatibilityresultDescParticipantNameProv is the schema descriptor for participant_name_prov field.
+	compatibilityresultDescParticipantNameProv := compatibilityresultFields[3].Descriptor()
+	// compatibilityresult.ParticipantNameProvValidator is a validator for the "participant_name_prov" field. It is called by the builders before save.
+	compatibilityresult.ParticipantNameProvValidator = compatibilityresultDescParticipantNameProv.Validators[0].(func(string) error)
+	// compatibilityresultDescCreatedAt is the schema descriptor for created_at field.
+	compatibilityresultDescCreatedAt := compatibilityresultFields[5].Descriptor()
+	// compatibilityresult.DefaultCreatedAt holds the default value on creation for the created_at field.
+	compatibilityresult.DefaultCreatedAt = compatibilityresultDescCreatedAt.Default.(func() time.Time)
+	// compatibilityresultDescUpdatedAt is the schema descriptor for updated_at field.
+	compatibilityresultDescUpdatedAt := compatibilityresultFields[6].Descriptor()
+	// compatibilityresult.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	compatibilityresult.DefaultUpdatedAt = compatibilityresultDescUpdatedAt.Default.(func() time.Time)
+	// compatibilityresult.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	compatibilityresult.UpdateDefaultUpdatedAt = compatibilityresultDescUpdatedAt.UpdateDefault.(func() time.Time)
 	registeredcontractFields := schema.RegisteredContract{}.Fields()
 	_ = registeredcontractFields
 	// registeredcontractDescContract is the schema descriptor for contract field.
@@ -33,6 +92,7 @@ func init() {
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
+			validators[2].(func(string) error),
 		}
 		return func(id string) error {
 			for _, fn := range fns {

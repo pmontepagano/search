@@ -16,7 +16,7 @@ type RegisteredContract struct {
 // Fields of the RegisteredContract.
 func (RegisteredContract) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").MaxLen(128).NotEmpty().Unique().Immutable(),
+		field.String("id").MaxLen(128).MinLen(128).NotEmpty().Unique().Immutable(),
 		field.Int("format"), // TODO: replace with Enum?
 		field.Bytes("contract").NotEmpty(),
 		field.Time("created_at").Immutable().Default(time.Now),
