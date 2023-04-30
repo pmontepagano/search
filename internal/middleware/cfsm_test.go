@@ -12,7 +12,7 @@ import (
 	"github.com/clpombo/search/internal/broker"
 	"google.golang.org/grpc"
 
-	"github.com/nickng/cfsm"
+	"github.com/pmontepagano/cfsm"
 )
 
 func TestTravelClient(t *testing.T) {
@@ -21,9 +21,9 @@ func TestTravelClient(t *testing.T) {
 	// machines as a dynamic binding mechanism of services", by
 	// Vissani, López Pombo, Tuosto (p. 94)
 	sys := cfsm.NewSystem()
-	TravelClient := sys.NewMachine()
-	HotelService := sys.NewMachine()
-	PaymentProcessorService := sys.NewMachine()
+	TravelClient, _ := sys.NewNamedMachine("TravelClient")
+	HotelService, _ := sys.NewNamedMachine("HotelService")
+	PaymentProcessorService, _ := sys.NewNamedMachine("PaymentProcessorService")
 
 	// TravelClient states
 	tcStart := TravelClient.NewState()

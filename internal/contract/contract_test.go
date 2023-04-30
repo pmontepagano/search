@@ -41,8 +41,8 @@ q0 0 ? world q1
 		t.Errorf("Parsed FSA has %d CFSMs. Expected 2.", len(sys.CFSMs))
 	}
 	firstCFSM := sys.CFSMs[0]
-	if firstCFSM.Comment != "A" {
-		t.Errorf("Expected fist CFSM to have Comment 'A' but instead had %s", firstCFSM.Comment)
+	if firstCFSM.Name != "A" {
+		t.Errorf("Expected fist CFSM to have Name 'A' but instead had %s", firstCFSM.Name)
 	}
 	if len(firstCFSM.States()) != 2 {
 		t.Errorf("Expected 2 states in first CFSM. Found %d", len(firstCFSM.States()))
@@ -50,6 +50,10 @@ q0 0 ? world q1
 	if firstCFSM.Start.Label != "q0" {
 		t.Errorf("Expected start state of first CFSM to be 'q0'. Found %s instead", firstCFSM.Start.Label)
 	}
+
+	// TODO: we should add a test to check output format.
+	// outString := sys.String()
+	// require.Equal(t, exampleFSAContent, outString)
 
 }
 
@@ -104,8 +108,8 @@ func TestPingPongFSAParser(t *testing.T) {
 	require.ElementsMatch(t, []string{"Ping", "Pong"}, contract.GetParticipants())
 
 	firstCFSM := sys.CFSMs[0]
-	if firstCFSM.Comment != "Ping" {
-		t.Errorf("Expected fist CFSM to have Comment 'Ping' but instead had %s", firstCFSM.Comment)
+	if firstCFSM.Name != "Ping" {
+		t.Errorf("Expected first CFSM to have Name 'Ping' but instead had %s", firstCFSM.Name)
 	}
 	if len(firstCFSM.States()) != 6 {
 		t.Errorf("Expected 6 states in first CFSM. Found %d", len(firstCFSM.States()))

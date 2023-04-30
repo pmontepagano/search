@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/nickng/cfsm"
+	"github.com/pmontepagano/cfsm"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
 )
@@ -19,6 +19,8 @@ type Contract interface {
 	GetParticipants() []string
 	GetRemoteParticipantNames() []string
 	GetLocalParticipantName() string // This returns the name of the local participant of this contract.
+	GetBytesRepr() []byte
+	GetFormat() pb.ContractFormat
 	// TODO: add GetNextState()
 }
 
@@ -32,7 +34,7 @@ func (s *CFSMContract) GetParticipants() []string {
 }
 
 func (c *CFSMContract) GetLocalParticipantName() string {
-	return c.localParticipant.Comment
+	return c.localParticipant.Name
 }
 
 func (c *CFSMContract) GetRemoteParticipantNames() (ret []string) {
@@ -44,14 +46,17 @@ func (c *CFSMContract) getParticipants(includeLocal bool) (ret []string) {
 		if !includeLocal && m == c.localParticipant {
 			continue
 		}
-		// TODO: maybe instead of using Comment to save each CFSMs name, fork the library and change attribute.
-		if m.Comment != "" {
-			ret = append(ret, m.Comment)
-		} else {
-			ret = append(ret, strconv.Itoa(m.ID))
-		}
+		ret = append(ret, m.Name)
 	}
 	return
+}
+
+func (c *CFSMContract) GetBytesRepr() []byte {
+	return c.Bytes()
+}
+
+func (c *CFSMContract) GetFormat() pb.ContractFormat {
+	return pb.ContractFormat_CONTRACT_FORMAT_FSA
 }
 
 func ConvertPBContract(pbContract *pb.Contract) (Contract, error) {
@@ -62,7 +67,7 @@ func ConvertPBContract(pbContract *pb.Contract) (Contract, error) {
 		}
 		var localCFSM *cfsm.CFSM
 		for _, m := range cfsmSystem.CFSMs {
-			if m.Comment != "" && m.Comment == pbContract.LocalParticipant {
+			if m.Name != "" && m.Name == pbContract.LocalParticipant {
 				localCFSM = m
 				break
 			} else {
@@ -146,19 +151,25 @@ func ParseFSAFile(reader io.Reader) (*cfsm.System, error) {
 				return nil, errors.New("fsa file invalid. Expected .outputs")
 			}
 			currentMachineNumber := len(namesOfCFSMs)
-			if matches[2] != "" {
-				num, err := strconv.Atoi(matches[2])
+			machineName := matches[2]
+			if machineName != "" {
+				num, err := strconv.Atoi(machineName)
 				if err == nil && num != currentMachineNumber {
 					return nil, fmt.Errorf("fsa file invalid: machine number %d is named %d", currentMachineNumber, num)
 				}
-				namesOfCFSMs = append(namesOfCFSMs, matches[2])
-				numberOfCFSM[matches[2]] = currentMachineNumber
+				namesOfCFSMs = append(namesOfCFSMs, machineName)
+				numberOfCFSM[machineName] = currentMachineNumber
 			} else {
+				machineName = strconv.Itoa(currentMachineNumber)
 				namesOfCFSMs = append(namesOfCFSMs, strconv.Itoa(len(namesOfCFSMs)))
-				numberOfCFSM[strconv.Itoa(currentMachineNumber)] = currentMachineNumber
+				numberOfCFSM[machineName] = currentMachineNumber
 			}
-			currentMachine = sys.NewMachine()
-			currentMachine.Comment = namesOfCFSMs[currentMachineNumber]
+			var err error
+			currentMachine, err = sys.NewNamedMachine(machineName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create machine %s", machineName)
+			}
+			// currentMachine.Comment = namesOfCFSMs[currentMachineNumber]
 			stateNames = make(map[string]*cfsm.State)
 			transitionsToBackfill[currentMachine] = make([]Transition, 0)
 			status = MachineStarting
