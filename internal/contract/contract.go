@@ -17,31 +17,43 @@ import (
 
 type Contract interface {
 	GetParticipants() []string
-	GetRemoteParticipantNames() []string
-	GetLocalParticipantName() string // This returns the name of the local participant of this contract.
 	GetBytesRepr() []byte
 	GetFormat() pb.ContractFormat
 	// TODO: add GetNextState()
 }
 
+// BoundContract is a contract that has a specific distinguished participant (the local participant).
+type BoundContract interface {
+	Contract
+	GetRemoteParticipantNames() []string
+	GetLocalParticipantName() string // This returns the name of the local participant of this contract.
+}
+
 type CFSMContract struct {
 	*cfsm.System
+}
+
+type BoundCFSMContract struct {
+	CFSMContract
 	localParticipant *cfsm.CFSM
 }
 
-func (s *CFSMContract) GetParticipants() []string {
-	return s.getParticipants(true)
+func (c *CFSMContract) GetParticipants() (ret []string) {
+	for _, m := range c.CFSMs {
+		ret = append(ret, m.Name)
+	}
+	return
 }
 
-func (c *CFSMContract) GetLocalParticipantName() string {
+func (c *BoundCFSMContract) GetLocalParticipantName() string {
 	return c.localParticipant.Name
 }
 
-func (c *CFSMContract) GetRemoteParticipantNames() (ret []string) {
+func (c *BoundCFSMContract) GetRemoteParticipantNames() (ret []string) {
 	return c.getParticipants(false)
 }
 
-func (c *CFSMContract) getParticipants(includeLocal bool) (ret []string) {
+func (c *BoundCFSMContract) getParticipants(includeLocal bool) (ret []string) {
 	for _, m := range c.CFSMs {
 		if !includeLocal && m == c.localParticipant {
 			continue
@@ -65,24 +77,8 @@ func ConvertPBContract(pbContract *pb.Contract) (Contract, error) {
 		if err != nil {
 			return nil, err
 		}
-		var localCFSM *cfsm.CFSM
-		for _, m := range cfsmSystem.CFSMs {
-			if m.Name != "" && m.Name == pbContract.LocalParticipant {
-				localCFSM = m
-				break
-			} else {
-				if strconv.Itoa(m.ID) == pbContract.LocalParticipant {
-					localCFSM = m
-					break
-				}
-			}
-		}
-		if localCFSM == nil {
-			return nil, fmt.Errorf("invalid contract. local_participant not present in FSA.")
-		}
 		contract := CFSMContract{
-			System:           cfsmSystem,
-			localParticipant: localCFSM,
+			System: cfsmSystem,
 		}
 		return &contract, nil
 	}

@@ -47,8 +47,7 @@ q0 0 ? hello q0
 .marking q0
 .end
 `),
-			Format:           pb.ContractFormat_CONTRACT_FORMAT_FSA,
-			LocalParticipant: "FooBar",
+			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
 		ProviderName: "FooBar",
 		Url:          "fakeurl",
@@ -72,8 +71,7 @@ q0 0 ? hello q0
 		.marking q0
 		.end
 		`),
-		Format:           pb.ContractFormat_CONTRACT_FORMAT_FSA,
-		LocalParticipant: "0",
+		Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 	}
 	req := pb.BrokerChannelRequest{
 		Contract: &c,
@@ -128,8 +126,7 @@ q0 0 ? hello q0
 .marking q0
 .end
 `),
-			Format:           pb.ContractFormat_CONTRACT_FORMAT_FSA,
-			LocalParticipant: "0",
+			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
 		ProviderName: "0",
 		Url:          "fakeurl",
