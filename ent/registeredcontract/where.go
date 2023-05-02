@@ -205,7 +205,7 @@ func HasProviders() predicate.RegisteredContract {
 	return predicate.RegisteredContract(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ProvidersTable, ProvidersColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, ProvidersTable, ProvidersColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -215,6 +215,52 @@ func HasProviders() predicate.RegisteredContract {
 func HasProvidersWith(preds ...predicate.RegisteredProvider) predicate.RegisteredContract {
 	return predicate.RegisteredContract(func(s *sql.Selector) {
 		step := newProvidersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCompatibilityResultsAsRequirement applies the HasEdge predicate on the "compatibility_results_as_requirement" edge.
+func HasCompatibilityResultsAsRequirement() predicate.RegisteredContract {
+	return predicate.RegisteredContract(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, CompatibilityResultsAsRequirementTable, CompatibilityResultsAsRequirementColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCompatibilityResultsAsRequirementWith applies the HasEdge predicate on the "compatibility_results_as_requirement" edge with a given conditions (other predicates).
+func HasCompatibilityResultsAsRequirementWith(preds ...predicate.CompatibilityResult) predicate.RegisteredContract {
+	return predicate.RegisteredContract(func(s *sql.Selector) {
+		step := newCompatibilityResultsAsRequirementStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCompatibilityResultsAsProvider applies the HasEdge predicate on the "compatibility_results_as_provider" edge.
+func HasCompatibilityResultsAsProvider() predicate.RegisteredContract {
+	return predicate.RegisteredContract(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, CompatibilityResultsAsProviderTable, CompatibilityResultsAsProviderColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCompatibilityResultsAsProviderWith applies the HasEdge predicate on the "compatibility_results_as_provider" edge with a given conditions (other predicates).
+func HasCompatibilityResultsAsProviderWith(preds ...predicate.CompatibilityResult) predicate.RegisteredContract {
+	return predicate.RegisteredContract(func(s *sql.Selector) {
+		step := newCompatibilityResultsAsProviderStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

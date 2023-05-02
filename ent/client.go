@@ -460,7 +460,39 @@ func (c *RegisteredContractClient) QueryProviders(rc *RegisteredContract) *Regis
 		step := sqlgraph.NewStep(
 			sqlgraph.From(registeredcontract.Table, registeredcontract.FieldID, id),
 			sqlgraph.To(registeredprovider.Table, registeredprovider.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, registeredcontract.ProvidersTable, registeredcontract.ProvidersColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, registeredcontract.ProvidersTable, registeredcontract.ProvidersColumn),
+		)
+		fromV = sqlgraph.Neighbors(rc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCompatibilityResultsAsRequirement queries the compatibility_results_as_requirement edge of a RegisteredContract.
+func (c *RegisteredContractClient) QueryCompatibilityResultsAsRequirement(rc *RegisteredContract) *CompatibilityResultQuery {
+	query := (&CompatibilityResultClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(registeredcontract.Table, registeredcontract.FieldID, id),
+			sqlgraph.To(compatibilityresult.Table, compatibilityresult.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, registeredcontract.CompatibilityResultsAsRequirementTable, registeredcontract.CompatibilityResultsAsRequirementColumn),
+		)
+		fromV = sqlgraph.Neighbors(rc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCompatibilityResultsAsProvider queries the compatibility_results_as_provider edge of a RegisteredContract.
+func (c *RegisteredContractClient) QueryCompatibilityResultsAsProvider(rc *RegisteredContract) *CompatibilityResultQuery {
+	query := (&CompatibilityResultClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(registeredcontract.Table, registeredcontract.FieldID, id),
+			sqlgraph.To(compatibilityresult.Table, compatibilityresult.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, registeredcontract.CompatibilityResultsAsProviderTable, registeredcontract.CompatibilityResultsAsProviderColumn),
 		)
 		fromV = sqlgraph.Neighbors(rc.driver.Dialect(), step)
 		return fromV, nil
@@ -594,7 +626,7 @@ func (c *RegisteredProviderClient) QueryContract(rp *RegisteredProvider) *Regist
 		step := sqlgraph.NewStep(
 			sqlgraph.From(registeredprovider.Table, registeredprovider.FieldID, id),
 			sqlgraph.To(registeredcontract.Table, registeredcontract.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, registeredprovider.ContractTable, registeredprovider.ContractColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, registeredprovider.ContractTable, registeredprovider.ContractColumn),
 		)
 		fromV = sqlgraph.Neighbors(rp.driver.Dialect(), step)
 		return fromV, nil

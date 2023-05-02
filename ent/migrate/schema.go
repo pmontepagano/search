@@ -14,10 +14,11 @@ var (
 		{Name: "participant_name_req", Type: field.TypeString},
 		{Name: "participant_name_prov", Type: field.TypeString},
 		{Name: "result", Type: field.TypeBool},
+		{Name: "mapping", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "req_contract_id", Type: field.TypeString, Size: 128},
-		{Name: "prov_contract_id", Type: field.TypeString, Size: 128},
+		{Name: "requirement_contract_id", Type: field.TypeString, Size: 128},
+		{Name: "provider_contract_id", Type: field.TypeString, Size: 128},
 	}
 	// CompatibilityResultsTable holds the schema information for the "compatibility_results" table.
 	CompatibilityResultsTable = &schema.Table{
@@ -27,22 +28,22 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "compatibility_results_registered_contracts_requirement_contract",
-				Columns:    []*schema.Column{CompatibilityResultsColumns[6]},
+				Columns:    []*schema.Column{CompatibilityResultsColumns[7]},
 				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "compatibility_results_registered_contracts_provider_contract",
-				Columns:    []*schema.Column{CompatibilityResultsColumns[7]},
+				Columns:    []*schema.Column{CompatibilityResultsColumns[8]},
 				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "compatibilityresult_participant_name_req_participant_name_prov_req_contract_id_prov_contract_id",
+				Name:    "compatibilityresult_requirement_contract_id_provider_contract_id_participant_name_req_participant_name_prov",
 				Unique:  true,
-				Columns: []*schema.Column{CompatibilityResultsColumns[1], CompatibilityResultsColumns[2], CompatibilityResultsColumns[6], CompatibilityResultsColumns[7]},
+				Columns: []*schema.Column{CompatibilityResultsColumns[7], CompatibilityResultsColumns[8], CompatibilityResultsColumns[1], CompatibilityResultsColumns[2]},
 			},
 		},
 	}
@@ -66,7 +67,7 @@ var (
 		{Name: "participant_name", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "registered_contract_providers", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "contract_id", Type: field.TypeString, Size: 128},
 	}
 	// RegisteredProvidersTable holds the schema information for the "registered_providers" table.
 	RegisteredProvidersTable = &schema.Table{
@@ -75,10 +76,10 @@ var (
 		PrimaryKey: []*schema.Column{RegisteredProvidersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "registered_providers_registered_contracts_providers",
+				Symbol:     "registered_providers_registered_contracts_contract",
 				Columns:    []*schema.Column{RegisteredProvidersColumns[5]},
 				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}

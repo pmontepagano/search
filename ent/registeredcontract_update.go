@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/predicate"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
@@ -63,6 +64,36 @@ func (rcu *RegisteredContractUpdate) AddProviders(r ...*RegisteredProvider) *Reg
 	return rcu.AddProviderIDs(ids...)
 }
 
+// AddCompatibilityResultsAsRequirementIDs adds the "compatibility_results_as_requirement" edge to the CompatibilityResult entity by IDs.
+func (rcu *RegisteredContractUpdate) AddCompatibilityResultsAsRequirementIDs(ids ...int) *RegisteredContractUpdate {
+	rcu.mutation.AddCompatibilityResultsAsRequirementIDs(ids...)
+	return rcu
+}
+
+// AddCompatibilityResultsAsRequirement adds the "compatibility_results_as_requirement" edges to the CompatibilityResult entity.
+func (rcu *RegisteredContractUpdate) AddCompatibilityResultsAsRequirement(c ...*CompatibilityResult) *RegisteredContractUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcu.AddCompatibilityResultsAsRequirementIDs(ids...)
+}
+
+// AddCompatibilityResultsAsProviderIDs adds the "compatibility_results_as_provider" edge to the CompatibilityResult entity by IDs.
+func (rcu *RegisteredContractUpdate) AddCompatibilityResultsAsProviderIDs(ids ...int) *RegisteredContractUpdate {
+	rcu.mutation.AddCompatibilityResultsAsProviderIDs(ids...)
+	return rcu
+}
+
+// AddCompatibilityResultsAsProvider adds the "compatibility_results_as_provider" edges to the CompatibilityResult entity.
+func (rcu *RegisteredContractUpdate) AddCompatibilityResultsAsProvider(c ...*CompatibilityResult) *RegisteredContractUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcu.AddCompatibilityResultsAsProviderIDs(ids...)
+}
+
 // Mutation returns the RegisteredContractMutation object of the builder.
 func (rcu *RegisteredContractUpdate) Mutation() *RegisteredContractMutation {
 	return rcu.mutation
@@ -87,6 +118,48 @@ func (rcu *RegisteredContractUpdate) RemoveProviders(r ...*RegisteredProvider) *
 		ids[i] = r[i].ID
 	}
 	return rcu.RemoveProviderIDs(ids...)
+}
+
+// ClearCompatibilityResultsAsRequirement clears all "compatibility_results_as_requirement" edges to the CompatibilityResult entity.
+func (rcu *RegisteredContractUpdate) ClearCompatibilityResultsAsRequirement() *RegisteredContractUpdate {
+	rcu.mutation.ClearCompatibilityResultsAsRequirement()
+	return rcu
+}
+
+// RemoveCompatibilityResultsAsRequirementIDs removes the "compatibility_results_as_requirement" edge to CompatibilityResult entities by IDs.
+func (rcu *RegisteredContractUpdate) RemoveCompatibilityResultsAsRequirementIDs(ids ...int) *RegisteredContractUpdate {
+	rcu.mutation.RemoveCompatibilityResultsAsRequirementIDs(ids...)
+	return rcu
+}
+
+// RemoveCompatibilityResultsAsRequirement removes "compatibility_results_as_requirement" edges to CompatibilityResult entities.
+func (rcu *RegisteredContractUpdate) RemoveCompatibilityResultsAsRequirement(c ...*CompatibilityResult) *RegisteredContractUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcu.RemoveCompatibilityResultsAsRequirementIDs(ids...)
+}
+
+// ClearCompatibilityResultsAsProvider clears all "compatibility_results_as_provider" edges to the CompatibilityResult entity.
+func (rcu *RegisteredContractUpdate) ClearCompatibilityResultsAsProvider() *RegisteredContractUpdate {
+	rcu.mutation.ClearCompatibilityResultsAsProvider()
+	return rcu
+}
+
+// RemoveCompatibilityResultsAsProviderIDs removes the "compatibility_results_as_provider" edge to CompatibilityResult entities by IDs.
+func (rcu *RegisteredContractUpdate) RemoveCompatibilityResultsAsProviderIDs(ids ...int) *RegisteredContractUpdate {
+	rcu.mutation.RemoveCompatibilityResultsAsProviderIDs(ids...)
+	return rcu
+}
+
+// RemoveCompatibilityResultsAsProvider removes "compatibility_results_as_provider" edges to CompatibilityResult entities.
+func (rcu *RegisteredContractUpdate) RemoveCompatibilityResultsAsProvider(c ...*CompatibilityResult) *RegisteredContractUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcu.RemoveCompatibilityResultsAsProviderIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -150,7 +223,7 @@ func (rcu *RegisteredContractUpdate) sqlSave(ctx context.Context) (n int, err er
 	if rcu.mutation.ProvidersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   registeredcontract.ProvidersTable,
 			Columns: []string{registeredcontract.ProvidersColumn},
 			Bidi:    false,
@@ -163,7 +236,7 @@ func (rcu *RegisteredContractUpdate) sqlSave(ctx context.Context) (n int, err er
 	if nodes := rcu.mutation.RemovedProvidersIDs(); len(nodes) > 0 && !rcu.mutation.ProvidersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   registeredcontract.ProvidersTable,
 			Columns: []string{registeredcontract.ProvidersColumn},
 			Bidi:    false,
@@ -179,12 +252,102 @@ func (rcu *RegisteredContractUpdate) sqlSave(ctx context.Context) (n int, err er
 	if nodes := rcu.mutation.ProvidersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   registeredcontract.ProvidersTable,
 			Columns: []string{registeredcontract.ProvidersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(registeredprovider.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if rcu.mutation.CompatibilityResultsAsRequirementCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsRequirementTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsRequirementColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcu.mutation.RemovedCompatibilityResultsAsRequirementIDs(); len(nodes) > 0 && !rcu.mutation.CompatibilityResultsAsRequirementCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsRequirementTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsRequirementColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcu.mutation.CompatibilityResultsAsRequirementIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsRequirementTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsRequirementColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if rcu.mutation.CompatibilityResultsAsProviderCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsProviderTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsProviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcu.mutation.RemovedCompatibilityResultsAsProviderIDs(); len(nodes) > 0 && !rcu.mutation.CompatibilityResultsAsProviderCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsProviderTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsProviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcu.mutation.CompatibilityResultsAsProviderIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsProviderTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsProviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -246,6 +409,36 @@ func (rcuo *RegisteredContractUpdateOne) AddProviders(r ...*RegisteredProvider) 
 	return rcuo.AddProviderIDs(ids...)
 }
 
+// AddCompatibilityResultsAsRequirementIDs adds the "compatibility_results_as_requirement" edge to the CompatibilityResult entity by IDs.
+func (rcuo *RegisteredContractUpdateOne) AddCompatibilityResultsAsRequirementIDs(ids ...int) *RegisteredContractUpdateOne {
+	rcuo.mutation.AddCompatibilityResultsAsRequirementIDs(ids...)
+	return rcuo
+}
+
+// AddCompatibilityResultsAsRequirement adds the "compatibility_results_as_requirement" edges to the CompatibilityResult entity.
+func (rcuo *RegisteredContractUpdateOne) AddCompatibilityResultsAsRequirement(c ...*CompatibilityResult) *RegisteredContractUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcuo.AddCompatibilityResultsAsRequirementIDs(ids...)
+}
+
+// AddCompatibilityResultsAsProviderIDs adds the "compatibility_results_as_provider" edge to the CompatibilityResult entity by IDs.
+func (rcuo *RegisteredContractUpdateOne) AddCompatibilityResultsAsProviderIDs(ids ...int) *RegisteredContractUpdateOne {
+	rcuo.mutation.AddCompatibilityResultsAsProviderIDs(ids...)
+	return rcuo
+}
+
+// AddCompatibilityResultsAsProvider adds the "compatibility_results_as_provider" edges to the CompatibilityResult entity.
+func (rcuo *RegisteredContractUpdateOne) AddCompatibilityResultsAsProvider(c ...*CompatibilityResult) *RegisteredContractUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcuo.AddCompatibilityResultsAsProviderIDs(ids...)
+}
+
 // Mutation returns the RegisteredContractMutation object of the builder.
 func (rcuo *RegisteredContractUpdateOne) Mutation() *RegisteredContractMutation {
 	return rcuo.mutation
@@ -270,6 +463,48 @@ func (rcuo *RegisteredContractUpdateOne) RemoveProviders(r ...*RegisteredProvide
 		ids[i] = r[i].ID
 	}
 	return rcuo.RemoveProviderIDs(ids...)
+}
+
+// ClearCompatibilityResultsAsRequirement clears all "compatibility_results_as_requirement" edges to the CompatibilityResult entity.
+func (rcuo *RegisteredContractUpdateOne) ClearCompatibilityResultsAsRequirement() *RegisteredContractUpdateOne {
+	rcuo.mutation.ClearCompatibilityResultsAsRequirement()
+	return rcuo
+}
+
+// RemoveCompatibilityResultsAsRequirementIDs removes the "compatibility_results_as_requirement" edge to CompatibilityResult entities by IDs.
+func (rcuo *RegisteredContractUpdateOne) RemoveCompatibilityResultsAsRequirementIDs(ids ...int) *RegisteredContractUpdateOne {
+	rcuo.mutation.RemoveCompatibilityResultsAsRequirementIDs(ids...)
+	return rcuo
+}
+
+// RemoveCompatibilityResultsAsRequirement removes "compatibility_results_as_requirement" edges to CompatibilityResult entities.
+func (rcuo *RegisteredContractUpdateOne) RemoveCompatibilityResultsAsRequirement(c ...*CompatibilityResult) *RegisteredContractUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcuo.RemoveCompatibilityResultsAsRequirementIDs(ids...)
+}
+
+// ClearCompatibilityResultsAsProvider clears all "compatibility_results_as_provider" edges to the CompatibilityResult entity.
+func (rcuo *RegisteredContractUpdateOne) ClearCompatibilityResultsAsProvider() *RegisteredContractUpdateOne {
+	rcuo.mutation.ClearCompatibilityResultsAsProvider()
+	return rcuo
+}
+
+// RemoveCompatibilityResultsAsProviderIDs removes the "compatibility_results_as_provider" edge to CompatibilityResult entities by IDs.
+func (rcuo *RegisteredContractUpdateOne) RemoveCompatibilityResultsAsProviderIDs(ids ...int) *RegisteredContractUpdateOne {
+	rcuo.mutation.RemoveCompatibilityResultsAsProviderIDs(ids...)
+	return rcuo
+}
+
+// RemoveCompatibilityResultsAsProvider removes "compatibility_results_as_provider" edges to CompatibilityResult entities.
+func (rcuo *RegisteredContractUpdateOne) RemoveCompatibilityResultsAsProvider(c ...*CompatibilityResult) *RegisteredContractUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcuo.RemoveCompatibilityResultsAsProviderIDs(ids...)
 }
 
 // Where appends a list predicates to the RegisteredContractUpdate builder.
@@ -363,7 +598,7 @@ func (rcuo *RegisteredContractUpdateOne) sqlSave(ctx context.Context) (_node *Re
 	if rcuo.mutation.ProvidersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   registeredcontract.ProvidersTable,
 			Columns: []string{registeredcontract.ProvidersColumn},
 			Bidi:    false,
@@ -376,7 +611,7 @@ func (rcuo *RegisteredContractUpdateOne) sqlSave(ctx context.Context) (_node *Re
 	if nodes := rcuo.mutation.RemovedProvidersIDs(); len(nodes) > 0 && !rcuo.mutation.ProvidersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   registeredcontract.ProvidersTable,
 			Columns: []string{registeredcontract.ProvidersColumn},
 			Bidi:    false,
@@ -392,12 +627,102 @@ func (rcuo *RegisteredContractUpdateOne) sqlSave(ctx context.Context) (_node *Re
 	if nodes := rcuo.mutation.ProvidersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   registeredcontract.ProvidersTable,
 			Columns: []string{registeredcontract.ProvidersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(registeredprovider.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if rcuo.mutation.CompatibilityResultsAsRequirementCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsRequirementTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsRequirementColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcuo.mutation.RemovedCompatibilityResultsAsRequirementIDs(); len(nodes) > 0 && !rcuo.mutation.CompatibilityResultsAsRequirementCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsRequirementTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsRequirementColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcuo.mutation.CompatibilityResultsAsRequirementIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsRequirementTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsRequirementColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if rcuo.mutation.CompatibilityResultsAsProviderCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsProviderTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsProviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcuo.mutation.RemovedCompatibilityResultsAsProviderIDs(); len(nodes) > 0 && !rcuo.mutation.CompatibilityResultsAsProviderCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsProviderTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsProviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rcuo.mutation.CompatibilityResultsAsProviderIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsProviderTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsProviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

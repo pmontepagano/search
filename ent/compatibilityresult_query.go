@@ -332,12 +332,12 @@ func (crq *CompatibilityResultQuery) WithProviderContract(opts ...func(*Register
 // Example:
 //
 //	var v []struct {
-//		ReqContractID string `json:"req_contract_id,omitempty"`
+//		RequirementContractID string `json:"requirement_contract_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.CompatibilityResult.Query().
-//		GroupBy(compatibilityresult.FieldReqContractID).
+//		GroupBy(compatibilityresult.FieldRequirementContractID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (crq *CompatibilityResultQuery) GroupBy(field string, fields ...string) *CompatibilityResultGroupBy {
@@ -355,11 +355,11 @@ func (crq *CompatibilityResultQuery) GroupBy(field string, fields ...string) *Co
 // Example:
 //
 //	var v []struct {
-//		ReqContractID string `json:"req_contract_id,omitempty"`
+//		RequirementContractID string `json:"requirement_contract_id,omitempty"`
 //	}
 //
 //	client.CompatibilityResult.Query().
-//		Select(compatibilityresult.FieldReqContractID).
+//		Select(compatibilityresult.FieldRequirementContractID).
 //		Scan(ctx, &v)
 func (crq *CompatibilityResultQuery) Select(fields ...string) *CompatibilityResultSelect {
 	crq.ctx.Fields = append(crq.ctx.Fields, fields...)
@@ -446,7 +446,7 @@ func (crq *CompatibilityResultQuery) loadRequirementContract(ctx context.Context
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*CompatibilityResult)
 	for i := range nodes {
-		fk := nodes[i].ReqContractID
+		fk := nodes[i].RequirementContractID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -463,7 +463,7 @@ func (crq *CompatibilityResultQuery) loadRequirementContract(ctx context.Context
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "req_contract_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "requirement_contract_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -475,7 +475,7 @@ func (crq *CompatibilityResultQuery) loadProviderContract(ctx context.Context, q
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*CompatibilityResult)
 	for i := range nodes {
-		fk := nodes[i].ProvContractID
+		fk := nodes[i].ProviderContractID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -492,7 +492,7 @@ func (crq *CompatibilityResultQuery) loadProviderContract(ctx context.Context, q
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "prov_contract_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "provider_contract_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -527,10 +527,10 @@ func (crq *CompatibilityResultQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 		if crq.withRequirementContract != nil {
-			_spec.Node.AddColumnOnce(compatibilityresult.FieldReqContractID)
+			_spec.Node.AddColumnOnce(compatibilityresult.FieldRequirementContractID)
 		}
 		if crq.withProviderContract != nil {
-			_spec.Node.AddColumnOnce(compatibilityresult.FieldProvContractID)
+			_spec.Node.AddColumnOnce(compatibilityresult.FieldProviderContractID)
 		}
 	}
 	if ps := crq.predicates; len(ps) > 0 {

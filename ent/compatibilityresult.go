@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/registeredcontract"
+	"github.com/clpombo/search/ent/schema"
 )
 
 // CompatibilityResult is the model entity for the CompatibilityResult schema.
@@ -18,16 +20,18 @@ type CompatibilityResult struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// ReqContractID holds the value of the "req_contract_id" field.
-	ReqContractID string `json:"req_contract_id,omitempty"`
-	// ProvContractID holds the value of the "prov_contract_id" field.
-	ProvContractID string `json:"prov_contract_id,omitempty"`
+	// RequirementContractID holds the value of the "requirement_contract_id" field.
+	RequirementContractID string `json:"requirement_contract_id,omitempty"`
+	// ProviderContractID holds the value of the "provider_contract_id" field.
+	ProviderContractID string `json:"provider_contract_id,omitempty"`
 	// ParticipantNameReq holds the value of the "participant_name_req" field.
 	ParticipantNameReq string `json:"participant_name_req,omitempty"`
 	// ParticipantNameProv holds the value of the "participant_name_prov" field.
 	ParticipantNameProv string `json:"participant_name_prov,omitempty"`
 	// Result holds the value of the "result" field.
 	Result bool `json:"result,omitempty"`
+	// Mapping holds the value of the "mapping" field.
+	Mapping schema.ParticipantNameMapping `json:"mapping,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -80,11 +84,13 @@ func (*CompatibilityResult) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case compatibilityresult.FieldMapping:
+			values[i] = new([]byte)
 		case compatibilityresult.FieldResult:
 			values[i] = new(sql.NullBool)
 		case compatibilityresult.FieldID:
 			values[i] = new(sql.NullInt64)
-		case compatibilityresult.FieldReqContractID, compatibilityresult.FieldProvContractID, compatibilityresult.FieldParticipantNameReq, compatibilityresult.FieldParticipantNameProv:
+		case compatibilityresult.FieldRequirementContractID, compatibilityresult.FieldProviderContractID, compatibilityresult.FieldParticipantNameReq, compatibilityresult.FieldParticipantNameProv:
 			values[i] = new(sql.NullString)
 		case compatibilityresult.FieldCreatedAt, compatibilityresult.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -109,17 +115,17 @@ func (cr *CompatibilityResult) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			cr.ID = int(value.Int64)
-		case compatibilityresult.FieldReqContractID:
+		case compatibilityresult.FieldRequirementContractID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field req_contract_id", values[i])
+				return fmt.Errorf("unexpected type %T for field requirement_contract_id", values[i])
 			} else if value.Valid {
-				cr.ReqContractID = value.String
+				cr.RequirementContractID = value.String
 			}
-		case compatibilityresult.FieldProvContractID:
+		case compatibilityresult.FieldProviderContractID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field prov_contract_id", values[i])
+				return fmt.Errorf("unexpected type %T for field provider_contract_id", values[i])
 			} else if value.Valid {
-				cr.ProvContractID = value.String
+				cr.ProviderContractID = value.String
 			}
 		case compatibilityresult.FieldParticipantNameReq:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -138,6 +144,14 @@ func (cr *CompatibilityResult) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field result", values[i])
 			} else if value.Valid {
 				cr.Result = value.Bool
+			}
+		case compatibilityresult.FieldMapping:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field mapping", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &cr.Mapping); err != nil {
+					return fmt.Errorf("unmarshal field mapping: %w", err)
+				}
 			}
 		case compatibilityresult.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -197,11 +211,11 @@ func (cr *CompatibilityResult) String() string {
 	var builder strings.Builder
 	builder.WriteString("CompatibilityResult(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", cr.ID))
-	builder.WriteString("req_contract_id=")
-	builder.WriteString(cr.ReqContractID)
+	builder.WriteString("requirement_contract_id=")
+	builder.WriteString(cr.RequirementContractID)
 	builder.WriteString(", ")
-	builder.WriteString("prov_contract_id=")
-	builder.WriteString(cr.ProvContractID)
+	builder.WriteString("provider_contract_id=")
+	builder.WriteString(cr.ProviderContractID)
 	builder.WriteString(", ")
 	builder.WriteString("participant_name_req=")
 	builder.WriteString(cr.ParticipantNameReq)
@@ -211,6 +225,9 @@ func (cr *CompatibilityResult) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("result=")
 	builder.WriteString(fmt.Sprintf("%v", cr.Result))
+	builder.WriteString(", ")
+	builder.WriteString("mapping=")
+	builder.WriteString(fmt.Sprintf("%v", cr.Mapping))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(cr.CreatedAt.Format(time.ANSIC))

@@ -11,6 +11,7 @@ import (
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
 	"github.com/clpombo/search/internal/broker"
+	"github.com/clpombo/search/internal/contract"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -447,6 +448,7 @@ func TestPingPongFullExample(t *testing.T) {
 
 	// start broker
 	bs := broker.NewBrokerServer("file:ent?mode=memory&_fk=1")
+	bs.SetCompatFunc(pingPongContractCompatChecker)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 	defer bs.Stop()
 
@@ -477,13 +479,7 @@ func TestPingPongFullExample(t *testing.T) {
 	bs.Stop()
 }
 
-func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool, exitPong chan bool) {
-	// Auxiliary function for TestPingPongFullExample.
-	// TODO: we need a channel or other way to notify this program to stop and exit gracefully.
-
-	// TODO: is it valid to send a single CFSM? The 'Other' machine is undefined in this example.
-	// For now, I'll send both CFSMs, because otherwise the FSA parser fails.
-	const pongContractFSA = `
+const pongContractFSA = `
 .outputs Pong
 .state graph
 0 Other ? ping 1
@@ -504,6 +500,68 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 .marking 0
 .end
 `
+
+const pingContractFSA = `
+.outputs Ping
+.state graph
+0 Pong ! ping 1
+1 Pong ? pong 0
+0 Pong ! bye 2
+0 Pong ! finished 3
+2 Pong ? bye 3
+.marking 0
+.end
+
+.outputs Pong
+.state graph
+0 Ping ? ping 1
+1 Ping ! pong 0
+0 Ping ? bye 2
+2 Ping ! bye 3
+0 Ping ? finished 3
+.marking 0
+.end
+`
+
+// Mock function for checking contracts in TestPingPongFullExample.
+func pingPongContractCompatChecker(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error) {
+	log.Printf("Checking with pingPongContractCompatChecker...")
+	pongContract, err := contract.ConvertPBContract(&pb.Contract{
+		Contract: []byte(pongContractFSA),
+		Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+	})
+	if err != nil {
+		return false, nil, err
+	}
+	pingContract, err := contract.ConvertPBContract(&pb.Contract{
+		Contract: []byte(pingContractFSA),
+		Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+	})
+	if err != nil {
+		return false, nil, err
+	}
+	if req.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(req.GetBytesRepr(), pingContract.GetBytesRepr()) &&
+		prov.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(prov.GetBytesRepr(), pongContract.GetBytesRepr()) {
+		mapping := map[string]string{
+			"Other": "Ping",
+			"Pong":  "Pong",
+		}
+		if reqParticipant == "Ping" && provParticipant == "Other" {
+			return true, mapping, nil
+		}
+		if reqParticipant == "Pong" && provParticipant == "Pong" {
+			return true, mapping, nil
+		}
+	}
+	return false, nil, nil
+}
+
+func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool, exitPong chan bool) {
+	// Auxiliary function for TestPingPongFullExample.
+
+	// TODO: is it valid to send a single CFSM? The 'Other' machine is undefined in this example.
+	// For now, I'll send both CFSMs, because otherwise the FSA parser fails.
+
 	// Connect to the middleware and instantiate client.
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -637,27 +695,6 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 
 func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 	// Auxiliary function for TestPingPongFullExample.
-	const pingPongFSA = `
-.outputs Ping
-.state graph
-0 Pong ! ping 1
-1 Pong ? pong 0
-0 Pong ! bye 2
-0 Pong ! finished 3
-2 Pong ? bye 3
-.marking 0
-.end
-
-.outputs Pong
-.state graph
-0 Ping ? ping 1
-1 Ping ! pong 0
-0 Ping ? bye 2
-2 Ping ! bye 3
-0 Ping ? finished 3
-.marking 0
-.end
-`
 
 	// Connect to the middleware and instantiate client.
 	var opts []grpc.DialOption
@@ -674,7 +711,7 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 	defer cancel()
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.Contract{
-			Contract: []byte(pingPongFSA),
+			Contract: []byte(pingContractFSA),
 			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
 		InitiatorName: "Ping",

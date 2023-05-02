@@ -14,16 +14,18 @@ const (
 	Label = "compatibility_result"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldReqContractID holds the string denoting the req_contract_id field in the database.
-	FieldReqContractID = "req_contract_id"
-	// FieldProvContractID holds the string denoting the prov_contract_id field in the database.
-	FieldProvContractID = "prov_contract_id"
+	// FieldRequirementContractID holds the string denoting the requirement_contract_id field in the database.
+	FieldRequirementContractID = "requirement_contract_id"
+	// FieldProviderContractID holds the string denoting the provider_contract_id field in the database.
+	FieldProviderContractID = "provider_contract_id"
 	// FieldParticipantNameReq holds the string denoting the participant_name_req field in the database.
 	FieldParticipantNameReq = "participant_name_req"
 	// FieldParticipantNameProv holds the string denoting the participant_name_prov field in the database.
 	FieldParticipantNameProv = "participant_name_prov"
 	// FieldResult holds the string denoting the result field in the database.
 	FieldResult = "result"
+	// FieldMapping holds the string denoting the mapping field in the database.
+	FieldMapping = "mapping"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -40,24 +42,25 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "registeredcontract" package.
 	RequirementContractInverseTable = "registered_contracts"
 	// RequirementContractColumn is the table column denoting the requirement_contract relation/edge.
-	RequirementContractColumn = "req_contract_id"
+	RequirementContractColumn = "requirement_contract_id"
 	// ProviderContractTable is the table that holds the provider_contract relation/edge.
 	ProviderContractTable = "compatibility_results"
 	// ProviderContractInverseTable is the table name for the RegisteredContract entity.
 	// It exists in this package in order to avoid circular dependency with the "registeredcontract" package.
 	ProviderContractInverseTable = "registered_contracts"
 	// ProviderContractColumn is the table column denoting the provider_contract relation/edge.
-	ProviderContractColumn = "prov_contract_id"
+	ProviderContractColumn = "provider_contract_id"
 )
 
 // Columns holds all SQL columns for compatibilityresult fields.
 var Columns = []string{
 	FieldID,
-	FieldReqContractID,
-	FieldProvContractID,
+	FieldRequirementContractID,
+	FieldProviderContractID,
 	FieldParticipantNameReq,
 	FieldParticipantNameProv,
 	FieldResult,
+	FieldMapping,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -73,10 +76,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// ReqContractIDValidator is a validator for the "req_contract_id" field. It is called by the builders before save.
-	ReqContractIDValidator func(string) error
-	// ProvContractIDValidator is a validator for the "prov_contract_id" field. It is called by the builders before save.
-	ProvContractIDValidator func(string) error
+	// RequirementContractIDValidator is a validator for the "requirement_contract_id" field. It is called by the builders before save.
+	RequirementContractIDValidator func(string) error
+	// ProviderContractIDValidator is a validator for the "provider_contract_id" field. It is called by the builders before save.
+	ProviderContractIDValidator func(string) error
 	// ParticipantNameReqValidator is a validator for the "participant_name_req" field. It is called by the builders before save.
 	ParticipantNameReqValidator func(string) error
 	// ParticipantNameProvValidator is a validator for the "participant_name_prov" field. It is called by the builders before save.
@@ -97,14 +100,14 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByReqContractID orders the results by the req_contract_id field.
-func ByReqContractID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldReqContractID, opts...).ToFunc()
+// ByRequirementContractID orders the results by the requirement_contract_id field.
+func ByRequirementContractID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRequirementContractID, opts...).ToFunc()
 }
 
-// ByProvContractID orders the results by the prov_contract_id field.
-func ByProvContractID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProvContractID, opts...).ToFunc()
+// ByProviderContractID orders the results by the provider_contract_id field.
+func ByProviderContractID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderContractID, opts...).ToFunc()
 }
 
 // ByParticipantNameReq orders the results by the participant_name_req field.

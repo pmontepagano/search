@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/registeredcontract"
+	"github.com/clpombo/search/ent/schema"
 )
 
 // CompatibilityResultCreate is the builder for creating a CompatibilityResult entity.
@@ -21,15 +22,15 @@ type CompatibilityResultCreate struct {
 	hooks    []Hook
 }
 
-// SetReqContractID sets the "req_contract_id" field.
-func (crc *CompatibilityResultCreate) SetReqContractID(s string) *CompatibilityResultCreate {
-	crc.mutation.SetReqContractID(s)
+// SetRequirementContractID sets the "requirement_contract_id" field.
+func (crc *CompatibilityResultCreate) SetRequirementContractID(s string) *CompatibilityResultCreate {
+	crc.mutation.SetRequirementContractID(s)
 	return crc
 }
 
-// SetProvContractID sets the "prov_contract_id" field.
-func (crc *CompatibilityResultCreate) SetProvContractID(s string) *CompatibilityResultCreate {
-	crc.mutation.SetProvContractID(s)
+// SetProviderContractID sets the "provider_contract_id" field.
+func (crc *CompatibilityResultCreate) SetProviderContractID(s string) *CompatibilityResultCreate {
+	crc.mutation.SetProviderContractID(s)
 	return crc
 }
 
@@ -48,6 +49,12 @@ func (crc *CompatibilityResultCreate) SetParticipantNameProv(s string) *Compatib
 // SetResult sets the "result" field.
 func (crc *CompatibilityResultCreate) SetResult(b bool) *CompatibilityResultCreate {
 	crc.mutation.SetResult(b)
+	return crc
+}
+
+// SetMapping sets the "mapping" field.
+func (crc *CompatibilityResultCreate) SetMapping(snm schema.ParticipantNameMapping) *CompatibilityResultCreate {
+	crc.mutation.SetMapping(snm)
 	return crc
 }
 
@@ -79,21 +86,9 @@ func (crc *CompatibilityResultCreate) SetNillableUpdatedAt(t *time.Time) *Compat
 	return crc
 }
 
-// SetRequirementContractID sets the "requirement_contract" edge to the RegisteredContract entity by ID.
-func (crc *CompatibilityResultCreate) SetRequirementContractID(id string) *CompatibilityResultCreate {
-	crc.mutation.SetRequirementContractID(id)
-	return crc
-}
-
 // SetRequirementContract sets the "requirement_contract" edge to the RegisteredContract entity.
 func (crc *CompatibilityResultCreate) SetRequirementContract(r *RegisteredContract) *CompatibilityResultCreate {
 	return crc.SetRequirementContractID(r.ID)
-}
-
-// SetProviderContractID sets the "provider_contract" edge to the RegisteredContract entity by ID.
-func (crc *CompatibilityResultCreate) SetProviderContractID(id string) *CompatibilityResultCreate {
-	crc.mutation.SetProviderContractID(id)
-	return crc
 }
 
 // SetProviderContract sets the "provider_contract" edge to the RegisteredContract entity.
@@ -148,20 +143,20 @@ func (crc *CompatibilityResultCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (crc *CompatibilityResultCreate) check() error {
-	if _, ok := crc.mutation.ReqContractID(); !ok {
-		return &ValidationError{Name: "req_contract_id", err: errors.New(`ent: missing required field "CompatibilityResult.req_contract_id"`)}
+	if _, ok := crc.mutation.RequirementContractID(); !ok {
+		return &ValidationError{Name: "requirement_contract_id", err: errors.New(`ent: missing required field "CompatibilityResult.requirement_contract_id"`)}
 	}
-	if v, ok := crc.mutation.ReqContractID(); ok {
-		if err := compatibilityresult.ReqContractIDValidator(v); err != nil {
-			return &ValidationError{Name: "req_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.req_contract_id": %w`, err)}
+	if v, ok := crc.mutation.RequirementContractID(); ok {
+		if err := compatibilityresult.RequirementContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "requirement_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.requirement_contract_id": %w`, err)}
 		}
 	}
-	if _, ok := crc.mutation.ProvContractID(); !ok {
-		return &ValidationError{Name: "prov_contract_id", err: errors.New(`ent: missing required field "CompatibilityResult.prov_contract_id"`)}
+	if _, ok := crc.mutation.ProviderContractID(); !ok {
+		return &ValidationError{Name: "provider_contract_id", err: errors.New(`ent: missing required field "CompatibilityResult.provider_contract_id"`)}
 	}
-	if v, ok := crc.mutation.ProvContractID(); ok {
-		if err := compatibilityresult.ProvContractIDValidator(v); err != nil {
-			return &ValidationError{Name: "prov_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.prov_contract_id": %w`, err)}
+	if v, ok := crc.mutation.ProviderContractID(); ok {
+		if err := compatibilityresult.ProviderContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.provider_contract_id": %w`, err)}
 		}
 	}
 	if _, ok := crc.mutation.ParticipantNameReq(); !ok {
@@ -233,6 +228,10 @@ func (crc *CompatibilityResultCreate) createSpec() (*CompatibilityResult, *sqlgr
 		_spec.SetField(compatibilityresult.FieldResult, field.TypeBool, value)
 		_node.Result = value
 	}
+	if value, ok := crc.mutation.Mapping(); ok {
+		_spec.SetField(compatibilityresult.FieldMapping, field.TypeJSON, value)
+		_node.Mapping = value
+	}
 	if value, ok := crc.mutation.CreatedAt(); ok {
 		_spec.SetField(compatibilityresult.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -255,7 +254,7 @@ func (crc *CompatibilityResultCreate) createSpec() (*CompatibilityResult, *sqlgr
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ReqContractID = nodes[0]
+		_node.RequirementContractID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := crc.mutation.ProviderContractIDs(); len(nodes) > 0 {
@@ -272,7 +271,7 @@ func (crc *CompatibilityResultCreate) createSpec() (*CompatibilityResult, *sqlgr
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ProvContractID = nodes[0]
+		_node.ProviderContractID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

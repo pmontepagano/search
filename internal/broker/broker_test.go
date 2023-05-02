@@ -10,6 +10,7 @@ import (
 	pb "github.com/clpombo/search/gen/go/search/v1"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
@@ -19,7 +20,7 @@ func TestBrokerChannel_Request(t *testing.T) {
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithBlock())
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", "localhost", 3333), opts...)
@@ -98,7 +99,7 @@ func TestGetParticipantMapping(t *testing.T) {
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithBlock())
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", "localhost", 3333), opts...)

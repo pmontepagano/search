@@ -33,9 +33,13 @@ type RegisteredContract struct {
 type RegisteredContractEdges struct {
 	// Providers holds the value of the providers edge.
 	Providers []*RegisteredProvider `json:"providers,omitempty"`
+	// CompatibilityResultsAsRequirement holds the value of the compatibility_results_as_requirement edge.
+	CompatibilityResultsAsRequirement []*CompatibilityResult `json:"compatibility_results_as_requirement,omitempty"`
+	// CompatibilityResultsAsProvider holds the value of the compatibility_results_as_provider edge.
+	CompatibilityResultsAsProvider []*CompatibilityResult `json:"compatibility_results_as_provider,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // ProvidersOrErr returns the Providers value or an error if the edge
@@ -45,6 +49,24 @@ func (e RegisteredContractEdges) ProvidersOrErr() ([]*RegisteredProvider, error)
 		return e.Providers, nil
 	}
 	return nil, &NotLoadedError{edge: "providers"}
+}
+
+// CompatibilityResultsAsRequirementOrErr returns the CompatibilityResultsAsRequirement value or an error if the edge
+// was not loaded in eager-loading.
+func (e RegisteredContractEdges) CompatibilityResultsAsRequirementOrErr() ([]*CompatibilityResult, error) {
+	if e.loadedTypes[1] {
+		return e.CompatibilityResultsAsRequirement, nil
+	}
+	return nil, &NotLoadedError{edge: "compatibility_results_as_requirement"}
+}
+
+// CompatibilityResultsAsProviderOrErr returns the CompatibilityResultsAsProvider value or an error if the edge
+// was not loaded in eager-loading.
+func (e RegisteredContractEdges) CompatibilityResultsAsProviderOrErr() ([]*CompatibilityResult, error) {
+	if e.loadedTypes[2] {
+		return e.CompatibilityResultsAsProvider, nil
+	}
+	return nil, &NotLoadedError{edge: "compatibility_results_as_provider"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -115,6 +137,16 @@ func (rc *RegisteredContract) Value(name string) (ent.Value, error) {
 // QueryProviders queries the "providers" edge of the RegisteredContract entity.
 func (rc *RegisteredContract) QueryProviders() *RegisteredProviderQuery {
 	return NewRegisteredContractClient(rc.config).QueryProviders(rc)
+}
+
+// QueryCompatibilityResultsAsRequirement queries the "compatibility_results_as_requirement" edge of the RegisteredContract entity.
+func (rc *RegisteredContract) QueryCompatibilityResultsAsRequirement() *CompatibilityResultQuery {
+	return NewRegisteredContractClient(rc.config).QueryCompatibilityResultsAsRequirement(rc)
+}
+
+// QueryCompatibilityResultsAsProvider queries the "compatibility_results_as_provider" edge of the RegisteredContract entity.
+func (rc *RegisteredContract) QueryCompatibilityResultsAsProvider() *CompatibilityResultQuery {
+	return NewRegisteredContractClient(rc.config).QueryCompatibilityResultsAsProvider(rc)
 }
 
 // Update returns a builder for updating this RegisteredContract.

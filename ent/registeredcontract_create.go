@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
 	"github.com/google/uuid"
@@ -67,6 +68,36 @@ func (rcc *RegisteredContractCreate) AddProviders(r ...*RegisteredProvider) *Reg
 		ids[i] = r[i].ID
 	}
 	return rcc.AddProviderIDs(ids...)
+}
+
+// AddCompatibilityResultsAsRequirementIDs adds the "compatibility_results_as_requirement" edge to the CompatibilityResult entity by IDs.
+func (rcc *RegisteredContractCreate) AddCompatibilityResultsAsRequirementIDs(ids ...int) *RegisteredContractCreate {
+	rcc.mutation.AddCompatibilityResultsAsRequirementIDs(ids...)
+	return rcc
+}
+
+// AddCompatibilityResultsAsRequirement adds the "compatibility_results_as_requirement" edges to the CompatibilityResult entity.
+func (rcc *RegisteredContractCreate) AddCompatibilityResultsAsRequirement(c ...*CompatibilityResult) *RegisteredContractCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcc.AddCompatibilityResultsAsRequirementIDs(ids...)
+}
+
+// AddCompatibilityResultsAsProviderIDs adds the "compatibility_results_as_provider" edge to the CompatibilityResult entity by IDs.
+func (rcc *RegisteredContractCreate) AddCompatibilityResultsAsProviderIDs(ids ...int) *RegisteredContractCreate {
+	rcc.mutation.AddCompatibilityResultsAsProviderIDs(ids...)
+	return rcc
+}
+
+// AddCompatibilityResultsAsProvider adds the "compatibility_results_as_provider" edges to the CompatibilityResult entity.
+func (rcc *RegisteredContractCreate) AddCompatibilityResultsAsProvider(c ...*CompatibilityResult) *RegisteredContractCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return rcc.AddCompatibilityResultsAsProviderIDs(ids...)
 }
 
 // Mutation returns the RegisteredContractMutation object of the builder.
@@ -181,12 +212,44 @@ func (rcc *RegisteredContractCreate) createSpec() (*RegisteredContract, *sqlgrap
 	if nodes := rcc.mutation.ProvidersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   registeredcontract.ProvidersTable,
 			Columns: []string{registeredcontract.ProvidersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(registeredprovider.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rcc.mutation.CompatibilityResultsAsRequirementIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsRequirementTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsRequirementColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rcc.mutation.CompatibilityResultsAsProviderIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   registeredcontract.CompatibilityResultsAsProviderTable,
+			Columns: []string{registeredcontract.CompatibilityResultsAsProviderColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -13,16 +13,22 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/sourcegraph/conc/iter"
+	"github.com/sourcegraph/conc/pool"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/testdata"
 
 	"github.com/clpombo/search/ent"
+	"github.com/clpombo/search/ent/compatibilityresult"
+	"github.com/clpombo/search/ent/registeredcontract"
+	"github.com/clpombo/search/ent/registeredprovider"
 	"github.com/clpombo/search/internal/contract"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
@@ -33,18 +39,19 @@ type brokerServer struct {
 	pb.UnimplementedBrokerServiceServer
 	server *grpc.Server
 
-	// db       *gorm.DB
-	dbClient *ent.Client
+	dbClient   *ent.Client
+	compatFunc ContractCompatibilityFunc
 
 	PublicURL string
 	logger    *log.Logger
 }
 
 // TODO: move this into an ent template? https://entgo.io/docs/templates
-func getRemoteParticipant(r *ent.RegisteredProvider) (res *pb.RemoteParticipant) {
+func getRemoteParticipant(r *ent.RegisteredProvider) *pb.RemoteParticipant {
+	var res pb.RemoteParticipant
 	res.AppId = r.ID.String()
 	res.Url = r.URL.String()
-	return res
+	return &res
 }
 
 func getProviderContract(r *ent.RegisteredProvider) (contract.Contract, error) {
@@ -56,6 +63,12 @@ func getContract(c *ent.RegisteredContract) (contract.Contract, error) {
 		Contract: c.Contract,
 		Format:   pb.ContractFormat(c.Format),
 	})
+}
+
+type ContractCompatibilityFunc func(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error)
+
+func computeCompatibility(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error) {
+	return false, nil, nil
 }
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
@@ -87,28 +100,110 @@ func (s *brokerServer) getRandomRegisteredProvider() *ent.RegisteredProvider {
 	return r
 }
 
-func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Contract, p string) (*ent.RegisteredProvider, error) {
+func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Contract, rc *ent.RegisteredContract, p string) (*ent.RegisteredProvider, error) {
 	// Search in database if there are any compatible providers.
-	// s.dbClient.CompatibilityResult.Query().Where(compatibilityresult.HasRequirementContractWith(registeredcontract.))
+	cachedResults, err := s.dbClient.CompatibilityResult.
+		Query().
+		WithProviderContract().
+		Where(compatibilityresult.And(
+			compatibilityresult.Result(true),
+			compatibilityresult.HasRequirementContractWith(registeredcontract.ID(rc.ID)),
+		)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(cachedResults) > 0 {
+		// If there is at least one, return the best ranked one.
+		// But before returning, send to a work queue a requests to calculate compatibility between this req and providers with
+		// which compatibility has not yet been calculated.
 
-	// If there is at least one, return the best ranked one.
-	// But before returning, send to a work queue a requests to calculate compatibility between this req and providers with
-	// which compatibility has not yet been calculated.
+		// Here we can have multiple contracts compatible and each contract can have more than one provider!
 
-	// It there is no result in the cache, also enqueue jobs to calculate compatibility with all providers for which we have not
+		// TODO: sort by ranking (firs we need to add ranking to the schema).
+		result := cachedResults[0].Edges.ProviderContract.Edges.Providers[0]
+		// TODO: enqueue jobs to calculate compatibility with all providers for which we have no data
+		return result, nil
+	}
+
+	// If there is no result in the cache, also enqueue jobs to calculate compatibility with all providers for which we have not
 	// calculated compatibility, but in this case wait until either they all fail to find
 	// a compatible provider or we find one (and in that case we return the first one).
+	// FALTA FILTRAR POR LOS QUE TENGAN CONTRATO DE REQUERIMIENTO IGUAL AL QUE ESTAMOS PROCESANDO.
+	contractsToCalculate, err := s.dbClient.Debug().RegisteredContract.Query().
+		Where(func(s *sql.Selector) {
+			rpt := sql.Table(registeredprovider.Table)
+			crt := sql.Table(compatibilityresult.Table)
+			s.Join(rpt).On(s.C(registeredcontract.FieldID), rpt.C(registeredprovider.ContractColumn))
+			s.LeftJoin(crt).On(s.C(registeredcontract.FieldID), crt.C(compatibilityresult.FieldProviderContractID))
+		}).WithProviders().
+		All(ctx)
+	// providersToCompute, err := s.dbClient.Debug().RegisteredProvider.Query().
+	// 	Where(
+	// 		registeredprovider.Not(registeredprovider.HasContractWith(registeredcontract)
+	if err != nil {
+		return nil, err
+	}
+	// allRegisteredProviders, err := s.dbClient.Debug().RegisteredProvider.Query().WithContract().All(ctx)
+	// for _, rp := range allRegisteredProviders {
+	// 	fmt.Printf("registered provider with participant name %s and contract ID: %s\n", rp.ParticipantName, rp.Edges.Contract.ID)
+	// }
+	// TODO(2023-05-01): no me está trayendo ningún RegisteredProvider en el edge. O sea c.Edges.Providers está vacío.
+	firstResult := make(chan *ent.RegisteredProvider)
+	workersFinished := make(chan struct{})
+	go func() {
+		for _, c := range contractsToCalculate {
+			for _, prov := range c.Edges.Providers {
+				workers := pool.New()
+				workers.Go(func() {
+					provContract, err := getContract(c)
+					if err != nil {
+						s.logger.Printf("error parsing registeredContract with ID %s", c.ID)
+						// TODO: handle error properly
+						return
+					}
+					isCompatible, mapping, err := s.compatFunc(ctx, req, provContract, p, prov.ParticipantName)
+					if err != nil {
+						s.logger.Printf("error calculating compatibility: %v", err)
+						// TODO: proper error handler
+						return
+					}
+					_, err = s.dbClient.CompatibilityResult.Create().
+						SetRequirementContractID(rc.ID).
+						SetParticipantNameReq(p).
+						SetProviderContractID(c.ID).
+						SetParticipantNameProv(prov.ParticipantName).
+						SetResult(isCompatible).
+						SetMapping(mapping).
+						Save(ctx)
+					if err != nil {
+						s.logger.Printf("error saving compatibility result: %v", err)
+						// TODO: proper error handler
+						return
+					}
+					if isCompatible {
+						firstResult <- prov
+					}
+				})
+				workers.Wait()
+				workersFinished <- struct{}{}
+			}
+		}
+	}()
 
-	return nil, nil
-}
+	select {
+	case r := <-firstResult:
+		return r, nil
+	case <-workersFinished:
+		return nil, errors.New("no compatible provider found")
+	}
 
-func (s *brokerServer) computeCompatibility(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string) {
-	return false, nil
 }
 
 // given a contract and a list of participants, get best possible candidates for those candidates
 // from all the candidates present in the registry
-func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.Contract, participants []string, blacklistedProviders map[*pb.RemoteParticipant]struct{}) (map[string]*ent.RegisteredProvider, error) {
+func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.Contract, rc *ent.RegisteredContract, participants []string,
+	blacklistedProviders map[*pb.RemoteParticipant]struct{}) (map[string]*ent.RegisteredProvider, error) {
 	// sanity check: check that all elements of param `participants` are present as participants in param `contract`
 	contractParticipants := contract.GetParticipants()
 	sort.Strings(contractParticipants)
@@ -126,7 +221,7 @@ func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.
 
 	// TODO: use blacklistedProviders
 	providers, err := iter.MapErr(participants, func(p *string) (*ent.RegisteredProvider, error) {
-		return s.getBestCandidate(ctx, contract, *p)
+		return s.getBestCandidate(ctx, contract, rc, *p)
 	})
 	if err != nil {
 		// TODO: better error handling.
@@ -137,11 +232,6 @@ func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.
 	}
 	return response, nil
 }
-
-// func (s *brokerServer) getBestProvider(requirementContract contract.Contract, participant string) (*registeredProvider, error) {
-// 	// Search in the cache?
-// 	for
-// }
 
 // getParticipantMapping takes the mapping between participant's names and RemoteParticipants from the
 // initiator's perspective, and a participant name (also in the initiator's perspective), called receiver,
@@ -203,7 +293,7 @@ func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.Rem
 }
 
 // this routine will find compatible candidates and notify them
-func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, presetParticipants map[string]*pb.RemoteParticipant,
+func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, rc *ent.RegisteredContract, presetParticipants map[string]*pb.RemoteParticipant,
 	initiatorName string, blacklistedProviders map[*pb.RemoteParticipant]struct{}) {
 	// TODO: split this function up in two functions: broker and initializeChannel
 	// func (s *brokerServer) broker(ctx context.Context, reqContract contract.Contract, initiatorName string, presetParticipants map[string]struct{},
@@ -216,10 +306,10 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, preset
 	s.logger.Printf("brokerAndInitialize contract.GetParticipants(): %v", reqContract.GetParticipants())
 	participantsToMatch := filterParticipants(reqContract.GetParticipants(), presetParticipants)
 	s.logger.Printf("brokerAndInitialize participantsToMatch: %v", participantsToMatch)
-	candidates, err := s.getBestCandidates(context.TODO(), reqContract, participantsToMatch, blacklistedProviders)
+	candidates, err := s.getBestCandidates(context.TODO(), reqContract, rc, participantsToMatch, blacklistedProviders)
 	if err != nil {
 		// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
-		s.logger.Fatal("Could not get any provider candidates.")
+		s.logger.Fatalf("Could not get any provider candidates. Error: %s", err)
 	}
 
 	// Initialize channel.
@@ -243,7 +333,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, preset
 		s.logger.Printf("Sending InitChannel to: %s", p.AppId)
 		conn, err := grpc.Dial(
 			p.Url,
-			grpc.WithInsecure(), // TODO: use tls
+			grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO: use tls
 			grpc.WithBlock(),
 			grpc.FailOnNonTempDialError(true),
 		)
@@ -330,12 +420,12 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 	presetParticipants := request.GetPresetParticipants()
 	initiatorName := request.GetInitiatorName()
 
-	_, err = s.getOrSaveContract(ctx, reqContract)
+	rc, err := s.getOrSaveContract(ctx, reqContract)
 	if err != nil {
 		return nil, status.New(codes.Internal, err.Error()).Err()
 	}
 
-	go s.brokerAndInitialize(reqContract, presetParticipants, initiatorName, make(map[*pb.RemoteParticipant]struct{}))
+	go s.brokerAndInitialize(reqContract, rc, presetParticipants, initiatorName, make(map[*pb.RemoteParticipant]struct{}))
 
 	return &pb.BrokerChannelResponse{Result: pb.BrokerChannelResponse_RESULT_ACK}, nil
 }
@@ -407,6 +497,7 @@ func NewBrokerServer(databasePath string) *brokerServer {
 	if err := dbClient.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
+	s.compatFunc = computeCompatibility
 
 	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)
 	return s
@@ -447,4 +538,8 @@ func (s *brokerServer) Stop() {
 		s.server.Stop()
 	}
 	s.dbClient.Close()
+}
+
+func (s *brokerServer) SetCompatFunc(f ContractCompatibilityFunc) {
+	s.compatFunc = f
 }

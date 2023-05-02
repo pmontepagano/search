@@ -16,6 +16,7 @@ import (
 	"github.com/clpombo/search/ent/predicate"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
+	"github.com/clpombo/search/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -42,6 +43,7 @@ type CompatibilityResultMutation struct {
 	participant_name_req        *string
 	participant_name_prov       *string
 	result                      *bool
+	mapping                     *schema.ParticipantNameMapping
 	created_at                  *time.Time
 	updated_at                  *time.Time
 	clearedFields               map[string]struct{}
@@ -152,13 +154,13 @@ func (m *CompatibilityResultMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetReqContractID sets the "req_contract_id" field.
-func (m *CompatibilityResultMutation) SetReqContractID(s string) {
+// SetRequirementContractID sets the "requirement_contract_id" field.
+func (m *CompatibilityResultMutation) SetRequirementContractID(s string) {
 	m.requirement_contract = &s
 }
 
-// ReqContractID returns the value of the "req_contract_id" field in the mutation.
-func (m *CompatibilityResultMutation) ReqContractID() (r string, exists bool) {
+// RequirementContractID returns the value of the "requirement_contract_id" field in the mutation.
+func (m *CompatibilityResultMutation) RequirementContractID() (r string, exists bool) {
 	v := m.requirement_contract
 	if v == nil {
 		return
@@ -166,35 +168,35 @@ func (m *CompatibilityResultMutation) ReqContractID() (r string, exists bool) {
 	return *v, true
 }
 
-// OldReqContractID returns the old "req_contract_id" field's value of the CompatibilityResult entity.
+// OldRequirementContractID returns the old "requirement_contract_id" field's value of the CompatibilityResult entity.
 // If the CompatibilityResult object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CompatibilityResultMutation) OldReqContractID(ctx context.Context) (v string, err error) {
+func (m *CompatibilityResultMutation) OldRequirementContractID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldReqContractID is only allowed on UpdateOne operations")
+		return v, errors.New("OldRequirementContractID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldReqContractID requires an ID field in the mutation")
+		return v, errors.New("OldRequirementContractID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldReqContractID: %w", err)
+		return v, fmt.Errorf("querying old value for OldRequirementContractID: %w", err)
 	}
-	return oldValue.ReqContractID, nil
+	return oldValue.RequirementContractID, nil
 }
 
-// ResetReqContractID resets all changes to the "req_contract_id" field.
-func (m *CompatibilityResultMutation) ResetReqContractID() {
+// ResetRequirementContractID resets all changes to the "requirement_contract_id" field.
+func (m *CompatibilityResultMutation) ResetRequirementContractID() {
 	m.requirement_contract = nil
 }
 
-// SetProvContractID sets the "prov_contract_id" field.
-func (m *CompatibilityResultMutation) SetProvContractID(s string) {
+// SetProviderContractID sets the "provider_contract_id" field.
+func (m *CompatibilityResultMutation) SetProviderContractID(s string) {
 	m.provider_contract = &s
 }
 
-// ProvContractID returns the value of the "prov_contract_id" field in the mutation.
-func (m *CompatibilityResultMutation) ProvContractID() (r string, exists bool) {
+// ProviderContractID returns the value of the "provider_contract_id" field in the mutation.
+func (m *CompatibilityResultMutation) ProviderContractID() (r string, exists bool) {
 	v := m.provider_contract
 	if v == nil {
 		return
@@ -202,25 +204,25 @@ func (m *CompatibilityResultMutation) ProvContractID() (r string, exists bool) {
 	return *v, true
 }
 
-// OldProvContractID returns the old "prov_contract_id" field's value of the CompatibilityResult entity.
+// OldProviderContractID returns the old "provider_contract_id" field's value of the CompatibilityResult entity.
 // If the CompatibilityResult object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CompatibilityResultMutation) OldProvContractID(ctx context.Context) (v string, err error) {
+func (m *CompatibilityResultMutation) OldProviderContractID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProvContractID is only allowed on UpdateOne operations")
+		return v, errors.New("OldProviderContractID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProvContractID requires an ID field in the mutation")
+		return v, errors.New("OldProviderContractID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProvContractID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProviderContractID: %w", err)
 	}
-	return oldValue.ProvContractID, nil
+	return oldValue.ProviderContractID, nil
 }
 
-// ResetProvContractID resets all changes to the "prov_contract_id" field.
-func (m *CompatibilityResultMutation) ResetProvContractID() {
+// ResetProviderContractID resets all changes to the "provider_contract_id" field.
+func (m *CompatibilityResultMutation) ResetProviderContractID() {
 	m.provider_contract = nil
 }
 
@@ -332,6 +334,55 @@ func (m *CompatibilityResultMutation) ResetResult() {
 	m.result = nil
 }
 
+// SetMapping sets the "mapping" field.
+func (m *CompatibilityResultMutation) SetMapping(snm schema.ParticipantNameMapping) {
+	m.mapping = &snm
+}
+
+// Mapping returns the value of the "mapping" field in the mutation.
+func (m *CompatibilityResultMutation) Mapping() (r schema.ParticipantNameMapping, exists bool) {
+	v := m.mapping
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMapping returns the old "mapping" field's value of the CompatibilityResult entity.
+// If the CompatibilityResult object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompatibilityResultMutation) OldMapping(ctx context.Context) (v schema.ParticipantNameMapping, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMapping is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMapping requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMapping: %w", err)
+	}
+	return oldValue.Mapping, nil
+}
+
+// ClearMapping clears the value of the "mapping" field.
+func (m *CompatibilityResultMutation) ClearMapping() {
+	m.mapping = nil
+	m.clearedFields[compatibilityresult.FieldMapping] = struct{}{}
+}
+
+// MappingCleared returns if the "mapping" field was cleared in this mutation.
+func (m *CompatibilityResultMutation) MappingCleared() bool {
+	_, ok := m.clearedFields[compatibilityresult.FieldMapping]
+	return ok
+}
+
+// ResetMapping resets all changes to the "mapping" field.
+func (m *CompatibilityResultMutation) ResetMapping() {
+	m.mapping = nil
+	delete(m.clearedFields, compatibilityresult.FieldMapping)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *CompatibilityResultMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -404,11 +455,6 @@ func (m *CompatibilityResultMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetRequirementContractID sets the "requirement_contract" edge to the RegisteredContract entity by id.
-func (m *CompatibilityResultMutation) SetRequirementContractID(id string) {
-	m.requirement_contract = &id
-}
-
 // ClearRequirementContract clears the "requirement_contract" edge to the RegisteredContract entity.
 func (m *CompatibilityResultMutation) ClearRequirementContract() {
 	m.clearedrequirement_contract = true
@@ -417,14 +463,6 @@ func (m *CompatibilityResultMutation) ClearRequirementContract() {
 // RequirementContractCleared reports if the "requirement_contract" edge to the RegisteredContract entity was cleared.
 func (m *CompatibilityResultMutation) RequirementContractCleared() bool {
 	return m.clearedrequirement_contract
-}
-
-// RequirementContractID returns the "requirement_contract" edge ID in the mutation.
-func (m *CompatibilityResultMutation) RequirementContractID() (id string, exists bool) {
-	if m.requirement_contract != nil {
-		return *m.requirement_contract, true
-	}
-	return
 }
 
 // RequirementContractIDs returns the "requirement_contract" edge IDs in the mutation.
@@ -443,11 +481,6 @@ func (m *CompatibilityResultMutation) ResetRequirementContract() {
 	m.clearedrequirement_contract = false
 }
 
-// SetProviderContractID sets the "provider_contract" edge to the RegisteredContract entity by id.
-func (m *CompatibilityResultMutation) SetProviderContractID(id string) {
-	m.provider_contract = &id
-}
-
 // ClearProviderContract clears the "provider_contract" edge to the RegisteredContract entity.
 func (m *CompatibilityResultMutation) ClearProviderContract() {
 	m.clearedprovider_contract = true
@@ -456,14 +489,6 @@ func (m *CompatibilityResultMutation) ClearProviderContract() {
 // ProviderContractCleared reports if the "provider_contract" edge to the RegisteredContract entity was cleared.
 func (m *CompatibilityResultMutation) ProviderContractCleared() bool {
 	return m.clearedprovider_contract
-}
-
-// ProviderContractID returns the "provider_contract" edge ID in the mutation.
-func (m *CompatibilityResultMutation) ProviderContractID() (id string, exists bool) {
-	if m.provider_contract != nil {
-		return *m.provider_contract, true
-	}
-	return
 }
 
 // ProviderContractIDs returns the "provider_contract" edge IDs in the mutation.
@@ -516,12 +541,12 @@ func (m *CompatibilityResultMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CompatibilityResultMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.requirement_contract != nil {
-		fields = append(fields, compatibilityresult.FieldReqContractID)
+		fields = append(fields, compatibilityresult.FieldRequirementContractID)
 	}
 	if m.provider_contract != nil {
-		fields = append(fields, compatibilityresult.FieldProvContractID)
+		fields = append(fields, compatibilityresult.FieldProviderContractID)
 	}
 	if m.participant_name_req != nil {
 		fields = append(fields, compatibilityresult.FieldParticipantNameReq)
@@ -531,6 +556,9 @@ func (m *CompatibilityResultMutation) Fields() []string {
 	}
 	if m.result != nil {
 		fields = append(fields, compatibilityresult.FieldResult)
+	}
+	if m.mapping != nil {
+		fields = append(fields, compatibilityresult.FieldMapping)
 	}
 	if m.created_at != nil {
 		fields = append(fields, compatibilityresult.FieldCreatedAt)
@@ -546,16 +574,18 @@ func (m *CompatibilityResultMutation) Fields() []string {
 // schema.
 func (m *CompatibilityResultMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case compatibilityresult.FieldReqContractID:
-		return m.ReqContractID()
-	case compatibilityresult.FieldProvContractID:
-		return m.ProvContractID()
+	case compatibilityresult.FieldRequirementContractID:
+		return m.RequirementContractID()
+	case compatibilityresult.FieldProviderContractID:
+		return m.ProviderContractID()
 	case compatibilityresult.FieldParticipantNameReq:
 		return m.ParticipantNameReq()
 	case compatibilityresult.FieldParticipantNameProv:
 		return m.ParticipantNameProv()
 	case compatibilityresult.FieldResult:
 		return m.Result()
+	case compatibilityresult.FieldMapping:
+		return m.Mapping()
 	case compatibilityresult.FieldCreatedAt:
 		return m.CreatedAt()
 	case compatibilityresult.FieldUpdatedAt:
@@ -569,16 +599,18 @@ func (m *CompatibilityResultMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CompatibilityResultMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case compatibilityresult.FieldReqContractID:
-		return m.OldReqContractID(ctx)
-	case compatibilityresult.FieldProvContractID:
-		return m.OldProvContractID(ctx)
+	case compatibilityresult.FieldRequirementContractID:
+		return m.OldRequirementContractID(ctx)
+	case compatibilityresult.FieldProviderContractID:
+		return m.OldProviderContractID(ctx)
 	case compatibilityresult.FieldParticipantNameReq:
 		return m.OldParticipantNameReq(ctx)
 	case compatibilityresult.FieldParticipantNameProv:
 		return m.OldParticipantNameProv(ctx)
 	case compatibilityresult.FieldResult:
 		return m.OldResult(ctx)
+	case compatibilityresult.FieldMapping:
+		return m.OldMapping(ctx)
 	case compatibilityresult.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case compatibilityresult.FieldUpdatedAt:
@@ -592,19 +624,19 @@ func (m *CompatibilityResultMutation) OldField(ctx context.Context, name string)
 // type.
 func (m *CompatibilityResultMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case compatibilityresult.FieldReqContractID:
+	case compatibilityresult.FieldRequirementContractID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetReqContractID(v)
+		m.SetRequirementContractID(v)
 		return nil
-	case compatibilityresult.FieldProvContractID:
+	case compatibilityresult.FieldProviderContractID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetProvContractID(v)
+		m.SetProviderContractID(v)
 		return nil
 	case compatibilityresult.FieldParticipantNameReq:
 		v, ok := value.(string)
@@ -626,6 +658,13 @@ func (m *CompatibilityResultMutation) SetField(name string, value ent.Value) err
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetResult(v)
+		return nil
+	case compatibilityresult.FieldMapping:
+		v, ok := value.(schema.ParticipantNameMapping)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMapping(v)
 		return nil
 	case compatibilityresult.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -670,7 +709,11 @@ func (m *CompatibilityResultMutation) AddField(name string, value ent.Value) err
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CompatibilityResultMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(compatibilityresult.FieldMapping) {
+		fields = append(fields, compatibilityresult.FieldMapping)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -683,6 +726,11 @@ func (m *CompatibilityResultMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CompatibilityResultMutation) ClearField(name string) error {
+	switch name {
+	case compatibilityresult.FieldMapping:
+		m.ClearMapping()
+		return nil
+	}
 	return fmt.Errorf("unknown CompatibilityResult nullable field %s", name)
 }
 
@@ -690,11 +738,11 @@ func (m *CompatibilityResultMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CompatibilityResultMutation) ResetField(name string) error {
 	switch name {
-	case compatibilityresult.FieldReqContractID:
-		m.ResetReqContractID()
+	case compatibilityresult.FieldRequirementContractID:
+		m.ResetRequirementContractID()
 		return nil
-	case compatibilityresult.FieldProvContractID:
-		m.ResetProvContractID()
+	case compatibilityresult.FieldProviderContractID:
+		m.ResetProviderContractID()
 		return nil
 	case compatibilityresult.FieldParticipantNameReq:
 		m.ResetParticipantNameReq()
@@ -704,6 +752,9 @@ func (m *CompatibilityResultMutation) ResetField(name string) error {
 		return nil
 	case compatibilityresult.FieldResult:
 		m.ResetResult()
+		return nil
+	case compatibilityresult.FieldMapping:
+		m.ResetMapping()
 		return nil
 	case compatibilityresult.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -810,20 +861,26 @@ func (m *CompatibilityResultMutation) ResetEdge(name string) error {
 // RegisteredContractMutation represents an operation that mutates the RegisteredContract nodes in the graph.
 type RegisteredContractMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *string
-	format           *int
-	addformat        *int
-	contract         *[]byte
-	created_at       *time.Time
-	clearedFields    map[string]struct{}
-	providers        map[uuid.UUID]struct{}
-	removedproviders map[uuid.UUID]struct{}
-	clearedproviders bool
-	done             bool
-	oldValue         func(context.Context) (*RegisteredContract, error)
-	predicates       []predicate.RegisteredContract
+	op                                          Op
+	typ                                         string
+	id                                          *string
+	format                                      *int
+	addformat                                   *int
+	contract                                    *[]byte
+	created_at                                  *time.Time
+	clearedFields                               map[string]struct{}
+	providers                                   map[uuid.UUID]struct{}
+	removedproviders                            map[uuid.UUID]struct{}
+	clearedproviders                            bool
+	compatibility_results_as_requirement        map[int]struct{}
+	removedcompatibility_results_as_requirement map[int]struct{}
+	clearedcompatibility_results_as_requirement bool
+	compatibility_results_as_provider           map[int]struct{}
+	removedcompatibility_results_as_provider    map[int]struct{}
+	clearedcompatibility_results_as_provider    bool
+	done                                        bool
+	oldValue                                    func(context.Context) (*RegisteredContract, error)
+	predicates                                  []predicate.RegisteredContract
 }
 
 var _ ent.Mutation = (*RegisteredContractMutation)(nil)
@@ -1112,6 +1169,114 @@ func (m *RegisteredContractMutation) ResetProviders() {
 	m.removedproviders = nil
 }
 
+// AddCompatibilityResultsAsRequirementIDs adds the "compatibility_results_as_requirement" edge to the CompatibilityResult entity by ids.
+func (m *RegisteredContractMutation) AddCompatibilityResultsAsRequirementIDs(ids ...int) {
+	if m.compatibility_results_as_requirement == nil {
+		m.compatibility_results_as_requirement = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.compatibility_results_as_requirement[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCompatibilityResultsAsRequirement clears the "compatibility_results_as_requirement" edge to the CompatibilityResult entity.
+func (m *RegisteredContractMutation) ClearCompatibilityResultsAsRequirement() {
+	m.clearedcompatibility_results_as_requirement = true
+}
+
+// CompatibilityResultsAsRequirementCleared reports if the "compatibility_results_as_requirement" edge to the CompatibilityResult entity was cleared.
+func (m *RegisteredContractMutation) CompatibilityResultsAsRequirementCleared() bool {
+	return m.clearedcompatibility_results_as_requirement
+}
+
+// RemoveCompatibilityResultsAsRequirementIDs removes the "compatibility_results_as_requirement" edge to the CompatibilityResult entity by IDs.
+func (m *RegisteredContractMutation) RemoveCompatibilityResultsAsRequirementIDs(ids ...int) {
+	if m.removedcompatibility_results_as_requirement == nil {
+		m.removedcompatibility_results_as_requirement = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.compatibility_results_as_requirement, ids[i])
+		m.removedcompatibility_results_as_requirement[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCompatibilityResultsAsRequirement returns the removed IDs of the "compatibility_results_as_requirement" edge to the CompatibilityResult entity.
+func (m *RegisteredContractMutation) RemovedCompatibilityResultsAsRequirementIDs() (ids []int) {
+	for id := range m.removedcompatibility_results_as_requirement {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CompatibilityResultsAsRequirementIDs returns the "compatibility_results_as_requirement" edge IDs in the mutation.
+func (m *RegisteredContractMutation) CompatibilityResultsAsRequirementIDs() (ids []int) {
+	for id := range m.compatibility_results_as_requirement {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCompatibilityResultsAsRequirement resets all changes to the "compatibility_results_as_requirement" edge.
+func (m *RegisteredContractMutation) ResetCompatibilityResultsAsRequirement() {
+	m.compatibility_results_as_requirement = nil
+	m.clearedcompatibility_results_as_requirement = false
+	m.removedcompatibility_results_as_requirement = nil
+}
+
+// AddCompatibilityResultsAsProviderIDs adds the "compatibility_results_as_provider" edge to the CompatibilityResult entity by ids.
+func (m *RegisteredContractMutation) AddCompatibilityResultsAsProviderIDs(ids ...int) {
+	if m.compatibility_results_as_provider == nil {
+		m.compatibility_results_as_provider = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.compatibility_results_as_provider[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCompatibilityResultsAsProvider clears the "compatibility_results_as_provider" edge to the CompatibilityResult entity.
+func (m *RegisteredContractMutation) ClearCompatibilityResultsAsProvider() {
+	m.clearedcompatibility_results_as_provider = true
+}
+
+// CompatibilityResultsAsProviderCleared reports if the "compatibility_results_as_provider" edge to the CompatibilityResult entity was cleared.
+func (m *RegisteredContractMutation) CompatibilityResultsAsProviderCleared() bool {
+	return m.clearedcompatibility_results_as_provider
+}
+
+// RemoveCompatibilityResultsAsProviderIDs removes the "compatibility_results_as_provider" edge to the CompatibilityResult entity by IDs.
+func (m *RegisteredContractMutation) RemoveCompatibilityResultsAsProviderIDs(ids ...int) {
+	if m.removedcompatibility_results_as_provider == nil {
+		m.removedcompatibility_results_as_provider = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.compatibility_results_as_provider, ids[i])
+		m.removedcompatibility_results_as_provider[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCompatibilityResultsAsProvider returns the removed IDs of the "compatibility_results_as_provider" edge to the CompatibilityResult entity.
+func (m *RegisteredContractMutation) RemovedCompatibilityResultsAsProviderIDs() (ids []int) {
+	for id := range m.removedcompatibility_results_as_provider {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CompatibilityResultsAsProviderIDs returns the "compatibility_results_as_provider" edge IDs in the mutation.
+func (m *RegisteredContractMutation) CompatibilityResultsAsProviderIDs() (ids []int) {
+	for id := range m.compatibility_results_as_provider {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCompatibilityResultsAsProvider resets all changes to the "compatibility_results_as_provider" edge.
+func (m *RegisteredContractMutation) ResetCompatibilityResultsAsProvider() {
+	m.compatibility_results_as_provider = nil
+	m.clearedcompatibility_results_as_provider = false
+	m.removedcompatibility_results_as_provider = nil
+}
+
 // Where appends a list predicates to the RegisteredContractMutation builder.
 func (m *RegisteredContractMutation) Where(ps ...predicate.RegisteredContract) {
 	m.predicates = append(m.predicates, ps...)
@@ -1294,9 +1459,15 @@ func (m *RegisteredContractMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RegisteredContractMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.providers != nil {
 		edges = append(edges, registeredcontract.EdgeProviders)
+	}
+	if m.compatibility_results_as_requirement != nil {
+		edges = append(edges, registeredcontract.EdgeCompatibilityResultsAsRequirement)
+	}
+	if m.compatibility_results_as_provider != nil {
+		edges = append(edges, registeredcontract.EdgeCompatibilityResultsAsProvider)
 	}
 	return edges
 }
@@ -1311,15 +1482,33 @@ func (m *RegisteredContractMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case registeredcontract.EdgeCompatibilityResultsAsRequirement:
+		ids := make([]ent.Value, 0, len(m.compatibility_results_as_requirement))
+		for id := range m.compatibility_results_as_requirement {
+			ids = append(ids, id)
+		}
+		return ids
+	case registeredcontract.EdgeCompatibilityResultsAsProvider:
+		ids := make([]ent.Value, 0, len(m.compatibility_results_as_provider))
+		for id := range m.compatibility_results_as_provider {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RegisteredContractMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.removedproviders != nil {
 		edges = append(edges, registeredcontract.EdgeProviders)
+	}
+	if m.removedcompatibility_results_as_requirement != nil {
+		edges = append(edges, registeredcontract.EdgeCompatibilityResultsAsRequirement)
+	}
+	if m.removedcompatibility_results_as_provider != nil {
+		edges = append(edges, registeredcontract.EdgeCompatibilityResultsAsProvider)
 	}
 	return edges
 }
@@ -1334,15 +1523,33 @@ func (m *RegisteredContractMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case registeredcontract.EdgeCompatibilityResultsAsRequirement:
+		ids := make([]ent.Value, 0, len(m.removedcompatibility_results_as_requirement))
+		for id := range m.removedcompatibility_results_as_requirement {
+			ids = append(ids, id)
+		}
+		return ids
+	case registeredcontract.EdgeCompatibilityResultsAsProvider:
+		ids := make([]ent.Value, 0, len(m.removedcompatibility_results_as_provider))
+		for id := range m.removedcompatibility_results_as_provider {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RegisteredContractMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.clearedproviders {
 		edges = append(edges, registeredcontract.EdgeProviders)
+	}
+	if m.clearedcompatibility_results_as_requirement {
+		edges = append(edges, registeredcontract.EdgeCompatibilityResultsAsRequirement)
+	}
+	if m.clearedcompatibility_results_as_provider {
+		edges = append(edges, registeredcontract.EdgeCompatibilityResultsAsProvider)
 	}
 	return edges
 }
@@ -1353,6 +1560,10 @@ func (m *RegisteredContractMutation) EdgeCleared(name string) bool {
 	switch name {
 	case registeredcontract.EdgeProviders:
 		return m.clearedproviders
+	case registeredcontract.EdgeCompatibilityResultsAsRequirement:
+		return m.clearedcompatibility_results_as_requirement
+	case registeredcontract.EdgeCompatibilityResultsAsProvider:
+		return m.clearedcompatibility_results_as_provider
 	}
 	return false
 }
@@ -1371,6 +1582,12 @@ func (m *RegisteredContractMutation) ResetEdge(name string) error {
 	switch name {
 	case registeredcontract.EdgeProviders:
 		m.ResetProviders()
+		return nil
+	case registeredcontract.EdgeCompatibilityResultsAsRequirement:
+		m.ResetCompatibilityResultsAsRequirement()
+		return nil
+	case registeredcontract.EdgeCompatibilityResultsAsProvider:
+		m.ResetCompatibilityResultsAsProvider()
 		return nil
 	}
 	return fmt.Errorf("unknown RegisteredContract edge %s", name)

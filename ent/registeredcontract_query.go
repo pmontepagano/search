@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/predicate"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
@@ -19,11 +20,13 @@ import (
 // RegisteredContractQuery is the builder for querying RegisteredContract entities.
 type RegisteredContractQuery struct {
 	config
-	ctx           *QueryContext
-	order         []registeredcontract.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.RegisteredContract
-	withProviders *RegisteredProviderQuery
+	ctx                                   *QueryContext
+	order                                 []registeredcontract.OrderOption
+	inters                                []Interceptor
+	predicates                            []predicate.RegisteredContract
+	withProviders                         *RegisteredProviderQuery
+	withCompatibilityResultsAsRequirement *CompatibilityResultQuery
+	withCompatibilityResultsAsProvider    *CompatibilityResultQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -74,7 +77,51 @@ func (rcq *RegisteredContractQuery) QueryProviders() *RegisteredProviderQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(registeredcontract.Table, registeredcontract.FieldID, selector),
 			sqlgraph.To(registeredprovider.Table, registeredprovider.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, registeredcontract.ProvidersTable, registeredcontract.ProvidersColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, registeredcontract.ProvidersTable, registeredcontract.ProvidersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCompatibilityResultsAsRequirement chains the current query on the "compatibility_results_as_requirement" edge.
+func (rcq *RegisteredContractQuery) QueryCompatibilityResultsAsRequirement() *CompatibilityResultQuery {
+	query := (&CompatibilityResultClient{config: rcq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(registeredcontract.Table, registeredcontract.FieldID, selector),
+			sqlgraph.To(compatibilityresult.Table, compatibilityresult.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, registeredcontract.CompatibilityResultsAsRequirementTable, registeredcontract.CompatibilityResultsAsRequirementColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCompatibilityResultsAsProvider chains the current query on the "compatibility_results_as_provider" edge.
+func (rcq *RegisteredContractQuery) QueryCompatibilityResultsAsProvider() *CompatibilityResultQuery {
+	query := (&CompatibilityResultClient{config: rcq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(registeredcontract.Table, registeredcontract.FieldID, selector),
+			sqlgraph.To(compatibilityresult.Table, compatibilityresult.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, registeredcontract.CompatibilityResultsAsProviderTable, registeredcontract.CompatibilityResultsAsProviderColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rcq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +316,14 @@ func (rcq *RegisteredContractQuery) Clone() *RegisteredContractQuery {
 		return nil
 	}
 	return &RegisteredContractQuery{
-		config:        rcq.config,
-		ctx:           rcq.ctx.Clone(),
-		order:         append([]registeredcontract.OrderOption{}, rcq.order...),
-		inters:        append([]Interceptor{}, rcq.inters...),
-		predicates:    append([]predicate.RegisteredContract{}, rcq.predicates...),
-		withProviders: rcq.withProviders.Clone(),
+		config:                                rcq.config,
+		ctx:                                   rcq.ctx.Clone(),
+		order:                                 append([]registeredcontract.OrderOption{}, rcq.order...),
+		inters:                                append([]Interceptor{}, rcq.inters...),
+		predicates:                            append([]predicate.RegisteredContract{}, rcq.predicates...),
+		withProviders:                         rcq.withProviders.Clone(),
+		withCompatibilityResultsAsRequirement: rcq.withCompatibilityResultsAsRequirement.Clone(),
+		withCompatibilityResultsAsProvider:    rcq.withCompatibilityResultsAsProvider.Clone(),
 		// clone intermediate query.
 		sql:  rcq.sql.Clone(),
 		path: rcq.path,
@@ -289,6 +338,28 @@ func (rcq *RegisteredContractQuery) WithProviders(opts ...func(*RegisteredProvid
 		opt(query)
 	}
 	rcq.withProviders = query
+	return rcq
+}
+
+// WithCompatibilityResultsAsRequirement tells the query-builder to eager-load the nodes that are connected to
+// the "compatibility_results_as_requirement" edge. The optional arguments are used to configure the query builder of the edge.
+func (rcq *RegisteredContractQuery) WithCompatibilityResultsAsRequirement(opts ...func(*CompatibilityResultQuery)) *RegisteredContractQuery {
+	query := (&CompatibilityResultClient{config: rcq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	rcq.withCompatibilityResultsAsRequirement = query
+	return rcq
+}
+
+// WithCompatibilityResultsAsProvider tells the query-builder to eager-load the nodes that are connected to
+// the "compatibility_results_as_provider" edge. The optional arguments are used to configure the query builder of the edge.
+func (rcq *RegisteredContractQuery) WithCompatibilityResultsAsProvider(opts ...func(*CompatibilityResultQuery)) *RegisteredContractQuery {
+	query := (&CompatibilityResultClient{config: rcq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	rcq.withCompatibilityResultsAsProvider = query
 	return rcq
 }
 
@@ -370,8 +441,10 @@ func (rcq *RegisteredContractQuery) sqlAll(ctx context.Context, hooks ...queryHo
 	var (
 		nodes       = []*RegisteredContract{}
 		_spec       = rcq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			rcq.withProviders != nil,
+			rcq.withCompatibilityResultsAsRequirement != nil,
+			rcq.withCompatibilityResultsAsProvider != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -399,6 +472,24 @@ func (rcq *RegisteredContractQuery) sqlAll(ctx context.Context, hooks ...queryHo
 			return nil, err
 		}
 	}
+	if query := rcq.withCompatibilityResultsAsRequirement; query != nil {
+		if err := rcq.loadCompatibilityResultsAsRequirement(ctx, query, nodes,
+			func(n *RegisteredContract) { n.Edges.CompatibilityResultsAsRequirement = []*CompatibilityResult{} },
+			func(n *RegisteredContract, e *CompatibilityResult) {
+				n.Edges.CompatibilityResultsAsRequirement = append(n.Edges.CompatibilityResultsAsRequirement, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := rcq.withCompatibilityResultsAsProvider; query != nil {
+		if err := rcq.loadCompatibilityResultsAsProvider(ctx, query, nodes,
+			func(n *RegisteredContract) { n.Edges.CompatibilityResultsAsProvider = []*CompatibilityResult{} },
+			func(n *RegisteredContract, e *CompatibilityResult) {
+				n.Edges.CompatibilityResultsAsProvider = append(n.Edges.CompatibilityResultsAsProvider, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -421,13 +512,73 @@ func (rcq *RegisteredContractQuery) loadProviders(ctx context.Context, query *Re
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.registered_contract_providers
+		fk := n.contract_id
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "registered_contract_providers" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "contract_id" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "registered_contract_providers" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "contract_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (rcq *RegisteredContractQuery) loadCompatibilityResultsAsRequirement(ctx context.Context, query *CompatibilityResultQuery, nodes []*RegisteredContract, init func(*RegisteredContract), assign func(*RegisteredContract, *CompatibilityResult)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*RegisteredContract)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(compatibilityresult.FieldRequirementContractID)
+	}
+	query.Where(predicate.CompatibilityResult(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(registeredcontract.CompatibilityResultsAsRequirementColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RequirementContractID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "requirement_contract_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (rcq *RegisteredContractQuery) loadCompatibilityResultsAsProvider(ctx context.Context, query *CompatibilityResultQuery, nodes []*RegisteredContract, init func(*RegisteredContract), assign func(*RegisteredContract, *CompatibilityResult)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*RegisteredContract)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(compatibilityresult.FieldProviderContractID)
+	}
+	query.Where(predicate.CompatibilityResult(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(registeredcontract.CompatibilityResultsAsProviderColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ProviderContractID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "provider_contract_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

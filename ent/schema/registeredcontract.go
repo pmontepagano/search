@@ -27,6 +27,8 @@ func (RegisteredContract) Fields() []ent.Field {
 // Edges of the RegisteredContract.
 func (RegisteredContract) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("providers", RegisteredProvider.Type),
+		edge.From("providers", RegisteredProvider.Type).Ref("contract"),
+		edge.From("compatibility_results_as_requirement", CompatibilityResult.Type).Ref("requirement_contract"),
+		edge.From("compatibility_results_as_provider", CompatibilityResult.Type).Ref("provider_contract"),
 	}
 }

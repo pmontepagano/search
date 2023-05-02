@@ -30,6 +30,6 @@ func (RegisteredProvider) Fields() []ent.Field {
 // Edges of the RegisteredProvider.
 func (RegisteredProvider) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("contract", RegisteredContract.Type).Ref("providers").Unique(),
+		edge.To("contract", RegisteredContract.Type).StorageKey(edge.Column("contract_id")).Unique().Required(),
 	}
 }

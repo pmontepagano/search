@@ -168,7 +168,7 @@ func (r *SEARCHChannel) broker() {
 	r.mw.logger.Printf("Requesting brokerage of contract: '%v'", r.Contract)
 	client, conn := r.mw.connectBroker()
 	defer conn.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithCancel(context.TODO()) // TODO: add deadline/timeout or inherit from request context.
 	defer cancel()
 	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
 		Contract:      r.ContractPB,

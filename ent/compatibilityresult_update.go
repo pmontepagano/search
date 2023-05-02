@@ -14,6 +14,7 @@ import (
 	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/predicate"
 	"github.com/clpombo/search/ent/registeredcontract"
+	"github.com/clpombo/search/ent/schema"
 )
 
 // CompatibilityResultUpdate is the builder for updating CompatibilityResult entities.
@@ -29,15 +30,15 @@ func (cru *CompatibilityResultUpdate) Where(ps ...predicate.CompatibilityResult)
 	return cru
 }
 
-// SetReqContractID sets the "req_contract_id" field.
-func (cru *CompatibilityResultUpdate) SetReqContractID(s string) *CompatibilityResultUpdate {
-	cru.mutation.SetReqContractID(s)
+// SetRequirementContractID sets the "requirement_contract_id" field.
+func (cru *CompatibilityResultUpdate) SetRequirementContractID(s string) *CompatibilityResultUpdate {
+	cru.mutation.SetRequirementContractID(s)
 	return cru
 }
 
-// SetProvContractID sets the "prov_contract_id" field.
-func (cru *CompatibilityResultUpdate) SetProvContractID(s string) *CompatibilityResultUpdate {
-	cru.mutation.SetProvContractID(s)
+// SetProviderContractID sets the "provider_contract_id" field.
+func (cru *CompatibilityResultUpdate) SetProviderContractID(s string) *CompatibilityResultUpdate {
+	cru.mutation.SetProviderContractID(s)
 	return cru
 }
 
@@ -59,27 +60,27 @@ func (cru *CompatibilityResultUpdate) SetResult(b bool) *CompatibilityResultUpda
 	return cru
 }
 
+// SetMapping sets the "mapping" field.
+func (cru *CompatibilityResultUpdate) SetMapping(snm schema.ParticipantNameMapping) *CompatibilityResultUpdate {
+	cru.mutation.SetMapping(snm)
+	return cru
+}
+
+// ClearMapping clears the value of the "mapping" field.
+func (cru *CompatibilityResultUpdate) ClearMapping() *CompatibilityResultUpdate {
+	cru.mutation.ClearMapping()
+	return cru
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (cru *CompatibilityResultUpdate) SetUpdatedAt(t time.Time) *CompatibilityResultUpdate {
 	cru.mutation.SetUpdatedAt(t)
 	return cru
 }
 
-// SetRequirementContractID sets the "requirement_contract" edge to the RegisteredContract entity by ID.
-func (cru *CompatibilityResultUpdate) SetRequirementContractID(id string) *CompatibilityResultUpdate {
-	cru.mutation.SetRequirementContractID(id)
-	return cru
-}
-
 // SetRequirementContract sets the "requirement_contract" edge to the RegisteredContract entity.
 func (cru *CompatibilityResultUpdate) SetRequirementContract(r *RegisteredContract) *CompatibilityResultUpdate {
 	return cru.SetRequirementContractID(r.ID)
-}
-
-// SetProviderContractID sets the "provider_contract" edge to the RegisteredContract entity by ID.
-func (cru *CompatibilityResultUpdate) SetProviderContractID(id string) *CompatibilityResultUpdate {
-	cru.mutation.SetProviderContractID(id)
-	return cru
 }
 
 // SetProviderContract sets the "provider_contract" edge to the RegisteredContract entity.
@@ -142,14 +143,14 @@ func (cru *CompatibilityResultUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cru *CompatibilityResultUpdate) check() error {
-	if v, ok := cru.mutation.ReqContractID(); ok {
-		if err := compatibilityresult.ReqContractIDValidator(v); err != nil {
-			return &ValidationError{Name: "req_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.req_contract_id": %w`, err)}
+	if v, ok := cru.mutation.RequirementContractID(); ok {
+		if err := compatibilityresult.RequirementContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "requirement_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.requirement_contract_id": %w`, err)}
 		}
 	}
-	if v, ok := cru.mutation.ProvContractID(); ok {
-		if err := compatibilityresult.ProvContractIDValidator(v); err != nil {
-			return &ValidationError{Name: "prov_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.prov_contract_id": %w`, err)}
+	if v, ok := cru.mutation.ProviderContractID(); ok {
+		if err := compatibilityresult.ProviderContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.provider_contract_id": %w`, err)}
 		}
 	}
 	if v, ok := cru.mutation.ParticipantNameReq(); ok {
@@ -191,6 +192,12 @@ func (cru *CompatibilityResultUpdate) sqlSave(ctx context.Context) (n int, err e
 	}
 	if value, ok := cru.mutation.Result(); ok {
 		_spec.SetField(compatibilityresult.FieldResult, field.TypeBool, value)
+	}
+	if value, ok := cru.mutation.Mapping(); ok {
+		_spec.SetField(compatibilityresult.FieldMapping, field.TypeJSON, value)
+	}
+	if cru.mutation.MappingCleared() {
+		_spec.ClearField(compatibilityresult.FieldMapping, field.TypeJSON)
 	}
 	if value, ok := cru.mutation.UpdatedAt(); ok {
 		_spec.SetField(compatibilityresult.FieldUpdatedAt, field.TypeTime, value)
@@ -273,15 +280,15 @@ type CompatibilityResultUpdateOne struct {
 	mutation *CompatibilityResultMutation
 }
 
-// SetReqContractID sets the "req_contract_id" field.
-func (cruo *CompatibilityResultUpdateOne) SetReqContractID(s string) *CompatibilityResultUpdateOne {
-	cruo.mutation.SetReqContractID(s)
+// SetRequirementContractID sets the "requirement_contract_id" field.
+func (cruo *CompatibilityResultUpdateOne) SetRequirementContractID(s string) *CompatibilityResultUpdateOne {
+	cruo.mutation.SetRequirementContractID(s)
 	return cruo
 }
 
-// SetProvContractID sets the "prov_contract_id" field.
-func (cruo *CompatibilityResultUpdateOne) SetProvContractID(s string) *CompatibilityResultUpdateOne {
-	cruo.mutation.SetProvContractID(s)
+// SetProviderContractID sets the "provider_contract_id" field.
+func (cruo *CompatibilityResultUpdateOne) SetProviderContractID(s string) *CompatibilityResultUpdateOne {
+	cruo.mutation.SetProviderContractID(s)
 	return cruo
 }
 
@@ -303,27 +310,27 @@ func (cruo *CompatibilityResultUpdateOne) SetResult(b bool) *CompatibilityResult
 	return cruo
 }
 
+// SetMapping sets the "mapping" field.
+func (cruo *CompatibilityResultUpdateOne) SetMapping(snm schema.ParticipantNameMapping) *CompatibilityResultUpdateOne {
+	cruo.mutation.SetMapping(snm)
+	return cruo
+}
+
+// ClearMapping clears the value of the "mapping" field.
+func (cruo *CompatibilityResultUpdateOne) ClearMapping() *CompatibilityResultUpdateOne {
+	cruo.mutation.ClearMapping()
+	return cruo
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (cruo *CompatibilityResultUpdateOne) SetUpdatedAt(t time.Time) *CompatibilityResultUpdateOne {
 	cruo.mutation.SetUpdatedAt(t)
 	return cruo
 }
 
-// SetRequirementContractID sets the "requirement_contract" edge to the RegisteredContract entity by ID.
-func (cruo *CompatibilityResultUpdateOne) SetRequirementContractID(id string) *CompatibilityResultUpdateOne {
-	cruo.mutation.SetRequirementContractID(id)
-	return cruo
-}
-
 // SetRequirementContract sets the "requirement_contract" edge to the RegisteredContract entity.
 func (cruo *CompatibilityResultUpdateOne) SetRequirementContract(r *RegisteredContract) *CompatibilityResultUpdateOne {
 	return cruo.SetRequirementContractID(r.ID)
-}
-
-// SetProviderContractID sets the "provider_contract" edge to the RegisteredContract entity by ID.
-func (cruo *CompatibilityResultUpdateOne) SetProviderContractID(id string) *CompatibilityResultUpdateOne {
-	cruo.mutation.SetProviderContractID(id)
-	return cruo
 }
 
 // SetProviderContract sets the "provider_contract" edge to the RegisteredContract entity.
@@ -399,14 +406,14 @@ func (cruo *CompatibilityResultUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cruo *CompatibilityResultUpdateOne) check() error {
-	if v, ok := cruo.mutation.ReqContractID(); ok {
-		if err := compatibilityresult.ReqContractIDValidator(v); err != nil {
-			return &ValidationError{Name: "req_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.req_contract_id": %w`, err)}
+	if v, ok := cruo.mutation.RequirementContractID(); ok {
+		if err := compatibilityresult.RequirementContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "requirement_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.requirement_contract_id": %w`, err)}
 		}
 	}
-	if v, ok := cruo.mutation.ProvContractID(); ok {
-		if err := compatibilityresult.ProvContractIDValidator(v); err != nil {
-			return &ValidationError{Name: "prov_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.prov_contract_id": %w`, err)}
+	if v, ok := cruo.mutation.ProviderContractID(); ok {
+		if err := compatibilityresult.ProviderContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "provider_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.provider_contract_id": %w`, err)}
 		}
 	}
 	if v, ok := cruo.mutation.ParticipantNameReq(); ok {
@@ -465,6 +472,12 @@ func (cruo *CompatibilityResultUpdateOne) sqlSave(ctx context.Context) (_node *C
 	}
 	if value, ok := cruo.mutation.Result(); ok {
 		_spec.SetField(compatibilityresult.FieldResult, field.TypeBool, value)
+	}
+	if value, ok := cruo.mutation.Mapping(); ok {
+		_spec.SetField(compatibilityresult.FieldMapping, field.TypeJSON, value)
+	}
+	if cruo.mutation.MappingCleared() {
+		_spec.ClearField(compatibilityresult.FieldMapping, field.TypeJSON)
 	}
 	if value, ok := cruo.mutation.UpdatedAt(); ok {
 		_spec.SetField(compatibilityresult.FieldUpdatedAt, field.TypeTime, value)

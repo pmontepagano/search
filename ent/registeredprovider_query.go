@@ -75,7 +75,7 @@ func (rpq *RegisteredProviderQuery) QueryContract() *RegisteredContractQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(registeredprovider.Table, registeredprovider.FieldID, selector),
 			sqlgraph.To(registeredcontract.Table, registeredcontract.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, registeredprovider.ContractTable, registeredprovider.ContractColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, registeredprovider.ContractTable, registeredprovider.ContractColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rpq.driver.Dialect(), step)
 		return fromU, nil
@@ -413,10 +413,10 @@ func (rpq *RegisteredProviderQuery) loadContract(ctx context.Context, query *Reg
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*RegisteredProvider)
 	for i := range nodes {
-		if nodes[i].registered_contract_providers == nil {
+		if nodes[i].contract_id == nil {
 			continue
 		}
-		fk := *nodes[i].registered_contract_providers
+		fk := *nodes[i].contract_id
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -433,7 +433,7 @@ func (rpq *RegisteredProviderQuery) loadContract(ctx context.Context, query *Reg
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "registered_contract_providers" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "contract_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

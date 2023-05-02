@@ -33,7 +33,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "registeredcontract" package.
 	ContractInverseTable = "registered_contracts"
 	// ContractColumn is the table column denoting the contract relation/edge.
-	ContractColumn = "registered_contract_providers"
+	ContractColumn = "contract_id"
 )
 
 // Columns holds all SQL columns for registeredprovider fields.
@@ -48,7 +48,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "registered_providers"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"registered_contract_providers",
+	"contract_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -112,6 +112,6 @@ func newContractStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ContractInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ContractTable, ContractColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, ContractTable, ContractColumn),
 	)
 }

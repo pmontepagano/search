@@ -31,9 +31,9 @@ type RegisteredProvider struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RegisteredProviderQuery when eager-loading is set.
-	Edges                         RegisteredProviderEdges `json:"edges"`
-	registered_contract_providers *string
-	selectValues                  sql.SelectValues
+	Edges        RegisteredProviderEdges `json:"edges"`
+	contract_id  *string
+	selectValues sql.SelectValues
 }
 
 // RegisteredProviderEdges holds the relations/edges for other nodes in the graph.
@@ -71,7 +71,7 @@ func (*RegisteredProvider) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case registeredprovider.FieldID:
 			values[i] = new(uuid.UUID)
-		case registeredprovider.ForeignKeys[0]: // registered_contract_providers
+		case registeredprovider.ForeignKeys[0]: // contract_id
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -122,10 +122,10 @@ func (rp *RegisteredProvider) assignValues(columns []string, values []any) error
 			}
 		case registeredprovider.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field registered_contract_providers", values[i])
+				return fmt.Errorf("unexpected type %T for field contract_id", values[i])
 			} else if value.Valid {
-				rp.registered_contract_providers = new(string)
-				*rp.registered_contract_providers = value.String
+				rp.contract_id = new(string)
+				*rp.contract_id = value.String
 			}
 		default:
 			rp.selectValues.Set(columns[i], values[i])

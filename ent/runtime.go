@@ -18,15 +18,14 @@ import (
 func init() {
 	compatibilityresultFields := schema.CompatibilityResult{}.Fields()
 	_ = compatibilityresultFields
-	// compatibilityresultDescReqContractID is the schema descriptor for req_contract_id field.
-	compatibilityresultDescReqContractID := compatibilityresultFields[0].Descriptor()
-	// compatibilityresult.ReqContractIDValidator is a validator for the "req_contract_id" field. It is called by the builders before save.
-	compatibilityresult.ReqContractIDValidator = func() func(string) error {
-		validators := compatibilityresultDescReqContractID.Validators
+	// compatibilityresultDescRequirementContractID is the schema descriptor for requirement_contract_id field.
+	compatibilityresultDescRequirementContractID := compatibilityresultFields[0].Descriptor()
+	// compatibilityresult.RequirementContractIDValidator is a validator for the "requirement_contract_id" field. It is called by the builders before save.
+	compatibilityresult.RequirementContractIDValidator = func() func(string) error {
+		validators := compatibilityresultDescRequirementContractID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
-			validators[2].(func(string) error),
 		}
 		return func(requirement_contract string) error {
 			for _, fn := range fns {
@@ -37,15 +36,14 @@ func init() {
 			return nil
 		}
 	}()
-	// compatibilityresultDescProvContractID is the schema descriptor for prov_contract_id field.
-	compatibilityresultDescProvContractID := compatibilityresultFields[1].Descriptor()
-	// compatibilityresult.ProvContractIDValidator is a validator for the "prov_contract_id" field. It is called by the builders before save.
-	compatibilityresult.ProvContractIDValidator = func() func(string) error {
-		validators := compatibilityresultDescProvContractID.Validators
+	// compatibilityresultDescProviderContractID is the schema descriptor for provider_contract_id field.
+	compatibilityresultDescProviderContractID := compatibilityresultFields[1].Descriptor()
+	// compatibilityresult.ProviderContractIDValidator is a validator for the "provider_contract_id" field. It is called by the builders before save.
+	compatibilityresult.ProviderContractIDValidator = func() func(string) error {
+		validators := compatibilityresultDescProviderContractID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
-			validators[2].(func(string) error),
 		}
 		return func(provider_contract string) error {
 			for _, fn := range fns {
@@ -65,11 +63,11 @@ func init() {
 	// compatibilityresult.ParticipantNameProvValidator is a validator for the "participant_name_prov" field. It is called by the builders before save.
 	compatibilityresult.ParticipantNameProvValidator = compatibilityresultDescParticipantNameProv.Validators[0].(func(string) error)
 	// compatibilityresultDescCreatedAt is the schema descriptor for created_at field.
-	compatibilityresultDescCreatedAt := compatibilityresultFields[5].Descriptor()
+	compatibilityresultDescCreatedAt := compatibilityresultFields[6].Descriptor()
 	// compatibilityresult.DefaultCreatedAt holds the default value on creation for the created_at field.
 	compatibilityresult.DefaultCreatedAt = compatibilityresultDescCreatedAt.Default.(func() time.Time)
 	// compatibilityresultDescUpdatedAt is the schema descriptor for updated_at field.
-	compatibilityresultDescUpdatedAt := compatibilityresultFields[6].Descriptor()
+	compatibilityresultDescUpdatedAt := compatibilityresultFields[7].Descriptor()
 	// compatibilityresult.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	compatibilityresult.DefaultUpdatedAt = compatibilityresultDescUpdatedAt.Default.(func() time.Time)
 	// compatibilityresult.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

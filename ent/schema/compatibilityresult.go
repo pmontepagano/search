@@ -14,14 +14,17 @@ type CompatibilityResult struct {
 	ent.Schema
 }
 
+type ParticipantNameMapping map[string]string
+
 // Fields of the CompatibilityResult.
 func (CompatibilityResult) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("req_contract_id").MaxLen(128).MinLen(128).NotEmpty(),
-		field.String("prov_contract_id").MaxLen(128).MinLen(128).NotEmpty(),
+		field.String("requirement_contract_id").MaxLen(128).MinLen(128),
+		field.String("provider_contract_id").MaxLen(128).MinLen(128),
 		field.String("participant_name_req").NotEmpty(),
 		field.String("participant_name_prov").NotEmpty(),
 		field.Bool("result"),
+		field.JSON("mapping", ParticipantNameMapping{}).Optional(),
 
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
@@ -31,13 +34,13 @@ func (CompatibilityResult) Fields() []ent.Field {
 // Edges of the CompatibilityResult.
 func (CompatibilityResult) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("requirement_contract", RegisteredContract.Type).Required().Field("req_contract_id").Unique(),
-		edge.To("provider_contract", RegisteredContract.Type).Required().Field("prov_contract_id").Unique(),
+		edge.To("requirement_contract", RegisteredContract.Type).Required().Unique().Field("requirement_contract_id"),
+		edge.To("provider_contract", RegisteredContract.Type).Required().Unique().Field("provider_contract_id"),
 	}
 }
 
 func (CompatibilityResult) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("participant_name_req", "participant_name_prov", "req_contract_id", "prov_contract_id").Unique(),
+		index.Fields("requirement_contract_id", "provider_contract_id", "participant_name_req", "participant_name_prov").Unique(),
 	}
 }

@@ -221,7 +221,7 @@ func HasContract() predicate.RegisteredProvider {
 	return predicate.RegisteredProvider(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ContractTable, ContractColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, ContractTable, ContractColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

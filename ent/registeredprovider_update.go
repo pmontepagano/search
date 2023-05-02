@@ -54,14 +54,6 @@ func (rpu *RegisteredProviderUpdate) SetContractID(id string) *RegisteredProvide
 	return rpu
 }
 
-// SetNillableContractID sets the "contract" edge to the RegisteredContract entity by ID if the given value is not nil.
-func (rpu *RegisteredProviderUpdate) SetNillableContractID(id *string) *RegisteredProviderUpdate {
-	if id != nil {
-		rpu = rpu.SetContractID(*id)
-	}
-	return rpu
-}
-
 // SetContract sets the "contract" edge to the RegisteredContract entity.
 func (rpu *RegisteredProviderUpdate) SetContract(r *RegisteredContract) *RegisteredProviderUpdate {
 	return rpu.SetContractID(r.ID)
@@ -121,6 +113,9 @@ func (rpu *RegisteredProviderUpdate) check() error {
 			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
 		}
 	}
+	if _, ok := rpu.mutation.ContractID(); rpu.mutation.ContractCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "RegisteredProvider.contract"`)
+	}
 	return nil
 }
 
@@ -148,7 +143,7 @@ func (rpu *RegisteredProviderUpdate) sqlSave(ctx context.Context) (n int, err er
 	if rpu.mutation.ContractCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   registeredprovider.ContractTable,
 			Columns: []string{registeredprovider.ContractColumn},
 			Bidi:    false,
@@ -161,7 +156,7 @@ func (rpu *RegisteredProviderUpdate) sqlSave(ctx context.Context) (n int, err er
 	if nodes := rpu.mutation.ContractIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   registeredprovider.ContractTable,
 			Columns: []string{registeredprovider.ContractColumn},
 			Bidi:    false,
@@ -215,14 +210,6 @@ func (rpuo *RegisteredProviderUpdateOne) SetUpdatedAt(t time.Time) *RegisteredPr
 // SetContractID sets the "contract" edge to the RegisteredContract entity by ID.
 func (rpuo *RegisteredProviderUpdateOne) SetContractID(id string) *RegisteredProviderUpdateOne {
 	rpuo.mutation.SetContractID(id)
-	return rpuo
-}
-
-// SetNillableContractID sets the "contract" edge to the RegisteredContract entity by ID if the given value is not nil.
-func (rpuo *RegisteredProviderUpdateOne) SetNillableContractID(id *string) *RegisteredProviderUpdateOne {
-	if id != nil {
-		rpuo = rpuo.SetContractID(*id)
-	}
 	return rpuo
 }
 
@@ -298,6 +285,9 @@ func (rpuo *RegisteredProviderUpdateOne) check() error {
 			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
 		}
 	}
+	if _, ok := rpuo.mutation.ContractID(); rpuo.mutation.ContractCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "RegisteredProvider.contract"`)
+	}
 	return nil
 }
 
@@ -342,7 +332,7 @@ func (rpuo *RegisteredProviderUpdateOne) sqlSave(ctx context.Context) (_node *Re
 	if rpuo.mutation.ContractCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   registeredprovider.ContractTable,
 			Columns: []string{registeredprovider.ContractColumn},
 			Bidi:    false,
@@ -355,7 +345,7 @@ func (rpuo *RegisteredProviderUpdateOne) sqlSave(ctx context.Context) (_node *Re
 	if nodes := rpuo.mutation.ContractIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   registeredprovider.ContractTable,
 			Columns: []string{registeredprovider.ContractColumn},
 			Bidi:    false,

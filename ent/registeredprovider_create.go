@@ -83,14 +83,6 @@ func (rpc *RegisteredProviderCreate) SetContractID(id string) *RegisteredProvide
 	return rpc
 }
 
-// SetNillableContractID sets the "contract" edge to the RegisteredContract entity by ID if the given value is not nil.
-func (rpc *RegisteredProviderCreate) SetNillableContractID(id *string) *RegisteredProviderCreate {
-	if id != nil {
-		rpc = rpc.SetContractID(*id)
-	}
-	return rpc
-}
-
 // SetContract sets the "contract" edge to the RegisteredContract entity.
 func (rpc *RegisteredProviderCreate) SetContract(r *RegisteredContract) *RegisteredProviderCreate {
 	return rpc.SetContractID(r.ID)
@@ -164,6 +156,9 @@ func (rpc *RegisteredProviderCreate) check() error {
 	if _, ok := rpc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "RegisteredProvider.updated_at"`)}
 	}
+	if _, ok := rpc.mutation.ContractID(); !ok {
+		return &ValidationError{Name: "contract", err: errors.New(`ent: missing required edge "RegisteredProvider.contract"`)}
+	}
 	return nil
 }
 
@@ -218,7 +213,7 @@ func (rpc *RegisteredProviderCreate) createSpec() (*RegisteredProvider, *sqlgrap
 	if nodes := rpc.mutation.ContractIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   registeredprovider.ContractTable,
 			Columns: []string{registeredprovider.ContractColumn},
 			Bidi:    false,
@@ -229,7 +224,7 @@ func (rpc *RegisteredProviderCreate) createSpec() (*RegisteredProvider, *sqlgrap
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.registered_contract_providers = &nodes[0]
+		_node.contract_id = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -55,14 +55,14 @@ func IDLTE(id int) predicate.CompatibilityResult {
 	return predicate.CompatibilityResult(sql.FieldLTE(FieldID, id))
 }
 
-// ReqContractID applies equality check predicate on the "req_contract_id" field. It's identical to ReqContractIDEQ.
-func ReqContractID(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldEQ(FieldReqContractID, v))
+// RequirementContractID applies equality check predicate on the "requirement_contract_id" field. It's identical to RequirementContractIDEQ.
+func RequirementContractID(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldEQ(FieldRequirementContractID, v))
 }
 
-// ProvContractID applies equality check predicate on the "prov_contract_id" field. It's identical to ProvContractIDEQ.
-func ProvContractID(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldEQ(FieldProvContractID, v))
+// ProviderContractID applies equality check predicate on the "provider_contract_id" field. It's identical to ProviderContractIDEQ.
+func ProviderContractID(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldEQ(FieldProviderContractID, v))
 }
 
 // ParticipantNameReq applies equality check predicate on the "participant_name_req" field. It's identical to ParticipantNameReqEQ.
@@ -90,134 +90,134 @@ func UpdatedAt(v time.Time) predicate.CompatibilityResult {
 	return predicate.CompatibilityResult(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// ReqContractIDEQ applies the EQ predicate on the "req_contract_id" field.
-func ReqContractIDEQ(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldEQ(FieldReqContractID, v))
+// RequirementContractIDEQ applies the EQ predicate on the "requirement_contract_id" field.
+func RequirementContractIDEQ(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldEQ(FieldRequirementContractID, v))
 }
 
-// ReqContractIDNEQ applies the NEQ predicate on the "req_contract_id" field.
-func ReqContractIDNEQ(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldNEQ(FieldReqContractID, v))
+// RequirementContractIDNEQ applies the NEQ predicate on the "requirement_contract_id" field.
+func RequirementContractIDNEQ(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldNEQ(FieldRequirementContractID, v))
 }
 
-// ReqContractIDIn applies the In predicate on the "req_contract_id" field.
-func ReqContractIDIn(vs ...string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldIn(FieldReqContractID, vs...))
+// RequirementContractIDIn applies the In predicate on the "requirement_contract_id" field.
+func RequirementContractIDIn(vs ...string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldIn(FieldRequirementContractID, vs...))
 }
 
-// ReqContractIDNotIn applies the NotIn predicate on the "req_contract_id" field.
-func ReqContractIDNotIn(vs ...string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldNotIn(FieldReqContractID, vs...))
+// RequirementContractIDNotIn applies the NotIn predicate on the "requirement_contract_id" field.
+func RequirementContractIDNotIn(vs ...string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldNotIn(FieldRequirementContractID, vs...))
 }
 
-// ReqContractIDGT applies the GT predicate on the "req_contract_id" field.
-func ReqContractIDGT(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldGT(FieldReqContractID, v))
+// RequirementContractIDGT applies the GT predicate on the "requirement_contract_id" field.
+func RequirementContractIDGT(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldGT(FieldRequirementContractID, v))
 }
 
-// ReqContractIDGTE applies the GTE predicate on the "req_contract_id" field.
-func ReqContractIDGTE(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldGTE(FieldReqContractID, v))
+// RequirementContractIDGTE applies the GTE predicate on the "requirement_contract_id" field.
+func RequirementContractIDGTE(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldGTE(FieldRequirementContractID, v))
 }
 
-// ReqContractIDLT applies the LT predicate on the "req_contract_id" field.
-func ReqContractIDLT(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldLT(FieldReqContractID, v))
+// RequirementContractIDLT applies the LT predicate on the "requirement_contract_id" field.
+func RequirementContractIDLT(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldLT(FieldRequirementContractID, v))
 }
 
-// ReqContractIDLTE applies the LTE predicate on the "req_contract_id" field.
-func ReqContractIDLTE(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldLTE(FieldReqContractID, v))
+// RequirementContractIDLTE applies the LTE predicate on the "requirement_contract_id" field.
+func RequirementContractIDLTE(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldLTE(FieldRequirementContractID, v))
 }
 
-// ReqContractIDContains applies the Contains predicate on the "req_contract_id" field.
-func ReqContractIDContains(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldContains(FieldReqContractID, v))
+// RequirementContractIDContains applies the Contains predicate on the "requirement_contract_id" field.
+func RequirementContractIDContains(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldContains(FieldRequirementContractID, v))
 }
 
-// ReqContractIDHasPrefix applies the HasPrefix predicate on the "req_contract_id" field.
-func ReqContractIDHasPrefix(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldHasPrefix(FieldReqContractID, v))
+// RequirementContractIDHasPrefix applies the HasPrefix predicate on the "requirement_contract_id" field.
+func RequirementContractIDHasPrefix(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldHasPrefix(FieldRequirementContractID, v))
 }
 
-// ReqContractIDHasSuffix applies the HasSuffix predicate on the "req_contract_id" field.
-func ReqContractIDHasSuffix(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldHasSuffix(FieldReqContractID, v))
+// RequirementContractIDHasSuffix applies the HasSuffix predicate on the "requirement_contract_id" field.
+func RequirementContractIDHasSuffix(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldHasSuffix(FieldRequirementContractID, v))
 }
 
-// ReqContractIDEqualFold applies the EqualFold predicate on the "req_contract_id" field.
-func ReqContractIDEqualFold(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldEqualFold(FieldReqContractID, v))
+// RequirementContractIDEqualFold applies the EqualFold predicate on the "requirement_contract_id" field.
+func RequirementContractIDEqualFold(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldEqualFold(FieldRequirementContractID, v))
 }
 
-// ReqContractIDContainsFold applies the ContainsFold predicate on the "req_contract_id" field.
-func ReqContractIDContainsFold(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldContainsFold(FieldReqContractID, v))
+// RequirementContractIDContainsFold applies the ContainsFold predicate on the "requirement_contract_id" field.
+func RequirementContractIDContainsFold(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldContainsFold(FieldRequirementContractID, v))
 }
 
-// ProvContractIDEQ applies the EQ predicate on the "prov_contract_id" field.
-func ProvContractIDEQ(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldEQ(FieldProvContractID, v))
+// ProviderContractIDEQ applies the EQ predicate on the "provider_contract_id" field.
+func ProviderContractIDEQ(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldEQ(FieldProviderContractID, v))
 }
 
-// ProvContractIDNEQ applies the NEQ predicate on the "prov_contract_id" field.
-func ProvContractIDNEQ(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldNEQ(FieldProvContractID, v))
+// ProviderContractIDNEQ applies the NEQ predicate on the "provider_contract_id" field.
+func ProviderContractIDNEQ(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldNEQ(FieldProviderContractID, v))
 }
 
-// ProvContractIDIn applies the In predicate on the "prov_contract_id" field.
-func ProvContractIDIn(vs ...string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldIn(FieldProvContractID, vs...))
+// ProviderContractIDIn applies the In predicate on the "provider_contract_id" field.
+func ProviderContractIDIn(vs ...string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldIn(FieldProviderContractID, vs...))
 }
 
-// ProvContractIDNotIn applies the NotIn predicate on the "prov_contract_id" field.
-func ProvContractIDNotIn(vs ...string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldNotIn(FieldProvContractID, vs...))
+// ProviderContractIDNotIn applies the NotIn predicate on the "provider_contract_id" field.
+func ProviderContractIDNotIn(vs ...string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldNotIn(FieldProviderContractID, vs...))
 }
 
-// ProvContractIDGT applies the GT predicate on the "prov_contract_id" field.
-func ProvContractIDGT(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldGT(FieldProvContractID, v))
+// ProviderContractIDGT applies the GT predicate on the "provider_contract_id" field.
+func ProviderContractIDGT(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldGT(FieldProviderContractID, v))
 }
 
-// ProvContractIDGTE applies the GTE predicate on the "prov_contract_id" field.
-func ProvContractIDGTE(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldGTE(FieldProvContractID, v))
+// ProviderContractIDGTE applies the GTE predicate on the "provider_contract_id" field.
+func ProviderContractIDGTE(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldGTE(FieldProviderContractID, v))
 }
 
-// ProvContractIDLT applies the LT predicate on the "prov_contract_id" field.
-func ProvContractIDLT(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldLT(FieldProvContractID, v))
+// ProviderContractIDLT applies the LT predicate on the "provider_contract_id" field.
+func ProviderContractIDLT(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldLT(FieldProviderContractID, v))
 }
 
-// ProvContractIDLTE applies the LTE predicate on the "prov_contract_id" field.
-func ProvContractIDLTE(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldLTE(FieldProvContractID, v))
+// ProviderContractIDLTE applies the LTE predicate on the "provider_contract_id" field.
+func ProviderContractIDLTE(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldLTE(FieldProviderContractID, v))
 }
 
-// ProvContractIDContains applies the Contains predicate on the "prov_contract_id" field.
-func ProvContractIDContains(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldContains(FieldProvContractID, v))
+// ProviderContractIDContains applies the Contains predicate on the "provider_contract_id" field.
+func ProviderContractIDContains(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldContains(FieldProviderContractID, v))
 }
 
-// ProvContractIDHasPrefix applies the HasPrefix predicate on the "prov_contract_id" field.
-func ProvContractIDHasPrefix(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldHasPrefix(FieldProvContractID, v))
+// ProviderContractIDHasPrefix applies the HasPrefix predicate on the "provider_contract_id" field.
+func ProviderContractIDHasPrefix(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldHasPrefix(FieldProviderContractID, v))
 }
 
-// ProvContractIDHasSuffix applies the HasSuffix predicate on the "prov_contract_id" field.
-func ProvContractIDHasSuffix(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldHasSuffix(FieldProvContractID, v))
+// ProviderContractIDHasSuffix applies the HasSuffix predicate on the "provider_contract_id" field.
+func ProviderContractIDHasSuffix(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldHasSuffix(FieldProviderContractID, v))
 }
 
-// ProvContractIDEqualFold applies the EqualFold predicate on the "prov_contract_id" field.
-func ProvContractIDEqualFold(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldEqualFold(FieldProvContractID, v))
+// ProviderContractIDEqualFold applies the EqualFold predicate on the "provider_contract_id" field.
+func ProviderContractIDEqualFold(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldEqualFold(FieldProviderContractID, v))
 }
 
-// ProvContractIDContainsFold applies the ContainsFold predicate on the "prov_contract_id" field.
-func ProvContractIDContainsFold(v string) predicate.CompatibilityResult {
-	return predicate.CompatibilityResult(sql.FieldContainsFold(FieldProvContractID, v))
+// ProviderContractIDContainsFold applies the ContainsFold predicate on the "provider_contract_id" field.
+func ProviderContractIDContainsFold(v string) predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldContainsFold(FieldProviderContractID, v))
 }
 
 // ParticipantNameReqEQ applies the EQ predicate on the "participant_name_req" field.
@@ -358,6 +358,16 @@ func ResultEQ(v bool) predicate.CompatibilityResult {
 // ResultNEQ applies the NEQ predicate on the "result" field.
 func ResultNEQ(v bool) predicate.CompatibilityResult {
 	return predicate.CompatibilityResult(sql.FieldNEQ(FieldResult, v))
+}
+
+// MappingIsNil applies the IsNil predicate on the "mapping" field.
+func MappingIsNil() predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldIsNull(FieldMapping))
+}
+
+// MappingNotNil applies the NotNil predicate on the "mapping" field.
+func MappingNotNil() predicate.CompatibilityResult {
+	return predicate.CompatibilityResult(sql.FieldNotNull(FieldMapping))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
