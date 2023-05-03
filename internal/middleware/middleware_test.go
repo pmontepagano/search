@@ -455,10 +455,10 @@ func TestPingPongFullExample(t *testing.T) {
 	var wg sync.WaitGroup
 	// start middlewares
 	pingMiddleware := NewMiddlewareServer("localhost", brokerPort)
-	pingMiddleware.StartMiddlewareServer(&wg, "localhost", pingPrivPort, "localhost", pingPubPort, false, "", "")
+	pingMiddleware.StartMiddlewareServer(&wg, "localhost", pingPubPort, "localhost", pingPrivPort, false, "", "")
 
 	pongMiddleware := NewMiddlewareServer("localhost", brokerPort)
-	pongMiddleware.StartMiddlewareServer(&wg, "localhost", pongPrivPort, "localhost", pongPubPort, false, "", "")
+	pongMiddleware.StartMiddlewareServer(&wg, "localhost", pongPubPort, "localhost", pongPrivPort, false, "", "")
 
 	defer pingMiddleware.Stop()
 	defer pongMiddleware.Stop()
@@ -591,6 +591,7 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 		t.Error("Could not receive ACK from RegisterApp")
 	}
 	appID := ack.GetAppId()
+	t.Logf("pongProgram finished registration. Got AppId %s", appID)
 	registeredNotify <- true
 
 	// wait on RegisterAppResponse stream to await for new channel

@@ -323,7 +323,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, rc *en
 		}
 		defer conn.Close()
 		client := pb.NewPublicMiddlewareServiceClient(conn)
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: remove hardcoded timeout
+		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		var participantsMapping map[string]*pb.RemoteParticipant
 		if pname == initiatorName {

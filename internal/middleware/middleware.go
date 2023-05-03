@@ -383,7 +383,8 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
-		r, err := s.newSEARCHChannel(&regapp.Contract, regapp.ProviderName)
+		var err error
+		r, err = s.newSEARCHChannel(&regapp.Contract, regapp.ProviderName)
 		if err != nil {
 			// TODO: return proper gRPC error
 			return nil, err
