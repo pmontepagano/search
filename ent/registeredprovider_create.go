@@ -35,6 +35,12 @@ func (rpc *RegisteredProviderCreate) SetParticipantName(s string) *RegisteredPro
 	return rpc
 }
 
+// SetContractID sets the "contract_id" field.
+func (rpc *RegisteredProviderCreate) SetContractID(s string) *RegisteredProviderCreate {
+	rpc.mutation.SetContractID(s)
+	return rpc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rpc *RegisteredProviderCreate) SetCreatedAt(t time.Time) *RegisteredProviderCreate {
 	rpc.mutation.SetCreatedAt(t)
@@ -74,12 +80,6 @@ func (rpc *RegisteredProviderCreate) SetNillableID(u *uuid.UUID) *RegisteredProv
 	if u != nil {
 		rpc.SetID(*u)
 	}
-	return rpc
-}
-
-// SetContractID sets the "contract" edge to the RegisteredContract entity by ID.
-func (rpc *RegisteredProviderCreate) SetContractID(id string) *RegisteredProviderCreate {
-	rpc.mutation.SetContractID(id)
 	return rpc
 }
 
@@ -148,6 +148,14 @@ func (rpc *RegisteredProviderCreate) check() error {
 	if v, ok := rpc.mutation.ParticipantName(); ok {
 		if err := registeredprovider.ParticipantNameValidator(v); err != nil {
 			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
+		}
+	}
+	if _, ok := rpc.mutation.ContractID(); !ok {
+		return &ValidationError{Name: "contract_id", err: errors.New(`ent: missing required field "RegisteredProvider.contract_id"`)}
+	}
+	if v, ok := rpc.mutation.ContractID(); ok {
+		if err := registeredprovider.ContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "contract_id", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.contract_id": %w`, err)}
 		}
 	}
 	if _, ok := rpc.mutation.CreatedAt(); !ok {
@@ -224,7 +232,7 @@ func (rpc *RegisteredProviderCreate) createSpec() (*RegisteredProvider, *sqlgrap
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.contract_id = &nodes[0]
+		_node.ContractID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

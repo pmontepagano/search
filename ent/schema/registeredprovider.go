@@ -21,6 +21,7 @@ func (RegisteredProvider) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique().Immutable(),
 		field.JSON("url", &url.URL{}),
 		field.String("participant_name").NotEmpty(),
+		field.String("contract_id").MaxLen(128).MinLen(128),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
@@ -30,6 +31,6 @@ func (RegisteredProvider) Fields() []ent.Field {
 // Edges of the RegisteredProvider.
 func (RegisteredProvider) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("contract", RegisteredContract.Type).StorageKey(edge.Column("contract_id")).Unique().Required(),
+		edge.To("contract", RegisteredContract.Type).Field("contract_id").Unique().Required(),
 	}
 }

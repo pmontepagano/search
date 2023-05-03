@@ -2,7 +2,6 @@ package broker
 
 import (
 	"context"
-	"crypto/sha512"
 	"errors"
 	"fmt"
 	"log"
@@ -10,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"sort"
-	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -55,6 +53,7 @@ func getRemoteParticipant(r *ent.RegisteredProvider) *pb.RemoteParticipant {
 }
 
 func getProviderContract(r *ent.RegisteredProvider) (contract.Contract, error) {
+	// TODO: replace with BoundContract ?
 	return getContract(r.Edges.Contract)
 }
 
@@ -120,8 +119,11 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Contra
 
 		// Here we can have multiple contracts compatible and each contract can have more than one provider!
 
-		// TODO: sort by ranking (firs we need to add ranking to the schema).
-		result := cachedResults[0].Edges.ProviderContract.Edges.Providers[0]
+		// TODO: sort by ranking (first we need to add ranking to the schema).
+		result, err := cachedResults[0].Edges.ProviderContract.QueryProviders().First(ctx)
+		if err != nil {
+			return nil, err
+		}
 		// TODO: enqueue jobs to calculate compatibility with all providers for which we have no data
 		return result, nil
 	}
@@ -238,58 +240,33 @@ func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.
 // and returns a mapping between participant names and RemoteParticipant's but using the receiver's
 // perspective for participant names. The receiver has to be present in the registry because
 // we need to parse its contract to get the mapping.
-func (s *brokerServer) getParticipantMapping(initiatorMapping map[string]*pb.RemoteParticipant, receiver string, initiatorName string) map[string]*pb.RemoteParticipant {
+func (s *brokerServer) getParticipantMapping(req contract.Contract, initiatorMapping map[string]*pb.RemoteParticipant, receiver string,
+	initiatorName string, receiverRegisteredProvider *ent.RegisteredProvider) (map[string]*pb.RemoteParticipant, error) {
+
 	s.logger.Printf("getParticipantMapping for %v", receiver)
-	receiverRemoteParticipant, ok := initiatorMapping[receiver]
+	_, ok := initiatorMapping[receiver]
 	if !ok {
-		s.logger.Fatal("Receiver not present in initiatormapping")
+		return nil, fmt.Errorf("receiver %s not present in initiator's mapping", receiver)
 	}
-	receiverProvider, err := s.getRegisteredProvider(receiverRemoteParticipant.AppId)
+
+	compatResult, err := s.dbClient.Debug().CompatibilityResult.Query().Where(
+		compatibilityresult.And(
+			compatibilityresult.HasRequirementContractWith(registeredcontract.ID(req.GetContractID())),
+			compatibilityresult.HasProviderContractWith(registeredcontract.ID(receiverRegisteredProvider.ContractID)),
+			compatibilityresult.ParticipantNameReq(receiver),
+			compatibilityresult.ParticipantNameProv(receiverRegisteredProvider.ParticipantName),
+		),
+	).First(context.TODO())
 	if err != nil {
-		s.logger.Fatal("Receiver not registered.")
+		return nil, fmt.Errorf("failed to retrieve mapping for %s", receiverRegisteredProvider.ID)
 	}
-
 	res := make(map[string]*pb.RemoteParticipant)
-	res[receiverProvider.ParticipantName] = receiverRemoteParticipant
-
-	// TODO: without parsing and understanding contracts, we can only translate mappings of
-	// contracts that have only two participants
-	// we make an exception for receivers with name "_special" to run a test...
-	if strings.HasSuffix(receiver, "_special") {
-		if receiver == "r1_special" {
-			res["sender"] = initiatorMapping["self"]
-			res["receiver"] = initiatorMapping["r2_special"]
-		}
-		if receiver == "r2_special" {
-			res["sender"] = initiatorMapping["r1_special"]
-			res["receiver"] = initiatorMapping["r3_special"]
-		}
-		if receiver == "r3_special" {
-			res["sender"] = initiatorMapping["r2_special"]
-			res["receiver"] = initiatorMapping["self"]
-		}
-	} else {
-		if len(initiatorMapping) > 2 {
-			s.logger.Fatal("Cannot translate a mapping of more than two participants. Not yet implemented.")
-		}
-		receiverContract, err := getProviderContract(receiverProvider)
-		if err != nil {
-			s.logger.Fatal("error retrieving contract from provider")
-		}
-		if len(receiverContract.GetParticipants()) > 2 {
-			s.logger.Fatal("Receiver has more than two participants in its contract. Cannot translate mapping, not yet implemented.")
-		}
-		var initiatorNameInReceiverContract string
-		for _, p := range receiverContract.GetParticipants() {
-			if p != receiverProvider.ParticipantName {
-				initiatorNameInReceiverContract = p
-				break
-			}
-		}
-		res[initiatorNameInReceiverContract] = initiatorMapping[initiatorName]
+	for a, b := range compatResult.Mapping {
+		res[a] = initiatorMapping[b]
 	}
+
 	s.logger.Printf("getParticipantMapping for %v returning %v", receiver, res)
-	return res
+	return res, nil
 }
 
 // this routine will find compatible candidates and notify them
@@ -352,7 +329,11 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, rc *en
 		if pname == initiatorName {
 			participantsMapping = allParticipants
 		} else {
-			participantsMapping = s.getParticipantMapping(allParticipants, pname, initiatorName)
+			participantsMapping, err = s.getParticipantMapping(reqContract, allParticipants, pname, initiatorName, candidates[pname])
+			if err != nil {
+				// TODO: proper error handling
+				s.logger.Panicf(err.Error())
+			}
 		}
 		req := pb.InitChannelRequest{
 			ChannelId:    channelID.String(),
@@ -431,8 +412,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 }
 
 func (s *brokerServer) getOrSaveContract(ctx context.Context, c contract.Contract) (*ent.RegisteredContract, error) {
-	contractHash := sha512.Sum512(c.GetBytesRepr())
-	contractID := fmt.Sprintf("%x", contractHash[:])
+	contractID := c.GetContractID()
 
 	rc, err := s.dbClient.RegisteredContract.Get(ctx, contractID)
 	if err != nil {

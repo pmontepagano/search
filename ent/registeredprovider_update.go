@@ -42,15 +42,15 @@ func (rpu *RegisteredProviderUpdate) SetParticipantName(s string) *RegisteredPro
 	return rpu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (rpu *RegisteredProviderUpdate) SetUpdatedAt(t time.Time) *RegisteredProviderUpdate {
-	rpu.mutation.SetUpdatedAt(t)
+// SetContractID sets the "contract_id" field.
+func (rpu *RegisteredProviderUpdate) SetContractID(s string) *RegisteredProviderUpdate {
+	rpu.mutation.SetContractID(s)
 	return rpu
 }
 
-// SetContractID sets the "contract" edge to the RegisteredContract entity by ID.
-func (rpu *RegisteredProviderUpdate) SetContractID(id string) *RegisteredProviderUpdate {
-	rpu.mutation.SetContractID(id)
+// SetUpdatedAt sets the "updated_at" field.
+func (rpu *RegisteredProviderUpdate) SetUpdatedAt(t time.Time) *RegisteredProviderUpdate {
+	rpu.mutation.SetUpdatedAt(t)
 	return rpu
 }
 
@@ -111,6 +111,11 @@ func (rpu *RegisteredProviderUpdate) check() error {
 	if v, ok := rpu.mutation.ParticipantName(); ok {
 		if err := registeredprovider.ParticipantNameValidator(v); err != nil {
 			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
+		}
+	}
+	if v, ok := rpu.mutation.ContractID(); ok {
+		if err := registeredprovider.ContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "contract_id", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.contract_id": %w`, err)}
 		}
 	}
 	if _, ok := rpu.mutation.ContractID(); rpu.mutation.ContractCleared() && !ok {
@@ -201,15 +206,15 @@ func (rpuo *RegisteredProviderUpdateOne) SetParticipantName(s string) *Registere
 	return rpuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (rpuo *RegisteredProviderUpdateOne) SetUpdatedAt(t time.Time) *RegisteredProviderUpdateOne {
-	rpuo.mutation.SetUpdatedAt(t)
+// SetContractID sets the "contract_id" field.
+func (rpuo *RegisteredProviderUpdateOne) SetContractID(s string) *RegisteredProviderUpdateOne {
+	rpuo.mutation.SetContractID(s)
 	return rpuo
 }
 
-// SetContractID sets the "contract" edge to the RegisteredContract entity by ID.
-func (rpuo *RegisteredProviderUpdateOne) SetContractID(id string) *RegisteredProviderUpdateOne {
-	rpuo.mutation.SetContractID(id)
+// SetUpdatedAt sets the "updated_at" field.
+func (rpuo *RegisteredProviderUpdateOne) SetUpdatedAt(t time.Time) *RegisteredProviderUpdateOne {
+	rpuo.mutation.SetUpdatedAt(t)
 	return rpuo
 }
 
@@ -283,6 +288,11 @@ func (rpuo *RegisteredProviderUpdateOne) check() error {
 	if v, ok := rpuo.mutation.ParticipantName(); ok {
 		if err := registeredprovider.ParticipantNameValidator(v); err != nil {
 			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
+		}
+	}
+	if v, ok := rpuo.mutation.ContractID(); ok {
+		if err := registeredprovider.ContractIDValidator(v); err != nil {
+			return &ValidationError{Name: "contract_id", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.contract_id": %w`, err)}
 		}
 	}
 	if _, ok := rpuo.mutation.ContractID(); rpuo.mutation.ContractCleared() && !ok {

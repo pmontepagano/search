@@ -19,6 +19,8 @@ const (
 	FieldURL = "url"
 	// FieldParticipantName holds the string denoting the participant_name field in the database.
 	FieldParticipantName = "participant_name"
+	// FieldContractID holds the string denoting the contract_id field in the database.
+	FieldContractID = "contract_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -41,14 +43,9 @@ var Columns = []string{
 	FieldID,
 	FieldURL,
 	FieldParticipantName,
+	FieldContractID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "registered_providers"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"contract_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -58,17 +55,14 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
 	// ParticipantNameValidator is a validator for the "participant_name" field. It is called by the builders before save.
 	ParticipantNameValidator func(string) error
+	// ContractIDValidator is a validator for the "contract_id" field. It is called by the builders before save.
+	ContractIDValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -90,6 +84,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByParticipantName orders the results by the participant_name field.
 func ByParticipantName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParticipantName, opts...).ToFunc()
+}
+
+// ByContractID orders the results by the contract_id field.
+func ByContractID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContractID, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

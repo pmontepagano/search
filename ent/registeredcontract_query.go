@@ -503,7 +503,9 @@ func (rcq *RegisteredContractQuery) loadProviders(ctx context.Context, query *Re
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(registeredprovider.FieldContractID)
+	}
 	query.Where(predicate.RegisteredProvider(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(registeredcontract.ProvidersColumn), fks...))
 	}))
@@ -512,13 +514,10 @@ func (rcq *RegisteredContractQuery) loadProviders(ctx context.Context, query *Re
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.contract_id
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "contract_id" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.ContractID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "contract_id" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "contract_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

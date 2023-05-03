@@ -25,6 +25,8 @@ type RegisteredProvider struct {
 	URL *url.URL `json:"url,omitempty"`
 	// ParticipantName holds the value of the "participant_name" field.
 	ParticipantName string `json:"participant_name,omitempty"`
+	// ContractID holds the value of the "contract_id" field.
+	ContractID string `json:"contract_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -32,7 +34,6 @@ type RegisteredProvider struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RegisteredProviderQuery when eager-loading is set.
 	Edges        RegisteredProviderEdges `json:"edges"`
-	contract_id  *string
 	selectValues sql.SelectValues
 }
 
@@ -65,14 +66,12 @@ func (*RegisteredProvider) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case registeredprovider.FieldURL:
 			values[i] = new([]byte)
-		case registeredprovider.FieldParticipantName:
+		case registeredprovider.FieldParticipantName, registeredprovider.FieldContractID:
 			values[i] = new(sql.NullString)
 		case registeredprovider.FieldCreatedAt, registeredprovider.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case registeredprovider.FieldID:
 			values[i] = new(uuid.UUID)
-		case registeredprovider.ForeignKeys[0]: // contract_id
-			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -108,6 +107,12 @@ func (rp *RegisteredProvider) assignValues(columns []string, values []any) error
 			} else if value.Valid {
 				rp.ParticipantName = value.String
 			}
+		case registeredprovider.FieldContractID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field contract_id", values[i])
+			} else if value.Valid {
+				rp.ContractID = value.String
+			}
 		case registeredprovider.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -119,13 +124,6 @@ func (rp *RegisteredProvider) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				rp.UpdatedAt = value.Time
-			}
-		case registeredprovider.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field contract_id", values[i])
-			} else if value.Valid {
-				rp.contract_id = new(string)
-				*rp.contract_id = value.String
 			}
 		default:
 			rp.selectValues.Set(columns[i], values[i])
@@ -173,6 +171,9 @@ func (rp *RegisteredProvider) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("participant_name=")
 	builder.WriteString(rp.ParticipantName)
+	builder.WriteString(", ")
+	builder.WriteString("contract_id=")
+	builder.WriteString(rp.ContractID)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(rp.CreatedAt.Format(time.ANSIC))

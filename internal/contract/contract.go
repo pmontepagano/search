@@ -3,6 +3,7 @@ package contract
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha512"
 	"errors"
 	"fmt"
 	"io"
@@ -16,6 +17,7 @@ import (
 )
 
 type Contract interface {
+	GetContractID() string
 	GetParticipants() []string
 	GetBytesRepr() []byte
 	GetFormat() pb.ContractFormat
@@ -31,11 +33,21 @@ type BoundContract interface {
 
 type CFSMContract struct {
 	*cfsm.System
+	id string
 }
 
 type BoundCFSMContract struct {
 	CFSMContract
 	localParticipant *cfsm.CFSM
+}
+
+func (c *CFSMContract) GetContractID() string {
+	if c.id != "" {
+		return c.id
+	}
+	contractHash := sha512.Sum512(c.GetBytesRepr())
+	c.id = fmt.Sprintf("%x", contractHash[:])
+	return c.id
 }
 
 func (c *CFSMContract) GetParticipants() (ret []string) {

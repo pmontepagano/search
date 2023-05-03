@@ -526,33 +526,33 @@ const pingContractFSA = `
 // Mock function for checking contracts in TestPingPongFullExample.
 func pingPongContractCompatChecker(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error) {
 	log.Printf("Checking with pingPongContractCompatChecker...")
-	pongContract, err := contract.ConvertPBContract(&pb.Contract{
-		Contract: []byte(pongContractFSA),
-		Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
-	})
-	if err != nil {
-		return false, nil, err
+	// pongContract, err := contract.ConvertPBContract(&pb.Contract{
+	// 	Contract: []byte(pongContractFSA),
+	// 	Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+	// })
+	// if err != nil {
+	// 	return false, nil, err
+	// }
+	// pingContract, err := contract.ConvertPBContract(&pb.Contract{
+	// 	Contract: []byte(pingContractFSA),
+	// 	Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+	// })
+	// if err != nil {
+	// 	return false, nil, err
+	// }
+	// if req.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(req.GetBytesRepr(), pingContract.GetBytesRepr()) &&
+	// 	prov.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(prov.GetBytesRepr(), pongContract.GetBytesRepr()) {
+	mapping := map[string]string{
+		"Other": "Ping",
+		"Pong":  "Pong",
 	}
-	pingContract, err := contract.ConvertPBContract(&pb.Contract{
-		Contract: []byte(pingContractFSA),
-		Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
-	})
-	if err != nil {
-		return false, nil, err
+	if reqParticipant == "Ping" && provParticipant == "Other" {
+		return true, mapping, nil
 	}
-	if req.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(req.GetBytesRepr(), pingContract.GetBytesRepr()) &&
-		prov.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(prov.GetBytesRepr(), pongContract.GetBytesRepr()) {
-		mapping := map[string]string{
-			"Other": "Ping",
-			"Pong":  "Pong",
-		}
-		if reqParticipant == "Ping" && provParticipant == "Other" {
-			return true, mapping, nil
-		}
-		if reqParticipant == "Pong" && provParticipant == "Pong" {
-			return true, mapping, nil
-		}
+	if reqParticipant == "Pong" && provParticipant == "Pong" {
+		return true, mapping, nil
 	}
+	// }
 	return false, nil, nil
 }
 

@@ -24,7 +24,6 @@ type RegisteredProviderQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.RegisteredProvider
 	withContract *RegisteredContractQuery
-	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -370,18 +369,11 @@ func (rpq *RegisteredProviderQuery) prepareQuery(ctx context.Context) error {
 func (rpq *RegisteredProviderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RegisteredProvider, error) {
 	var (
 		nodes       = []*RegisteredProvider{}
-		withFKs     = rpq.withFKs
 		_spec       = rpq.querySpec()
 		loadedTypes = [1]bool{
 			rpq.withContract != nil,
 		}
 	)
-	if rpq.withContract != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, registeredprovider.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RegisteredProvider).scanValues(nil, columns)
 	}
@@ -413,10 +405,7 @@ func (rpq *RegisteredProviderQuery) loadContract(ctx context.Context, query *Reg
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*RegisteredProvider)
 	for i := range nodes {
-		if nodes[i].contract_id == nil {
-			continue
-		}
-		fk := *nodes[i].contract_id
+		fk := nodes[i].ContractID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -466,6 +455,9 @@ func (rpq *RegisteredProviderQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != registeredprovider.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if rpq.withContract != nil {
+			_spec.Node.AddColumnOnce(registeredprovider.FieldContractID)
 		}
 	}
 	if ps := rpq.predicates; len(ps) > 0 {

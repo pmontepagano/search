@@ -1787,6 +1787,42 @@ func (m *RegisteredProviderMutation) ResetParticipantName() {
 	m.participant_name = nil
 }
 
+// SetContractID sets the "contract_id" field.
+func (m *RegisteredProviderMutation) SetContractID(s string) {
+	m.contract = &s
+}
+
+// ContractID returns the value of the "contract_id" field in the mutation.
+func (m *RegisteredProviderMutation) ContractID() (r string, exists bool) {
+	v := m.contract
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContractID returns the old "contract_id" field's value of the RegisteredProvider entity.
+// If the RegisteredProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegisteredProviderMutation) OldContractID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContractID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContractID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContractID: %w", err)
+	}
+	return oldValue.ContractID, nil
+}
+
+// ResetContractID resets all changes to the "contract_id" field.
+func (m *RegisteredProviderMutation) ResetContractID() {
+	m.contract = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *RegisteredProviderMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -1859,11 +1895,6 @@ func (m *RegisteredProviderMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetContractID sets the "contract" edge to the RegisteredContract entity by id.
-func (m *RegisteredProviderMutation) SetContractID(id string) {
-	m.contract = &id
-}
-
 // ClearContract clears the "contract" edge to the RegisteredContract entity.
 func (m *RegisteredProviderMutation) ClearContract() {
 	m.clearedcontract = true
@@ -1872,14 +1903,6 @@ func (m *RegisteredProviderMutation) ClearContract() {
 // ContractCleared reports if the "contract" edge to the RegisteredContract entity was cleared.
 func (m *RegisteredProviderMutation) ContractCleared() bool {
 	return m.clearedcontract
-}
-
-// ContractID returns the "contract" edge ID in the mutation.
-func (m *RegisteredProviderMutation) ContractID() (id string, exists bool) {
-	if m.contract != nil {
-		return *m.contract, true
-	}
-	return
 }
 
 // ContractIDs returns the "contract" edge IDs in the mutation.
@@ -1932,12 +1955,15 @@ func (m *RegisteredProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RegisteredProviderMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.url != nil {
 		fields = append(fields, registeredprovider.FieldURL)
 	}
 	if m.participant_name != nil {
 		fields = append(fields, registeredprovider.FieldParticipantName)
+	}
+	if m.contract != nil {
+		fields = append(fields, registeredprovider.FieldContractID)
 	}
 	if m.created_at != nil {
 		fields = append(fields, registeredprovider.FieldCreatedAt)
@@ -1957,6 +1983,8 @@ func (m *RegisteredProviderMutation) Field(name string) (ent.Value, bool) {
 		return m.URL()
 	case registeredprovider.FieldParticipantName:
 		return m.ParticipantName()
+	case registeredprovider.FieldContractID:
+		return m.ContractID()
 	case registeredprovider.FieldCreatedAt:
 		return m.CreatedAt()
 	case registeredprovider.FieldUpdatedAt:
@@ -1974,6 +2002,8 @@ func (m *RegisteredProviderMutation) OldField(ctx context.Context, name string) 
 		return m.OldURL(ctx)
 	case registeredprovider.FieldParticipantName:
 		return m.OldParticipantName(ctx)
+	case registeredprovider.FieldContractID:
+		return m.OldContractID(ctx)
 	case registeredprovider.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case registeredprovider.FieldUpdatedAt:
@@ -2000,6 +2030,13 @@ func (m *RegisteredProviderMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetParticipantName(v)
+		return nil
+	case registeredprovider.FieldContractID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContractID(v)
 		return nil
 	case registeredprovider.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -2069,6 +2106,9 @@ func (m *RegisteredProviderMutation) ResetField(name string) error {
 		return nil
 	case registeredprovider.FieldParticipantName:
 		m.ResetParticipantName()
+		return nil
+	case registeredprovider.FieldContractID:
+		m.ResetContractID()
 		return nil
 	case registeredprovider.FieldCreatedAt:
 		m.ResetCreatedAt()

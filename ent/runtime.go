@@ -107,12 +107,30 @@ func init() {
 	registeredproviderDescParticipantName := registeredproviderFields[2].Descriptor()
 	// registeredprovider.ParticipantNameValidator is a validator for the "participant_name" field. It is called by the builders before save.
 	registeredprovider.ParticipantNameValidator = registeredproviderDescParticipantName.Validators[0].(func(string) error)
+	// registeredproviderDescContractID is the schema descriptor for contract_id field.
+	registeredproviderDescContractID := registeredproviderFields[3].Descriptor()
+	// registeredprovider.ContractIDValidator is a validator for the "contract_id" field. It is called by the builders before save.
+	registeredprovider.ContractIDValidator = func() func(string) error {
+		validators := registeredproviderDescContractID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(contract string) error {
+			for _, fn := range fns {
+				if err := fn(contract); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// registeredproviderDescCreatedAt is the schema descriptor for created_at field.
-	registeredproviderDescCreatedAt := registeredproviderFields[3].Descriptor()
+	registeredproviderDescCreatedAt := registeredproviderFields[4].Descriptor()
 	// registeredprovider.DefaultCreatedAt holds the default value on creation for the created_at field.
 	registeredprovider.DefaultCreatedAt = registeredproviderDescCreatedAt.Default.(func() time.Time)
 	// registeredproviderDescUpdatedAt is the schema descriptor for updated_at field.
-	registeredproviderDescUpdatedAt := registeredproviderFields[4].Descriptor()
+	registeredproviderDescUpdatedAt := registeredproviderFields[5].Descriptor()
 	// registeredprovider.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	registeredprovider.DefaultUpdatedAt = registeredproviderDescUpdatedAt.Default.(func() time.Time)
 	// registeredprovider.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

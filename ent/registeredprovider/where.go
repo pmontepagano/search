@@ -61,6 +61,11 @@ func ParticipantName(v string) predicate.RegisteredProvider {
 	return predicate.RegisteredProvider(sql.FieldEQ(FieldParticipantName, v))
 }
 
+// ContractID applies equality check predicate on the "contract_id" field. It's identical to ContractIDEQ.
+func ContractID(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldEQ(FieldContractID, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.RegisteredProvider {
 	return predicate.RegisteredProvider(sql.FieldEQ(FieldCreatedAt, v))
@@ -134,6 +139,71 @@ func ParticipantNameEqualFold(v string) predicate.RegisteredProvider {
 // ParticipantNameContainsFold applies the ContainsFold predicate on the "participant_name" field.
 func ParticipantNameContainsFold(v string) predicate.RegisteredProvider {
 	return predicate.RegisteredProvider(sql.FieldContainsFold(FieldParticipantName, v))
+}
+
+// ContractIDEQ applies the EQ predicate on the "contract_id" field.
+func ContractIDEQ(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldEQ(FieldContractID, v))
+}
+
+// ContractIDNEQ applies the NEQ predicate on the "contract_id" field.
+func ContractIDNEQ(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldNEQ(FieldContractID, v))
+}
+
+// ContractIDIn applies the In predicate on the "contract_id" field.
+func ContractIDIn(vs ...string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldIn(FieldContractID, vs...))
+}
+
+// ContractIDNotIn applies the NotIn predicate on the "contract_id" field.
+func ContractIDNotIn(vs ...string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldNotIn(FieldContractID, vs...))
+}
+
+// ContractIDGT applies the GT predicate on the "contract_id" field.
+func ContractIDGT(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldGT(FieldContractID, v))
+}
+
+// ContractIDGTE applies the GTE predicate on the "contract_id" field.
+func ContractIDGTE(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldGTE(FieldContractID, v))
+}
+
+// ContractIDLT applies the LT predicate on the "contract_id" field.
+func ContractIDLT(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldLT(FieldContractID, v))
+}
+
+// ContractIDLTE applies the LTE predicate on the "contract_id" field.
+func ContractIDLTE(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldLTE(FieldContractID, v))
+}
+
+// ContractIDContains applies the Contains predicate on the "contract_id" field.
+func ContractIDContains(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldContains(FieldContractID, v))
+}
+
+// ContractIDHasPrefix applies the HasPrefix predicate on the "contract_id" field.
+func ContractIDHasPrefix(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldHasPrefix(FieldContractID, v))
+}
+
+// ContractIDHasSuffix applies the HasSuffix predicate on the "contract_id" field.
+func ContractIDHasSuffix(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldHasSuffix(FieldContractID, v))
+}
+
+// ContractIDEqualFold applies the EqualFold predicate on the "contract_id" field.
+func ContractIDEqualFold(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldEqualFold(FieldContractID, v))
+}
+
+// ContractIDContainsFold applies the ContainsFold predicate on the "contract_id" field.
+func ContractIDContainsFold(v string) predicate.RegisteredProvider {
+	return predicate.RegisteredProvider(sql.FieldContainsFold(FieldContractID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
