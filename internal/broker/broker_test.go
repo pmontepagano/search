@@ -8,6 +8,7 @@ import (
 	"time"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
+	"github.com/clpombo/search/internal/contract"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -112,9 +113,7 @@ func TestGetParticipantMapping(t *testing.T) {
 	defer cancel()
 
 	// register dummy provider
-	registrationResponse, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
-		Contract: &pb.Contract{
-			Contract: []byte(`--
+	var dummyContract = []byte(`--
 .outputs
 .state graph
 q0 1 ! hello q0
@@ -126,36 +125,75 @@ q0 1 ! hello q0
 q0 0 ? hello q0
 .marking q0
 .end
-`),
-			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+`)
+	registrationResponse, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
+		Contract: &pb.Contract{
+			Contract: dummyContract,
+			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
 		ProviderName: "0",
-		Url:          "fakeurl",
+		Url:          "fakeurl_for_provider",
 	})
 	if err != nil {
 		log.Fatalf("ERROR RegisterProvider: %v", err)
 	}
+	provider, err := b.getRegisteredProvider(registrationResponse.AppId)
+	if err != nil {
+		t.Error("error getting registered provider")
+	}
 
+	b.SetCompatFunc(mockTestGetParticipantMappingContractCompatChecker)
 	// test initiator mapping
-	initiatorMapping := map[string]*pb.RemoteParticipant{
-		"self": {
-			Url:   "initiator_fake_url",
-			AppId: "initiator_fake_appid",
+	_, err = client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
+		Contract: &pb.Contract{
+			Contract: dummyContract,
+			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
 		},
-		"other": {
-			Url:   "fakeurl",
+		InitiatorName: "FooBar",
+		PresetParticipants: map[string]*pb.RemoteParticipant{
+			"FooBar": {
+				Url:   "foobar_fake_url",
+				AppId: "foobar_fake_appid",
+			},
+		},
+	})
+	if err != nil {
+		t.Error("error brokering channel")
+	}
+	initiatorMapping := map[string]*pb.RemoteParticipant{
+		"FooBar": {
+			Url:   "foobar_fake_url",
+			AppId: "foobar_fake_appid",
+		},
+		"0": {
+			Url:   "fakeurl_for_provider",
 			AppId: registrationResponse.GetAppId(),
 		},
 	}
-	mapping := b.getParticipantMapping(initiatorMapping, "other", "self")
+	reqContract, err := contract.ConvertPBContract(&pb.Contract{
+		Contract: dummyContract,
+		Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+	})
+	if err != nil {
+		t.Error("error converting contract")
+	}
+
+	_, err = b.getBestCandidate(context.Background(), nil, nil, "other")
+	if err != nil {
+		t.Error("error running getBestCandidate")
+	}
+	mapping, err := b.getParticipantMapping(reqContract, initiatorMapping, "0", "FooBar", provider)
+	if err != nil {
+		t.Error("error getting participant mapping")
+	}
 	expected := map[string]*pb.RemoteParticipant{
 		"0": {
-			Url:   "fakeurl",
+			Url:   "fakeurl_for_provider",
 			AppId: registrationResponse.GetAppId(),
 		},
 		"FooBar": {
-			Url:   "initiator_fake_url",
-			AppId: "initiator_fake_appid",
+			Url:   "foobar_fake_url",
+			AppId: "foobar_fake_appid",
 		},
 	}
 
@@ -166,4 +204,12 @@ q0 0 ? hello q0
 		t.Errorf("Received erroneous response from getParticipantMapping: %v", mapping)
 	}
 	b.Stop()
+}
+
+func mockTestGetParticipantMappingContractCompatChecker(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error) {
+	mapping := map[string]string{
+		"0":      "FooBar",
+		"FooBar": "0",
+	}
+	return true, mapping, nil
 }

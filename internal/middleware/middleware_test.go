@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"sync"
@@ -80,162 +81,6 @@ func TestRegisterChannel(t *testing.T) {
 	wg.Wait()
 }
 
-// Start a Broker and two Middleware servers. One of the middleware servers shall have a
-// dummy provider registered, and the other will have an initiator app requesting a channel
-// We should see brokering happen and message exchange between apps
-func TestPingPong(t *testing.T) {
-	// start broker
-	bs := broker.NewBrokerServer("file:ent?mode=memory&_fk=1")
-	go bs.StartServer("localhost", 7777, false, "", "")
-
-	var wg sync.WaitGroup
-	// start provider middleware
-	provMw := NewMiddlewareServer("localhost", 7777)
-	provMw.StartMiddlewareServer(&wg, "localhost", 4444, "localhost", 5555, false, "", "")
-
-	// start client middleware
-	clientMw := NewMiddlewareServer("localhost", 7777)
-	clientMw.StartMiddlewareServer(&wg, "localhost", 8888, "localhost", 9999, false, "", "")
-
-	// common grpc.DialOption
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithBlock())
-
-	// register dummy provider app and keep waiting for a notification
-	go func() {
-		// this function is for provider app
-
-		// connect to provider middleware
-		conn, err := grpc.Dial("localhost:5555", opts...)
-		if err != nil {
-			t.Error("Could not contact local private middleware server.")
-		}
-
-		client := pb.NewPrivateMiddlewareServiceClient(conn)
-
-		// register dummy app with provider middleware
-		req := pb.RegisterAppRequest{
-			ProviderContract: &pb.Contract{
-				Contract: []byte("dummy provider contract"), // TODO: replace with real contract.
-			},
-			ProviderName: "dummy",
-		}
-
-		stream, err := client.RegisterApp(context.Background(), &req)
-		if err != nil {
-			t.Error("Could not Register App")
-		}
-		ack, err := stream.Recv()
-		if err != nil || ack.GetAppId() == "" {
-			t.Error("Could not receive ACK from RegisterApp")
-		}
-
-		// wait on RegisterAppResponse stream to await for new channel (once only for this test)
-		new, err := stream.Recv()
-		if err == io.EOF {
-			t.Error("Broker unexpectedly ended connection with provider")
-		}
-		if err != nil {
-			t.Errorf("Error receiving notification from RegisterApp: %v", err)
-		}
-		channelID := new.GetNotification().GetChannelId()
-		log.Printf("[PROVIDER] - Received Notification. ChannelID: %s", channelID)
-
-		// reply "ping!" messages with "pong!" until we receive a different message, then exit
-		go func(channelID string, conn *grpc.ClientConn) {
-			defer conn.Close()
-			defer provMw.Stop()
-			for {
-				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-				defer cancel()
-				res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-					ChannelId:   channelID,
-					Participant: "p1",
-				})
-				if err != nil {
-					t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
-				}
-				log.Printf("[PROVIDER] - Received message from p1: %s", res.Message.GetBody())
-				if string(res.Message.GetBody()) == "ping!" {
-					ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-					defer cancel()
-					client.AppSend(ctx, &pb.AppSendRequest{
-						ChannelId: channelID,
-						Recipient: "p1",
-						Message: &pb.AppMessage{
-							Body: []byte("pong!"),
-							// TODO: add Type
-						},
-					})
-				} else {
-					log.Printf("[PROVIDER] - Exiting...")
-					break
-				}
-			}
-		}(channelID, conn)
-
-	}()
-
-	// connect to client middleware and register channel
-	conn, err := grpc.Dial("localhost:9999", opts...)
-	if err != nil {
-		t.Error("Could not contact local private middleware server.")
-	}
-	defer conn.Close()
-	client := pb.NewPrivateMiddlewareServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	req := pb.RegisterChannelRequest{
-		RequirementsContract: &pb.Contract{
-			Contract: []byte("client example requirement contract"),
-			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
-		},
-		InitiatorName: "client",
-	}
-	regResult, err := client.RegisterChannel(ctx, &req)
-	if err != nil {
-		t.Errorf("Received error from RegisterChannel: %v", err)
-	}
-
-	// AppSend to p2
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	_, err = client.AppSend(ctx, &pb.AppSendRequest{
-		ChannelId: regResult.ChannelId,
-		Recipient: "p2",
-		Message:   &pb.AppMessage{Body: []byte("ping!")}, // TODO: add message type
-	})
-	if err != nil {
-		t.Error(err)
-	}
-
-	// receive echo from p2
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-		ChannelId:   regResult.ChannelId,
-		Participant: "p2",
-	})
-	if err != nil {
-		t.Error("Could not receive message from p2")
-	}
-	log.Printf("Received message from p2: %s", resp.Message.GetBody())
-
-	// AppSend goodbye to p2 so that it exits
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	_, err = client.AppSend(ctx, &pb.AppSendRequest{
-		ChannelId: regResult.ChannelId,
-		Recipient: "p2",
-		Message:   &pb.AppMessage{Body: []byte("goodbye!")},
-	})
-
-	clientMw.Stop()
-	wg.Wait()
-}
-
 func TestCircle(t *testing.T) {
 	brokerPort, p1Port, p2Port, p3Port, initiatorPort := 20000, 20001, 20003, 20005, 20007
 
@@ -260,7 +105,7 @@ func TestCircle(t *testing.T) {
 
 	// common grpc.DialOption
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithBlock())
 
 	// launch 3 provider apps that simply pass the message to next member adding their name...?
@@ -447,7 +292,7 @@ func TestPingPongFullExample(t *testing.T) {
 	brokerPort, pingPrivPort, pingPubPort, pongPrivPort, pongPubPort := 20000, 20001, 20002, 20003, 20004
 
 	// start broker
-	bs := broker.NewBrokerServer("file:ent?mode=memory&_fk=1")
+	bs := broker.NewBrokerServer(fmt.Sprintf("file:testpingpongfullexample-%s.db?_fk=1&mode=rwc", time.Now().Format("2006-01-02T15:04:05")))
 	bs.SetCompatFunc(pingPongContractCompatChecker)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 	defer bs.Stop()
