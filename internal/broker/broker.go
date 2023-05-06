@@ -414,22 +414,32 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 func (s *brokerServer) getOrSaveContract(ctx context.Context, c contract.Contract) (*ent.RegisteredContract, error) {
 	contractID := c.GetContractID()
 
-	rc, err := s.dbClient.RegisteredContract.Get(ctx, contractID)
+	tx, err := s.dbClient.Tx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error starting a transaction: %w", err)
+	}
+	rc, err := tx.RegisteredContract.Get(ctx, contractID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			rc, err = s.dbClient.RegisteredContract.Create().
+			rc, err = tx.RegisteredContract.Create().
 				SetID(contractID).
 				SetFormat(int(c.GetFormat().Number())).
 				SetContract(c.GetBytesRepr()).
 				Save(ctx)
 			if err != nil {
-				return nil, errors.New("database error registering contract")
+				if rerr := tx.Rollback(); rerr != nil {
+					err = fmt.Errorf("%w: %v", err, rerr)
+				}
+				return nil, fmt.Errorf("database error registering contract: %v", err)
 			}
 		} else {
-			return nil, errors.New("database error fetching existing contract")
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return nil, fmt.Errorf("database error fetching existing contract: %v", err)
 		}
 	}
-	return rc, nil
+	return rc, tx.Commit()
 }
 
 // we receive a LocalContract and the url, and we assign an AppID to this provider

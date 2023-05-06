@@ -85,7 +85,8 @@ func TestCircle(t *testing.T) {
 	brokerPort, p1Port, p2Port, p3Port, initiatorPort := 20000, 20001, 20003, 20005, 20007
 
 	// start broker
-	bs := broker.NewBrokerServer("file:ent?mode=memory&_fk=1")
+	// bs := broker.NewBrokerServer(fmt.Sprintf("file:testcircle-%s.db?_fk=1&mode=rwc&busy_timeout=1000", time.Now().Format("2006-01-02T15:04:05")))
+	bs := broker.NewBrokerServer(fmt.Sprintf("file:testcircle-%s.db?_fk=1&mode=memory&busy_timeout=1000", time.Now().Format("2006-01-02T15:04:05")))
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 
 	var wg sync.WaitGroup
