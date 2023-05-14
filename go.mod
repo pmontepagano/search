@@ -7,7 +7,6 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/mattn/go-sqlite3 v1.14.16
-	github.com/pmontepagano/cfsm v1.1.0
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.8.2
 	github.com/vishalkuo/bimap v0.0.0-20180703190407-09cff2814645

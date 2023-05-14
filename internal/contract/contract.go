@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pmontepagano/cfsm"
+	"github.com/clpombo/search/cfsm"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
 )

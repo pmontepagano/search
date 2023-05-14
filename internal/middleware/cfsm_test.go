@@ -12,7 +12,7 @@ import (
 	"github.com/clpombo/search/internal/broker"
 	"google.golang.org/grpc"
 
-	"github.com/pmontepagano/cfsm"
+	"github.com/clpombo/search/cfsm"
 )
 
 func TestTravelClient(t *testing.T) {
