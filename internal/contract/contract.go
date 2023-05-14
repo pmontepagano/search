@@ -16,32 +16,38 @@ import (
 	pb "github.com/clpombo/search/gen/go/search/v1"
 )
 
-type Contract interface {
+// LocalContract is an interface that represents a local view of a contract. It is used to
+// specify behaviour for Service Providers in SEARch.
+type LocalContract interface {
 	GetContractID() string
-	GetParticipants() []string
+	GetRemoteParticipantNames() []string // Returns the names of all participants in this contract (except the Service Provider, who is unnamed).
 	GetBytesRepr() []byte
-	GetFormat() pb.ContractFormat
+	GetFormat() pb.ContractFormat // TODO: make specific to each contract type.
 	// TODO: add GetNextState()
 }
 
-// BoundContract is a contract that has a specific distinguished participant (the local participant).
-type BoundContract interface {
-	Contract
-	GetRemoteParticipantNames() []string
-	GetLocalParticipantName() string // This returns the name of the local participant of this contract.
+// GlobalContract is an interface that represents the global view of a communication channel.
+// It is used to specify behaviour for Service Clients in SEARch.
+// You can project a GlobalContract into one LocalContract for each participant in the GlobalContract.
+type GlobalContract interface {
+	LocalContract
+	GetParticipants() []string       // Returns the names of all participants in this contract.
+	GetLocalParticipantName() string // Returns the name of the local participant of this contract.
+	// GetProjection(string) (LocalContract, error)
 }
 
-type CFSMContract struct {
-	*cfsm.System
+type LocalCFSMContract struct {
+	*cfsm.CFSM
 	id string
 }
 
-type BoundCFSMContract struct {
-	CFSMContract
+type GlobalCFSMContract struct {
+	*cfsm.System
+	id               string
 	localParticipant *cfsm.CFSM
 }
 
-func (c *CFSMContract) GetContractID() string {
+func (c *LocalCFSMContract) GetContractID() string {
 	if c.id != "" {
 		return c.id
 	}
@@ -50,22 +56,35 @@ func (c *CFSMContract) GetContractID() string {
 	return c.id
 }
 
-func (c *CFSMContract) GetParticipants() (ret []string) {
+func (c *GlobalCFSMContract) GetContractID() string {
+	if c.id != "" {
+		return c.id
+	}
+	contractHash := sha512.Sum512(c.GetBytesRepr())
+	c.id = fmt.Sprintf("%x", contractHash[:])
+	return c.id
+}
+
+func (lc *LocalCFSMContract) GetRemoteParticipantNames() []string {
+	return lc.CFSM.OtherCFSMs()
+}
+
+func (c *GlobalCFSMContract) GetParticipants() (ret []string) {
 	for _, m := range c.CFSMs {
 		ret = append(ret, m.Name)
 	}
 	return
 }
 
-func (c *BoundCFSMContract) GetLocalParticipantName() string {
+func (c *GlobalCFSMContract) GetLocalParticipantName() string {
 	return c.localParticipant.Name
 }
 
-func (c *BoundCFSMContract) GetRemoteParticipantNames() (ret []string) {
+func (c *GlobalCFSMContract) GetRemoteParticipantNames() (ret []string) {
 	return c.getParticipants(false)
 }
 
-func (c *BoundCFSMContract) getParticipants(includeLocal bool) (ret []string) {
+func (c *GlobalCFSMContract) getParticipants(includeLocal bool) (ret []string) {
 	for _, m := range c.CFSMs {
 		if !includeLocal && m == c.localParticipant {
 			continue
@@ -75,21 +94,30 @@ func (c *BoundCFSMContract) getParticipants(includeLocal bool) (ret []string) {
 	return
 }
 
-func (c *CFSMContract) GetBytesRepr() []byte {
+func (c *GlobalCFSMContract) GetBytesRepr() []byte {
 	return c.Bytes()
 }
 
-func (c *CFSMContract) GetFormat() pb.ContractFormat {
+func (c *LocalCFSMContract) GetBytesRepr() []byte {
+	return c.Bytes()
+}
+
+func (c *GlobalCFSMContract) GetFormat() pb.ContractFormat {
 	return pb.ContractFormat_CONTRACT_FORMAT_FSA
 }
 
-func ConvertPBContract(pbContract *pb.Contract) (Contract, error) {
+func (lc *LocalCFSMContract) GetFormat() pb.ContractFormat {
+	// TODO: differentiate between global and local!
+	return pb.ContractFormat_CONTRACT_FORMAT_FSA
+}
+
+func ConvertPBContract(pbContract *pb.Contract) (GlobalContract, error) {
 	if pbContract.Format == pb.ContractFormat_CONTRACT_FORMAT_FSA {
 		cfsmSystem, err := ParseFSAFile(bytes.NewReader(pbContract.Contract))
 		if err != nil {
 			return nil, err
 		}
-		contract := CFSMContract{
+		contract := GlobalCFSMContract{
 			System: cfsmSystem,
 		}
 		return &contract, nil

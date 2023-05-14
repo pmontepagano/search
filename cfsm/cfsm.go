@@ -184,6 +184,23 @@ func (m *CFSM) String() string {
 	return m.bytesBuffer().String()
 }
 
+// Return a slice with all the names of other CFSMs with which this CFSM has transitions.
+func (m *CFSM) OtherCFSMs() []string {
+	setOfNames := make(map[string]struct{})
+	for _, st := range m.states {
+		for tr := range st.edges {
+			setOfNames[tr.NameOfOtherCFSM()] = struct{}{}
+		}
+	}
+	result := make([]string, len(setOfNames))
+	i := 0
+	for name := range setOfNames {
+		result[i] = name
+		i++
+	}
+	return result
+}
+
 // State is a state.
 type State struct {
 	ID    int    // Unique identifier.
@@ -220,15 +237,17 @@ func (s *State) Transitions() []Transition {
 
 // Transition is a transition from a State to another State.
 type Transition interface {
-	Label() string // Label is the marking on the transition.
-	State() *State // State after transition.
+	Label() string           // Label is the marking on the transition.
+	State() *State           // State after transition.
+	NameOfOtherCFSM() string // Name of the CFSM we are communicating with.
 }
 
 // Send is a send transition (output).
 type Send struct {
-	to    *CFSM  // Destination CFSM.
-	msg   string // Payload message.
-	state *State // State after transition.
+	to     *CFSM  // Destination CFSM.
+	toName string // Name of destination CFSM if to is nil.
+	msg    string // Payload message.
+	state  *State // State after transition.
 }
 
 // NewSend returns a new Send transition.
@@ -236,12 +255,27 @@ func NewSend(cfsm *CFSM, msg string) *Send {
 	return &Send{to: cfsm, msg: msg}
 }
 
+// NewSendToName returns a new Send transition without a concrete destination CFSM.
+// Instead, the name of the destination CFSM is used. This is useful for CFSMs defined
+// outside of a System.
+func NewSendToName(name string, msg string) *Send {
+	return &Send{toName: name, msg: msg}
+}
+
 // Label for Send is "!"
 func (s *Send) Label() string {
 	if s.state == nil {
 		log.Fatal("Cannot get Label for Send:", ErrStateUndef)
 	}
-	return fmt.Sprintf("%s ! %s", s.to.Name, s.msg)
+	return fmt.Sprintf("%s ! %s", s.NameOfOtherCFSM(), s.msg)
+}
+
+// Name of the CFSM we are communicating with.
+func (s *Send) NameOfOtherCFSM() string {
+	if s.to != nil {
+		return s.to.Name
+	}
+	return s.toName
 }
 
 // State returns the State after transition.
@@ -256,9 +290,10 @@ func (s *Send) SetNext(st *State) {
 
 // Recv is a receive transition (input).
 type Recv struct {
-	from  *CFSM  // Source CFSM.
-	msg   string // Payload message expected.
-	state *State // State after transition.
+	from     *CFSM  // Source CFSM.
+	fromName string // Name of source CFSM if from is nil.
+	msg      string // Payload message expected.
+	state    *State // State after transition.
 }
 
 // NewRecv returns a new Recv transition.
@@ -266,12 +301,26 @@ func NewRecv(cfsm *CFSM, msg string) *Recv {
 	return &Recv{from: cfsm, msg: msg}
 }
 
+// NewRecvFromName returns a new Recv transition without a concrete source CFSM.
+// This is useful for CFSMs defined outside of a System.
+func NewRecvFromName(name string, msg string) *Recv {
+	return &Recv{fromName: name, msg: msg}
+}
+
 // Label for Recv is "?"
 func (r *Recv) Label() string {
 	if r.state == nil {
 		log.Fatal("Cannot get Label for Recv:", ErrStateUndef)
 	}
-	return fmt.Sprintf("%s ? %s", r.from.Name, r.msg)
+	return fmt.Sprintf("%s ? %s", r.NameOfOtherCFSM(), r.msg)
+}
+
+// Name of the CFSM we are communicating with.
+func (r *Recv) NameOfOtherCFSM() string {
+	if r.from != nil {
+		return r.from.Name
+	}
+	return r.fromName
 }
 
 // State returns the State after transition.
