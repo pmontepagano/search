@@ -40,8 +40,6 @@ type CompatibilityResultMutation struct {
 	op                          Op
 	typ                         string
 	id                          *int
-	participant_name_req        *string
-	participant_name_prov       *string
 	result                      *bool
 	mapping                     *schema.ParticipantNameMapping
 	created_at                  *time.Time
@@ -224,78 +222,6 @@ func (m *CompatibilityResultMutation) OldProviderContractID(ctx context.Context)
 // ResetProviderContractID resets all changes to the "provider_contract_id" field.
 func (m *CompatibilityResultMutation) ResetProviderContractID() {
 	m.provider_contract = nil
-}
-
-// SetParticipantNameReq sets the "participant_name_req" field.
-func (m *CompatibilityResultMutation) SetParticipantNameReq(s string) {
-	m.participant_name_req = &s
-}
-
-// ParticipantNameReq returns the value of the "participant_name_req" field in the mutation.
-func (m *CompatibilityResultMutation) ParticipantNameReq() (r string, exists bool) {
-	v := m.participant_name_req
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldParticipantNameReq returns the old "participant_name_req" field's value of the CompatibilityResult entity.
-// If the CompatibilityResult object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CompatibilityResultMutation) OldParticipantNameReq(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldParticipantNameReq is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldParticipantNameReq requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldParticipantNameReq: %w", err)
-	}
-	return oldValue.ParticipantNameReq, nil
-}
-
-// ResetParticipantNameReq resets all changes to the "participant_name_req" field.
-func (m *CompatibilityResultMutation) ResetParticipantNameReq() {
-	m.participant_name_req = nil
-}
-
-// SetParticipantNameProv sets the "participant_name_prov" field.
-func (m *CompatibilityResultMutation) SetParticipantNameProv(s string) {
-	m.participant_name_prov = &s
-}
-
-// ParticipantNameProv returns the value of the "participant_name_prov" field in the mutation.
-func (m *CompatibilityResultMutation) ParticipantNameProv() (r string, exists bool) {
-	v := m.participant_name_prov
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldParticipantNameProv returns the old "participant_name_prov" field's value of the CompatibilityResult entity.
-// If the CompatibilityResult object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CompatibilityResultMutation) OldParticipantNameProv(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldParticipantNameProv is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldParticipantNameProv requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldParticipantNameProv: %w", err)
-	}
-	return oldValue.ParticipantNameProv, nil
-}
-
-// ResetParticipantNameProv resets all changes to the "participant_name_prov" field.
-func (m *CompatibilityResultMutation) ResetParticipantNameProv() {
-	m.participant_name_prov = nil
 }
 
 // SetResult sets the "result" field.
@@ -541,18 +467,12 @@ func (m *CompatibilityResultMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CompatibilityResultMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 6)
 	if m.requirement_contract != nil {
 		fields = append(fields, compatibilityresult.FieldRequirementContractID)
 	}
 	if m.provider_contract != nil {
 		fields = append(fields, compatibilityresult.FieldProviderContractID)
-	}
-	if m.participant_name_req != nil {
-		fields = append(fields, compatibilityresult.FieldParticipantNameReq)
-	}
-	if m.participant_name_prov != nil {
-		fields = append(fields, compatibilityresult.FieldParticipantNameProv)
 	}
 	if m.result != nil {
 		fields = append(fields, compatibilityresult.FieldResult)
@@ -578,10 +498,6 @@ func (m *CompatibilityResultMutation) Field(name string) (ent.Value, bool) {
 		return m.RequirementContractID()
 	case compatibilityresult.FieldProviderContractID:
 		return m.ProviderContractID()
-	case compatibilityresult.FieldParticipantNameReq:
-		return m.ParticipantNameReq()
-	case compatibilityresult.FieldParticipantNameProv:
-		return m.ParticipantNameProv()
 	case compatibilityresult.FieldResult:
 		return m.Result()
 	case compatibilityresult.FieldMapping:
@@ -603,10 +519,6 @@ func (m *CompatibilityResultMutation) OldField(ctx context.Context, name string)
 		return m.OldRequirementContractID(ctx)
 	case compatibilityresult.FieldProviderContractID:
 		return m.OldProviderContractID(ctx)
-	case compatibilityresult.FieldParticipantNameReq:
-		return m.OldParticipantNameReq(ctx)
-	case compatibilityresult.FieldParticipantNameProv:
-		return m.OldParticipantNameProv(ctx)
 	case compatibilityresult.FieldResult:
 		return m.OldResult(ctx)
 	case compatibilityresult.FieldMapping:
@@ -637,20 +549,6 @@ func (m *CompatibilityResultMutation) SetField(name string, value ent.Value) err
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProviderContractID(v)
-		return nil
-	case compatibilityresult.FieldParticipantNameReq:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetParticipantNameReq(v)
-		return nil
-	case compatibilityresult.FieldParticipantNameProv:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetParticipantNameProv(v)
 		return nil
 	case compatibilityresult.FieldResult:
 		v, ok := value.(bool)
@@ -743,12 +641,6 @@ func (m *CompatibilityResultMutation) ResetField(name string) error {
 		return nil
 	case compatibilityresult.FieldProviderContractID:
 		m.ResetProviderContractID()
-		return nil
-	case compatibilityresult.FieldParticipantNameReq:
-		m.ResetParticipantNameReq()
-		return nil
-	case compatibilityresult.FieldParticipantNameProv:
-		m.ResetParticipantNameProv()
 		return nil
 	case compatibilityresult.FieldResult:
 		m.ResetResult()
@@ -1596,19 +1488,18 @@ func (m *RegisteredContractMutation) ResetEdge(name string) error {
 // RegisteredProviderMutation represents an operation that mutates the RegisteredProvider nodes in the graph.
 type RegisteredProviderMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *uuid.UUID
-	url              **url.URL
-	participant_name *string
-	created_at       *time.Time
-	updated_at       *time.Time
-	clearedFields    map[string]struct{}
-	contract         *string
-	clearedcontract  bool
-	done             bool
-	oldValue         func(context.Context) (*RegisteredProvider, error)
-	predicates       []predicate.RegisteredProvider
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	url             **url.URL
+	created_at      *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	contract        *string
+	clearedcontract bool
+	done            bool
+	oldValue        func(context.Context) (*RegisteredProvider, error)
+	predicates      []predicate.RegisteredProvider
 }
 
 var _ ent.Mutation = (*RegisteredProviderMutation)(nil)
@@ -1749,42 +1640,6 @@ func (m *RegisteredProviderMutation) OldURL(ctx context.Context) (v *url.URL, er
 // ResetURL resets all changes to the "url" field.
 func (m *RegisteredProviderMutation) ResetURL() {
 	m.url = nil
-}
-
-// SetParticipantName sets the "participant_name" field.
-func (m *RegisteredProviderMutation) SetParticipantName(s string) {
-	m.participant_name = &s
-}
-
-// ParticipantName returns the value of the "participant_name" field in the mutation.
-func (m *RegisteredProviderMutation) ParticipantName() (r string, exists bool) {
-	v := m.participant_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldParticipantName returns the old "participant_name" field's value of the RegisteredProvider entity.
-// If the RegisteredProvider object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RegisteredProviderMutation) OldParticipantName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldParticipantName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldParticipantName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldParticipantName: %w", err)
-	}
-	return oldValue.ParticipantName, nil
-}
-
-// ResetParticipantName resets all changes to the "participant_name" field.
-func (m *RegisteredProviderMutation) ResetParticipantName() {
-	m.participant_name = nil
 }
 
 // SetContractID sets the "contract_id" field.
@@ -1955,12 +1810,9 @@ func (m *RegisteredProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RegisteredProviderMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.url != nil {
 		fields = append(fields, registeredprovider.FieldURL)
-	}
-	if m.participant_name != nil {
-		fields = append(fields, registeredprovider.FieldParticipantName)
 	}
 	if m.contract != nil {
 		fields = append(fields, registeredprovider.FieldContractID)
@@ -1981,8 +1833,6 @@ func (m *RegisteredProviderMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case registeredprovider.FieldURL:
 		return m.URL()
-	case registeredprovider.FieldParticipantName:
-		return m.ParticipantName()
 	case registeredprovider.FieldContractID:
 		return m.ContractID()
 	case registeredprovider.FieldCreatedAt:
@@ -2000,8 +1850,6 @@ func (m *RegisteredProviderMutation) OldField(ctx context.Context, name string) 
 	switch name {
 	case registeredprovider.FieldURL:
 		return m.OldURL(ctx)
-	case registeredprovider.FieldParticipantName:
-		return m.OldParticipantName(ctx)
 	case registeredprovider.FieldContractID:
 		return m.OldContractID(ctx)
 	case registeredprovider.FieldCreatedAt:
@@ -2023,13 +1871,6 @@ func (m *RegisteredProviderMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetURL(v)
-		return nil
-	case registeredprovider.FieldParticipantName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetParticipantName(v)
 		return nil
 	case registeredprovider.FieldContractID:
 		v, ok := value.(string)
@@ -2103,9 +1944,6 @@ func (m *RegisteredProviderMutation) ResetField(name string) error {
 	switch name {
 	case registeredprovider.FieldURL:
 		m.ResetURL()
-		return nil
-	case registeredprovider.FieldParticipantName:
-		m.ResetParticipantName()
 		return nil
 	case registeredprovider.FieldContractID:
 		m.ResetContractID()

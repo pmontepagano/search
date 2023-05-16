@@ -34,18 +34,6 @@ func (crc *CompatibilityResultCreate) SetProviderContractID(s string) *Compatibi
 	return crc
 }
 
-// SetParticipantNameReq sets the "participant_name_req" field.
-func (crc *CompatibilityResultCreate) SetParticipantNameReq(s string) *CompatibilityResultCreate {
-	crc.mutation.SetParticipantNameReq(s)
-	return crc
-}
-
-// SetParticipantNameProv sets the "participant_name_prov" field.
-func (crc *CompatibilityResultCreate) SetParticipantNameProv(s string) *CompatibilityResultCreate {
-	crc.mutation.SetParticipantNameProv(s)
-	return crc
-}
-
 // SetResult sets the "result" field.
 func (crc *CompatibilityResultCreate) SetResult(b bool) *CompatibilityResultCreate {
 	crc.mutation.SetResult(b)
@@ -159,22 +147,6 @@ func (crc *CompatibilityResultCreate) check() error {
 			return &ValidationError{Name: "provider_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.provider_contract_id": %w`, err)}
 		}
 	}
-	if _, ok := crc.mutation.ParticipantNameReq(); !ok {
-		return &ValidationError{Name: "participant_name_req", err: errors.New(`ent: missing required field "CompatibilityResult.participant_name_req"`)}
-	}
-	if v, ok := crc.mutation.ParticipantNameReq(); ok {
-		if err := compatibilityresult.ParticipantNameReqValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name_req", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.participant_name_req": %w`, err)}
-		}
-	}
-	if _, ok := crc.mutation.ParticipantNameProv(); !ok {
-		return &ValidationError{Name: "participant_name_prov", err: errors.New(`ent: missing required field "CompatibilityResult.participant_name_prov"`)}
-	}
-	if v, ok := crc.mutation.ParticipantNameProv(); ok {
-		if err := compatibilityresult.ParticipantNameProvValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name_prov", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.participant_name_prov": %w`, err)}
-		}
-	}
 	if _, ok := crc.mutation.Result(); !ok {
 		return &ValidationError{Name: "result", err: errors.New(`ent: missing required field "CompatibilityResult.result"`)}
 	}
@@ -216,14 +188,6 @@ func (crc *CompatibilityResultCreate) createSpec() (*CompatibilityResult, *sqlgr
 		_node = &CompatibilityResult{config: crc.config}
 		_spec = sqlgraph.NewCreateSpec(compatibilityresult.Table, sqlgraph.NewFieldSpec(compatibilityresult.FieldID, field.TypeInt))
 	)
-	if value, ok := crc.mutation.ParticipantNameReq(); ok {
-		_spec.SetField(compatibilityresult.FieldParticipantNameReq, field.TypeString, value)
-		_node.ParticipantNameReq = value
-	}
-	if value, ok := crc.mutation.ParticipantNameProv(); ok {
-		_spec.SetField(compatibilityresult.FieldParticipantNameProv, field.TypeString, value)
-		_node.ParticipantNameProv = value
-	}
 	if value, ok := crc.mutation.Result(); ok {
 		_spec.SetField(compatibilityresult.FieldResult, field.TypeBool, value)
 		_node.Result = value

@@ -56,11 +56,6 @@ func IDLTE(id uuid.UUID) predicate.RegisteredProvider {
 	return predicate.RegisteredProvider(sql.FieldLTE(FieldID, id))
 }
 
-// ParticipantName applies equality check predicate on the "participant_name" field. It's identical to ParticipantNameEQ.
-func ParticipantName(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldEQ(FieldParticipantName, v))
-}
-
 // ContractID applies equality check predicate on the "contract_id" field. It's identical to ContractIDEQ.
 func ContractID(v string) predicate.RegisteredProvider {
 	return predicate.RegisteredProvider(sql.FieldEQ(FieldContractID, v))
@@ -74,71 +69,6 @@ func CreatedAt(v time.Time) predicate.RegisteredProvider {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.RegisteredProvider {
 	return predicate.RegisteredProvider(sql.FieldEQ(FieldUpdatedAt, v))
-}
-
-// ParticipantNameEQ applies the EQ predicate on the "participant_name" field.
-func ParticipantNameEQ(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldEQ(FieldParticipantName, v))
-}
-
-// ParticipantNameNEQ applies the NEQ predicate on the "participant_name" field.
-func ParticipantNameNEQ(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldNEQ(FieldParticipantName, v))
-}
-
-// ParticipantNameIn applies the In predicate on the "participant_name" field.
-func ParticipantNameIn(vs ...string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldIn(FieldParticipantName, vs...))
-}
-
-// ParticipantNameNotIn applies the NotIn predicate on the "participant_name" field.
-func ParticipantNameNotIn(vs ...string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldNotIn(FieldParticipantName, vs...))
-}
-
-// ParticipantNameGT applies the GT predicate on the "participant_name" field.
-func ParticipantNameGT(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldGT(FieldParticipantName, v))
-}
-
-// ParticipantNameGTE applies the GTE predicate on the "participant_name" field.
-func ParticipantNameGTE(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldGTE(FieldParticipantName, v))
-}
-
-// ParticipantNameLT applies the LT predicate on the "participant_name" field.
-func ParticipantNameLT(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldLT(FieldParticipantName, v))
-}
-
-// ParticipantNameLTE applies the LTE predicate on the "participant_name" field.
-func ParticipantNameLTE(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldLTE(FieldParticipantName, v))
-}
-
-// ParticipantNameContains applies the Contains predicate on the "participant_name" field.
-func ParticipantNameContains(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldContains(FieldParticipantName, v))
-}
-
-// ParticipantNameHasPrefix applies the HasPrefix predicate on the "participant_name" field.
-func ParticipantNameHasPrefix(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldHasPrefix(FieldParticipantName, v))
-}
-
-// ParticipantNameHasSuffix applies the HasSuffix predicate on the "participant_name" field.
-func ParticipantNameHasSuffix(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldHasSuffix(FieldParticipantName, v))
-}
-
-// ParticipantNameEqualFold applies the EqualFold predicate on the "participant_name" field.
-func ParticipantNameEqualFold(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldEqualFold(FieldParticipantName, v))
-}
-
-// ParticipantNameContainsFold applies the ContainsFold predicate on the "participant_name" field.
-func ParticipantNameContainsFold(v string) predicate.RegisteredProvider {
-	return predicate.RegisteredProvider(sql.FieldContainsFold(FieldParticipantName, v))
 }
 
 // ContractIDEQ applies the EQ predicate on the "contract_id" field.

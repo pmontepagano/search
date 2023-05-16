@@ -23,8 +23,6 @@ type RegisteredProvider struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// URL holds the value of the "url" field.
 	URL *url.URL `json:"url,omitempty"`
-	// ParticipantName holds the value of the "participant_name" field.
-	ParticipantName string `json:"participant_name,omitempty"`
 	// ContractID holds the value of the "contract_id" field.
 	ContractID string `json:"contract_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -66,7 +64,7 @@ func (*RegisteredProvider) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case registeredprovider.FieldURL:
 			values[i] = new([]byte)
-		case registeredprovider.FieldParticipantName, registeredprovider.FieldContractID:
+		case registeredprovider.FieldContractID:
 			values[i] = new(sql.NullString)
 		case registeredprovider.FieldCreatedAt, registeredprovider.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -100,12 +98,6 @@ func (rp *RegisteredProvider) assignValues(columns []string, values []any) error
 				if err := json.Unmarshal(*value, &rp.URL); err != nil {
 					return fmt.Errorf("unmarshal field url: %w", err)
 				}
-			}
-		case registeredprovider.FieldParticipantName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field participant_name", values[i])
-			} else if value.Valid {
-				rp.ParticipantName = value.String
 			}
 		case registeredprovider.FieldContractID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -168,9 +160,6 @@ func (rp *RegisteredProvider) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", rp.ID))
 	builder.WriteString("url=")
 	builder.WriteString(fmt.Sprintf("%v", rp.URL))
-	builder.WriteString(", ")
-	builder.WriteString("participant_name=")
-	builder.WriteString(rp.ParticipantName)
 	builder.WriteString(", ")
 	builder.WriteString("contract_id=")
 	builder.WriteString(rp.ContractID)

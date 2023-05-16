@@ -20,8 +20,8 @@ const (
 // System is a set of CFSMs.
 type System struct {
 	sync.Mutex
-	CFSMs     []*CFSM          // Individual CFSMs in the communicating system.
-	cfsmNames map[string]*CFSM // Same CFSMs but ordered by insertion time.
+	CFSMs     []*CFSM          // Individual CFSMs in the communicating system ordered by insertion time.
+	cfsmNames map[string]*CFSM // Same CFSMs but indexed by name (names must be unique).
 	Comment   string           // Comments on the System.
 }
 
@@ -84,6 +84,16 @@ func (s *System) RemoveMachine(id int) {
 	}
 }
 
+func (s *System) GetMachine(name string) (*CFSM, error) {
+	s.Lock()
+	defer s.Unlock()
+	val, ok := s.cfsmNames[name]
+	if !ok {
+		return nil, fmt.Errorf("machine with name %s does not exist in the System", name)
+	}
+	return val, nil
+}
+
 func (s *System) bytesBuffer() *bytes.Buffer {
 	var buf bytes.Buffer
 	for _, cfsm := range s.CFSMs {
@@ -98,6 +108,16 @@ func (s *System) String() string {
 
 func (s *System) Bytes() []byte {
 	return s.bytesBuffer().Bytes()
+}
+
+func (s *System) GetAllMachineNames() []string {
+	s.Lock()
+	defer s.Unlock()
+	names := make([]string, len(s.CFSMs))
+	for i, m := range s.CFSMs {
+		names[i] = m.Name
+	}
+	return names
 }
 
 // CFSM is a single Communicating Finite State Machine.

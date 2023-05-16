@@ -29,12 +29,6 @@ func (rpc *RegisteredProviderCreate) SetURL(u *url.URL) *RegisteredProviderCreat
 	return rpc
 }
 
-// SetParticipantName sets the "participant_name" field.
-func (rpc *RegisteredProviderCreate) SetParticipantName(s string) *RegisteredProviderCreate {
-	rpc.mutation.SetParticipantName(s)
-	return rpc
-}
-
 // SetContractID sets the "contract_id" field.
 func (rpc *RegisteredProviderCreate) SetContractID(s string) *RegisteredProviderCreate {
 	rpc.mutation.SetContractID(s)
@@ -142,14 +136,6 @@ func (rpc *RegisteredProviderCreate) check() error {
 	if _, ok := rpc.mutation.URL(); !ok {
 		return &ValidationError{Name: "url", err: errors.New(`ent: missing required field "RegisteredProvider.url"`)}
 	}
-	if _, ok := rpc.mutation.ParticipantName(); !ok {
-		return &ValidationError{Name: "participant_name", err: errors.New(`ent: missing required field "RegisteredProvider.participant_name"`)}
-	}
-	if v, ok := rpc.mutation.ParticipantName(); ok {
-		if err := registeredprovider.ParticipantNameValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
-		}
-	}
 	if _, ok := rpc.mutation.ContractID(); !ok {
 		return &ValidationError{Name: "contract_id", err: errors.New(`ent: missing required field "RegisteredProvider.contract_id"`)}
 	}
@@ -205,10 +191,6 @@ func (rpc *RegisteredProviderCreate) createSpec() (*RegisteredProvider, *sqlgrap
 	if value, ok := rpc.mutation.URL(); ok {
 		_spec.SetField(registeredprovider.FieldURL, field.TypeJSON, value)
 		_node.URL = value
-	}
-	if value, ok := rpc.mutation.ParticipantName(); ok {
-		_spec.SetField(registeredprovider.FieldParticipantName, field.TypeString, value)
-		_node.ParticipantName = value
 	}
 	if value, ok := rpc.mutation.CreatedAt(); ok {
 		_spec.SetField(registeredprovider.FieldCreatedAt, field.TypeTime, value)

@@ -21,8 +21,6 @@ func (CompatibilityResult) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("requirement_contract_id").MaxLen(128).MinLen(128),
 		field.String("provider_contract_id").MaxLen(128).MinLen(128),
-		field.String("participant_name_req").NotEmpty(),
-		field.String("participant_name_prov").NotEmpty(),
 		field.Bool("result"),
 		field.JSON("mapping", ParticipantNameMapping{}).Optional(),
 
@@ -41,6 +39,6 @@ func (CompatibilityResult) Edges() []ent.Edge {
 
 func (CompatibilityResult) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("requirement_contract_id", "provider_contract_id", "participant_name_req", "participant_name_prov").Unique(),
+		index.Fields("requirement_contract_id", "provider_contract_id").Unique(),
 	}
 }

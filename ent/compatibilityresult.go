@@ -24,10 +24,6 @@ type CompatibilityResult struct {
 	RequirementContractID string `json:"requirement_contract_id,omitempty"`
 	// ProviderContractID holds the value of the "provider_contract_id" field.
 	ProviderContractID string `json:"provider_contract_id,omitempty"`
-	// ParticipantNameReq holds the value of the "participant_name_req" field.
-	ParticipantNameReq string `json:"participant_name_req,omitempty"`
-	// ParticipantNameProv holds the value of the "participant_name_prov" field.
-	ParticipantNameProv string `json:"participant_name_prov,omitempty"`
 	// Result holds the value of the "result" field.
 	Result bool `json:"result,omitempty"`
 	// Mapping holds the value of the "mapping" field.
@@ -90,7 +86,7 @@ func (*CompatibilityResult) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case compatibilityresult.FieldID:
 			values[i] = new(sql.NullInt64)
-		case compatibilityresult.FieldRequirementContractID, compatibilityresult.FieldProviderContractID, compatibilityresult.FieldParticipantNameReq, compatibilityresult.FieldParticipantNameProv:
+		case compatibilityresult.FieldRequirementContractID, compatibilityresult.FieldProviderContractID:
 			values[i] = new(sql.NullString)
 		case compatibilityresult.FieldCreatedAt, compatibilityresult.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -126,18 +122,6 @@ func (cr *CompatibilityResult) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field provider_contract_id", values[i])
 			} else if value.Valid {
 				cr.ProviderContractID = value.String
-			}
-		case compatibilityresult.FieldParticipantNameReq:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field participant_name_req", values[i])
-			} else if value.Valid {
-				cr.ParticipantNameReq = value.String
-			}
-		case compatibilityresult.FieldParticipantNameProv:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field participant_name_prov", values[i])
-			} else if value.Valid {
-				cr.ParticipantNameProv = value.String
 			}
 		case compatibilityresult.FieldResult:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -216,12 +200,6 @@ func (cr *CompatibilityResult) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("provider_contract_id=")
 	builder.WriteString(cr.ProviderContractID)
-	builder.WriteString(", ")
-	builder.WriteString("participant_name_req=")
-	builder.WriteString(cr.ParticipantNameReq)
-	builder.WriteString(", ")
-	builder.WriteString("participant_name_prov=")
-	builder.WriteString(cr.ParticipantNameProv)
 	builder.WriteString(", ")
 	builder.WriteString("result=")
 	builder.WriteString(fmt.Sprintf("%v", cr.Result))

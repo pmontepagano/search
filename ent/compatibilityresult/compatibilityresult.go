@@ -18,10 +18,6 @@ const (
 	FieldRequirementContractID = "requirement_contract_id"
 	// FieldProviderContractID holds the string denoting the provider_contract_id field in the database.
 	FieldProviderContractID = "provider_contract_id"
-	// FieldParticipantNameReq holds the string denoting the participant_name_req field in the database.
-	FieldParticipantNameReq = "participant_name_req"
-	// FieldParticipantNameProv holds the string denoting the participant_name_prov field in the database.
-	FieldParticipantNameProv = "participant_name_prov"
 	// FieldResult holds the string denoting the result field in the database.
 	FieldResult = "result"
 	// FieldMapping holds the string denoting the mapping field in the database.
@@ -57,8 +53,6 @@ var Columns = []string{
 	FieldID,
 	FieldRequirementContractID,
 	FieldProviderContractID,
-	FieldParticipantNameReq,
-	FieldParticipantNameProv,
 	FieldResult,
 	FieldMapping,
 	FieldCreatedAt,
@@ -80,10 +74,6 @@ var (
 	RequirementContractIDValidator func(string) error
 	// ProviderContractIDValidator is a validator for the "provider_contract_id" field. It is called by the builders before save.
 	ProviderContractIDValidator func(string) error
-	// ParticipantNameReqValidator is a validator for the "participant_name_req" field. It is called by the builders before save.
-	ParticipantNameReqValidator func(string) error
-	// ParticipantNameProvValidator is a validator for the "participant_name_prov" field. It is called by the builders before save.
-	ParticipantNameProvValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -108,16 +98,6 @@ func ByRequirementContractID(opts ...sql.OrderTermOption) OrderOption {
 // ByProviderContractID orders the results by the provider_contract_id field.
 func ByProviderContractID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProviderContractID, opts...).ToFunc()
-}
-
-// ByParticipantNameReq orders the results by the participant_name_req field.
-func ByParticipantNameReq(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldParticipantNameReq, opts...).ToFunc()
-}
-
-// ByParticipantNameProv orders the results by the participant_name_prov field.
-func ByParticipantNameProv(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldParticipantNameProv, opts...).ToFunc()
 }
 
 // ByResult orders the results by the result field.

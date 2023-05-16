@@ -54,20 +54,12 @@ func init() {
 			return nil
 		}
 	}()
-	// compatibilityresultDescParticipantNameReq is the schema descriptor for participant_name_req field.
-	compatibilityresultDescParticipantNameReq := compatibilityresultFields[2].Descriptor()
-	// compatibilityresult.ParticipantNameReqValidator is a validator for the "participant_name_req" field. It is called by the builders before save.
-	compatibilityresult.ParticipantNameReqValidator = compatibilityresultDescParticipantNameReq.Validators[0].(func(string) error)
-	// compatibilityresultDescParticipantNameProv is the schema descriptor for participant_name_prov field.
-	compatibilityresultDescParticipantNameProv := compatibilityresultFields[3].Descriptor()
-	// compatibilityresult.ParticipantNameProvValidator is a validator for the "participant_name_prov" field. It is called by the builders before save.
-	compatibilityresult.ParticipantNameProvValidator = compatibilityresultDescParticipantNameProv.Validators[0].(func(string) error)
 	// compatibilityresultDescCreatedAt is the schema descriptor for created_at field.
-	compatibilityresultDescCreatedAt := compatibilityresultFields[6].Descriptor()
+	compatibilityresultDescCreatedAt := compatibilityresultFields[4].Descriptor()
 	// compatibilityresult.DefaultCreatedAt holds the default value on creation for the created_at field.
 	compatibilityresult.DefaultCreatedAt = compatibilityresultDescCreatedAt.Default.(func() time.Time)
 	// compatibilityresultDescUpdatedAt is the schema descriptor for updated_at field.
-	compatibilityresultDescUpdatedAt := compatibilityresultFields[7].Descriptor()
+	compatibilityresultDescUpdatedAt := compatibilityresultFields[5].Descriptor()
 	// compatibilityresult.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	compatibilityresult.DefaultUpdatedAt = compatibilityresultDescUpdatedAt.Default.(func() time.Time)
 	// compatibilityresult.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -103,12 +95,8 @@ func init() {
 	}()
 	registeredproviderFields := schema.RegisteredProvider{}.Fields()
 	_ = registeredproviderFields
-	// registeredproviderDescParticipantName is the schema descriptor for participant_name field.
-	registeredproviderDescParticipantName := registeredproviderFields[2].Descriptor()
-	// registeredprovider.ParticipantNameValidator is a validator for the "participant_name" field. It is called by the builders before save.
-	registeredprovider.ParticipantNameValidator = registeredproviderDescParticipantName.Validators[0].(func(string) error)
 	// registeredproviderDescContractID is the schema descriptor for contract_id field.
-	registeredproviderDescContractID := registeredproviderFields[3].Descriptor()
+	registeredproviderDescContractID := registeredproviderFields[2].Descriptor()
 	// registeredprovider.ContractIDValidator is a validator for the "contract_id" field. It is called by the builders before save.
 	registeredprovider.ContractIDValidator = func() func(string) error {
 		validators := registeredproviderDescContractID.Validators
@@ -126,11 +114,11 @@ func init() {
 		}
 	}()
 	// registeredproviderDescCreatedAt is the schema descriptor for created_at field.
-	registeredproviderDescCreatedAt := registeredproviderFields[4].Descriptor()
+	registeredproviderDescCreatedAt := registeredproviderFields[3].Descriptor()
 	// registeredprovider.DefaultCreatedAt holds the default value on creation for the created_at field.
 	registeredprovider.DefaultCreatedAt = registeredproviderDescCreatedAt.Default.(func() time.Time)
 	// registeredproviderDescUpdatedAt is the schema descriptor for updated_at field.
-	registeredproviderDescUpdatedAt := registeredproviderFields[5].Descriptor()
+	registeredproviderDescUpdatedAt := registeredproviderFields[4].Descriptor()
 	// registeredprovider.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	registeredprovider.DefaultUpdatedAt = registeredproviderDescUpdatedAt.Default.(func() time.Time)
 	// registeredprovider.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

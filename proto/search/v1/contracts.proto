@@ -3,13 +3,24 @@ package search.v1;
 option go_package = "github.com/clpombo/search/gen/go/v1";
 
 
-message Contract {
+message GlobalContract {
     bytes contract = 1;
-    ContractFormat format = 2;
+    GlobalContractFormat format = 2;
+    // string initiator_name = 3;
 }
 
-enum ContractFormat {
-    CONTRACT_FORMAT_UNSPECIFIED = 0;
-    CONTRACT_FORMAT_FSA = 1;   // System of CFSMs in FSA file format.
-    CONTRACT_FORMAT_GC = 2;  // Global Choreography.
+enum GlobalContractFormat {
+    GLOBAL_CONTRACT_FORMAT_UNSPECIFIED = 0;
+    GLOBAL_CONTRACT_FORMAT_FSA = 1;   // System of CFSMs in FSA file format.
+    GLOBAL_CONTRACT_FORMAT_GC = 2;  // Global Choreography.
+}
+
+message LocalContract {
+    bytes contract = 1;
+    LocalContractFormat format = 2;
+}
+
+enum LocalContractFormat {
+    LOCAL_CONTRACT_FORMAT_UNSPECIFIED = 0;
+    LOCAL_CONTRACT_FORMAT_FSA = 1; // Single CFSM in FSA file format (for Service Providers).
 }

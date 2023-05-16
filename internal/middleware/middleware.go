@@ -80,9 +80,9 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
 }
 
 type registeredApp struct {
-	Contract     pb.Contract // TODO: replace with Contract interface
-	ProviderName string      // Name of the provider in the contract.
-	NotifyChan   *chan pb.InitChannelNotification
+	Contract pb.LocalContract // TODO: replace with contract.LocalContract interface?
+	// ProviderName string           // Name of the provider in the contract.
+	NotifyChan *chan pb.InitChannelNotification
 }
 
 type messageExchangeStream interface {

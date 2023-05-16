@@ -20,7 +20,6 @@ func (RegisteredProvider) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique().Immutable(),
 		field.JSON("url", &url.URL{}),
-		field.String("participant_name").NotEmpty(),
 		field.String("contract_id").MaxLen(128).MinLen(128),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

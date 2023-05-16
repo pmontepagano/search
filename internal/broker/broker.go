@@ -52,21 +52,20 @@ func getRemoteParticipant(r *ent.RegisteredProvider) *pb.RemoteParticipant {
 	return &res
 }
 
-func getProviderContract(r *ent.RegisteredProvider) (contract.Contract, error) {
-	// TODO: replace with BoundContract ?
+func getProviderContract(r *ent.RegisteredProvider) (contract.LocalContract, error) {
 	return getContract(r.Edges.Contract)
 }
 
-func getContract(c *ent.RegisteredContract) (contract.Contract, error) {
-	return contract.ConvertPBContract(&pb.Contract{
+func getContract(c *ent.RegisteredContract) (contract.LocalContract, error) {
+	return contract.ConvertPBLocalContract(&pb.LocalContract{
 		Contract: c.Contract,
-		Format:   pb.ContractFormat(c.Format),
+		Format:   pb.LocalContractFormat(c.Format),
 	})
 }
 
-type ContractCompatibilityFunc func(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error)
+type ContractCompatibilityFunc func(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error)
 
-func computeCompatibility(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error) {
+func computeCompatibility(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
 	return false, nil, nil
 }
 
@@ -99,7 +98,17 @@ func (s *brokerServer) getRandomRegisteredProvider() *ent.RegisteredProvider {
 	return r
 }
 
-func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Contract, rc *ent.RegisteredContract, p string) (*ent.RegisteredProvider, error) {
+func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.GlobalContract, p string) (*ent.RegisteredProvider, error) {
+	// Get from the database the projection of the requirement contract (it should have been saved when handling BrokerChannelRequest).
+	// rc *ent.RegisteredContract
+	projection, err := req.GetProjection(p)
+	if err != nil {
+		return nil, err
+	}
+	rc, err := s.dbClient.RegisteredContract.Get(ctx, projection.GetContractID())
+	if err != nil {
+		return nil, err
+	}
 	// Search in database if there are any compatible providers.
 	cachedResults, err := s.dbClient.CompatibilityResult.
 		Query().
@@ -164,7 +173,13 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Contra
 						// TODO: handle error properly
 						return
 					}
-					isCompatible, mapping, err := s.compatFunc(ctx, req, provContract, p, prov.ParticipantName)
+					reqProjection, err := req.GetProjection(p)
+					if err != nil {
+						s.logger.Printf("error getting projection for participant %s", p)
+						// TODO: handle error properly
+						return
+					}
+					isCompatible, mapping, err := s.compatFunc(ctx, reqProjection, provContract)
 					if err != nil {
 						s.logger.Printf("error calculating compatibility: %v", err)
 						// TODO: proper error handler
@@ -172,9 +187,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Contra
 					}
 					_, err = s.dbClient.CompatibilityResult.Create().
 						SetRequirementContractID(rc.ID).
-						SetParticipantNameReq(p).
 						SetProviderContractID(c.ID).
-						SetParticipantNameProv(prov.ParticipantName).
 						SetResult(isCompatible).
 						SetMapping(mapping).
 						Save(ctx)
@@ -204,7 +217,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Contra
 
 // given a contract and a list of participants, get best possible candidates for those candidates
 // from all the candidates present in the registry
-func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.Contract, rc *ent.RegisteredContract, participants []string,
+func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.GlobalContract, participants []string,
 	blacklistedProviders map[*pb.RemoteParticipant]struct{}) (map[string]*ent.RegisteredProvider, error) {
 	// sanity check: check that all elements of param `participants` are present as participants in param `contract`
 	contractParticipants := contract.GetParticipants()
@@ -223,7 +236,7 @@ func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.
 
 	// TODO: use blacklistedProviders
 	providers, err := iter.MapErr(participants, func(p *string) (*ent.RegisteredProvider, error) {
-		return s.getBestCandidate(ctx, contract, rc, *p)
+		return s.getBestCandidate(ctx, contract, *p)
 	})
 	if err != nil {
 		// TODO: better error handling.
@@ -253,8 +266,6 @@ func (s *brokerServer) getParticipantMapping(req contract.Contract, initiatorMap
 		compatibilityresult.And(
 			compatibilityresult.HasRequirementContractWith(registeredcontract.ID(req.GetContractID())),
 			compatibilityresult.HasProviderContractWith(registeredcontract.ID(receiverRegisteredProvider.ContractID)),
-			compatibilityresult.ParticipantNameReq(receiver),
-			compatibilityresult.ParticipantNameProv(receiverRegisteredProvider.ParticipantName),
 		),
 	).First(context.TODO())
 	if err != nil {
@@ -270,7 +281,7 @@ func (s *brokerServer) getParticipantMapping(req contract.Contract, initiatorMap
 }
 
 // this routine will find compatible candidates and notify them
-func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, rc *ent.RegisteredContract, presetParticipants map[string]*pb.RemoteParticipant,
+func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, presetParticipants map[string]*pb.RemoteParticipant,
 	initiatorName string, blacklistedProviders map[*pb.RemoteParticipant]struct{}) {
 	// TODO: split this function up in two functions: broker and initializeChannel
 	// func (s *brokerServer) broker(ctx context.Context, reqContract contract.Contract, initiatorName string, presetParticipants map[string]struct{},
@@ -283,7 +294,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, rc *en
 	s.logger.Printf("brokerAndInitialize contract.GetParticipants(): %v", reqContract.GetParticipants())
 	participantsToMatch := filterParticipants(reqContract.GetParticipants(), presetParticipants)
 	s.logger.Printf("brokerAndInitialize participantsToMatch: %v", participantsToMatch)
-	candidates, err := s.getBestCandidates(context.TODO(), reqContract, rc, participantsToMatch, blacklistedProviders)
+	candidates, err := s.getBestCandidates(context.TODO(), reqContract, participantsToMatch, blacklistedProviders)
 	if err != nil {
 		// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
 		s.logger.Fatalf("Could not get any provider candidates. Error: %s", err)
@@ -394,24 +405,32 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.Contract, rc *en
 
 func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
 	s.logger.Printf("Received broker request for contract: '%s'", request.Contract.Contract)
-	reqContract, err := contract.ConvertPBContract(request.GetContract())
+	reqContract, err := contract.ConvertPBGlobalContract(request.GetContract())
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse contract")
 	}
 	presetParticipants := request.GetPresetParticipants()
 	initiatorName := request.GetInitiatorName()
 
-	rc, err := s.getOrSaveContract(ctx, reqContract)
-	if err != nil {
-		return nil, status.New(codes.Internal, err.Error()).Err()
+	for _, pName := range reqContract.GetRemoteParticipantNames() {
+		if _, ok := presetParticipants[pName]; !ok {
+			participantContract, err := reqContract.GetProjection(pName)
+			if err != nil {
+				return nil, status.New(codes.Internal, err.Error()).Err()
+			}
+			_, err = s.getOrSaveContract(ctx, participantContract)
+			if err != nil {
+				return nil, status.New(codes.Internal, err.Error()).Err()
+			}
+		}
 	}
 
-	go s.brokerAndInitialize(reqContract, rc, presetParticipants, initiatorName, make(map[*pb.RemoteParticipant]struct{}))
+	go s.brokerAndInitialize(reqContract, presetParticipants, initiatorName, make(map[*pb.RemoteParticipant]struct{}))
 
 	return &pb.BrokerChannelResponse{Result: pb.BrokerChannelResponse_RESULT_ACK}, nil
 }
 
-func (s *brokerServer) getOrSaveContract(ctx context.Context, c contract.Contract) (*ent.RegisteredContract, error) {
+func (s *brokerServer) getOrSaveContract(ctx context.Context, c contract.LocalContract) (*ent.RegisteredContract, error) {
 	contractID := c.GetContractID()
 
 	tx, err := s.dbClient.Tx(ctx)
@@ -447,7 +466,7 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 	s.logger.Printf("Registering provider from URL: %s, contract '%s'", req.Url, req.Contract.Contract)
 
 	appID := uuid.New()
-	provContract, err := contract.ConvertPBContract(req.GetContract())
+	provContract, err := contract.ConvertPBLocalContract(req.GetContract())
 	if err != nil {
 		st := status.New(codes.InvalidArgument, "invalid contract or format")
 		return nil, st.Err()
@@ -465,7 +484,6 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 	_, err = s.dbClient.RegisteredProvider.Create().
 		SetID(appID).
 		SetURL(providerUrl).
-		SetParticipantName(req.ProviderName).
 		SetContract(rc).
 		Save(ctx)
 	if err != nil {

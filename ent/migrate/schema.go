@@ -11,8 +11,6 @@ var (
 	// CompatibilityResultsColumns holds the columns for the "compatibility_results" table.
 	CompatibilityResultsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "participant_name_req", Type: field.TypeString},
-		{Name: "participant_name_prov", Type: field.TypeString},
 		{Name: "result", Type: field.TypeBool},
 		{Name: "mapping", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
@@ -28,22 +26,22 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "compatibility_results_registered_contracts_requirement_contract",
-				Columns:    []*schema.Column{CompatibilityResultsColumns[7]},
+				Columns:    []*schema.Column{CompatibilityResultsColumns[5]},
 				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "compatibility_results_registered_contracts_provider_contract",
-				Columns:    []*schema.Column{CompatibilityResultsColumns[8]},
+				Columns:    []*schema.Column{CompatibilityResultsColumns[6]},
 				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "compatibilityresult_requirement_contract_id_provider_contract_id_participant_name_req_participant_name_prov",
+				Name:    "compatibilityresult_requirement_contract_id_provider_contract_id",
 				Unique:  true,
-				Columns: []*schema.Column{CompatibilityResultsColumns[7], CompatibilityResultsColumns[8], CompatibilityResultsColumns[1], CompatibilityResultsColumns[2]},
+				Columns: []*schema.Column{CompatibilityResultsColumns[5], CompatibilityResultsColumns[6]},
 			},
 		},
 	}
@@ -64,7 +62,6 @@ var (
 	RegisteredProvidersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "url", Type: field.TypeJSON},
-		{Name: "participant_name", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "contract_id", Type: field.TypeString, Size: 128},
@@ -77,7 +74,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "registered_providers_registered_contracts_contract",
-				Columns:    []*schema.Column{RegisteredProvidersColumns[5]},
+				Columns:    []*schema.Column{RegisteredProvidersColumns[4]},
 				RefColumns: []*schema.Column{RegisteredContractsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

@@ -42,18 +42,6 @@ func (cru *CompatibilityResultUpdate) SetProviderContractID(s string) *Compatibi
 	return cru
 }
 
-// SetParticipantNameReq sets the "participant_name_req" field.
-func (cru *CompatibilityResultUpdate) SetParticipantNameReq(s string) *CompatibilityResultUpdate {
-	cru.mutation.SetParticipantNameReq(s)
-	return cru
-}
-
-// SetParticipantNameProv sets the "participant_name_prov" field.
-func (cru *CompatibilityResultUpdate) SetParticipantNameProv(s string) *CompatibilityResultUpdate {
-	cru.mutation.SetParticipantNameProv(s)
-	return cru
-}
-
 // SetResult sets the "result" field.
 func (cru *CompatibilityResultUpdate) SetResult(b bool) *CompatibilityResultUpdate {
 	cru.mutation.SetResult(b)
@@ -153,16 +141,6 @@ func (cru *CompatibilityResultUpdate) check() error {
 			return &ValidationError{Name: "provider_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.provider_contract_id": %w`, err)}
 		}
 	}
-	if v, ok := cru.mutation.ParticipantNameReq(); ok {
-		if err := compatibilityresult.ParticipantNameReqValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name_req", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.participant_name_req": %w`, err)}
-		}
-	}
-	if v, ok := cru.mutation.ParticipantNameProv(); ok {
-		if err := compatibilityresult.ParticipantNameProvValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name_prov", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.participant_name_prov": %w`, err)}
-		}
-	}
 	if _, ok := cru.mutation.RequirementContractID(); cru.mutation.RequirementContractCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "CompatibilityResult.requirement_contract"`)
 	}
@@ -183,12 +161,6 @@ func (cru *CompatibilityResultUpdate) sqlSave(ctx context.Context) (n int, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cru.mutation.ParticipantNameReq(); ok {
-		_spec.SetField(compatibilityresult.FieldParticipantNameReq, field.TypeString, value)
-	}
-	if value, ok := cru.mutation.ParticipantNameProv(); ok {
-		_spec.SetField(compatibilityresult.FieldParticipantNameProv, field.TypeString, value)
 	}
 	if value, ok := cru.mutation.Result(); ok {
 		_spec.SetField(compatibilityresult.FieldResult, field.TypeBool, value)
@@ -289,18 +261,6 @@ func (cruo *CompatibilityResultUpdateOne) SetRequirementContractID(s string) *Co
 // SetProviderContractID sets the "provider_contract_id" field.
 func (cruo *CompatibilityResultUpdateOne) SetProviderContractID(s string) *CompatibilityResultUpdateOne {
 	cruo.mutation.SetProviderContractID(s)
-	return cruo
-}
-
-// SetParticipantNameReq sets the "participant_name_req" field.
-func (cruo *CompatibilityResultUpdateOne) SetParticipantNameReq(s string) *CompatibilityResultUpdateOne {
-	cruo.mutation.SetParticipantNameReq(s)
-	return cruo
-}
-
-// SetParticipantNameProv sets the "participant_name_prov" field.
-func (cruo *CompatibilityResultUpdateOne) SetParticipantNameProv(s string) *CompatibilityResultUpdateOne {
-	cruo.mutation.SetParticipantNameProv(s)
 	return cruo
 }
 
@@ -416,16 +376,6 @@ func (cruo *CompatibilityResultUpdateOne) check() error {
 			return &ValidationError{Name: "provider_contract_id", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.provider_contract_id": %w`, err)}
 		}
 	}
-	if v, ok := cruo.mutation.ParticipantNameReq(); ok {
-		if err := compatibilityresult.ParticipantNameReqValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name_req", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.participant_name_req": %w`, err)}
-		}
-	}
-	if v, ok := cruo.mutation.ParticipantNameProv(); ok {
-		if err := compatibilityresult.ParticipantNameProvValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name_prov", err: fmt.Errorf(`ent: validator failed for field "CompatibilityResult.participant_name_prov": %w`, err)}
-		}
-	}
 	if _, ok := cruo.mutation.RequirementContractID(); cruo.mutation.RequirementContractCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "CompatibilityResult.requirement_contract"`)
 	}
@@ -463,12 +413,6 @@ func (cruo *CompatibilityResultUpdateOne) sqlSave(ctx context.Context) (_node *C
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cruo.mutation.ParticipantNameReq(); ok {
-		_spec.SetField(compatibilityresult.FieldParticipantNameReq, field.TypeString, value)
-	}
-	if value, ok := cruo.mutation.ParticipantNameProv(); ok {
-		_spec.SetField(compatibilityresult.FieldParticipantNameProv, field.TypeString, value)
 	}
 	if value, ok := cruo.mutation.Result(); ok {
 		_spec.SetField(compatibilityresult.FieldResult, field.TypeBool, value)

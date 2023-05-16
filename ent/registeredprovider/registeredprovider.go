@@ -17,8 +17,6 @@ const (
 	FieldID = "id"
 	// FieldURL holds the string denoting the url field in the database.
 	FieldURL = "url"
-	// FieldParticipantName holds the string denoting the participant_name field in the database.
-	FieldParticipantName = "participant_name"
 	// FieldContractID holds the string denoting the contract_id field in the database.
 	FieldContractID = "contract_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -42,7 +40,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldURL,
-	FieldParticipantName,
 	FieldContractID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -59,8 +56,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// ParticipantNameValidator is a validator for the "participant_name" field. It is called by the builders before save.
-	ParticipantNameValidator func(string) error
 	// ContractIDValidator is a validator for the "contract_id" field. It is called by the builders before save.
 	ContractIDValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -79,11 +74,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByParticipantName orders the results by the participant_name field.
-func ByParticipantName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldParticipantName, opts...).ToFunc()
 }
 
 // ByContractID orders the results by the contract_id field.

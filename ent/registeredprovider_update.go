@@ -36,12 +36,6 @@ func (rpu *RegisteredProviderUpdate) SetURL(u *url.URL) *RegisteredProviderUpdat
 	return rpu
 }
 
-// SetParticipantName sets the "participant_name" field.
-func (rpu *RegisteredProviderUpdate) SetParticipantName(s string) *RegisteredProviderUpdate {
-	rpu.mutation.SetParticipantName(s)
-	return rpu
-}
-
 // SetContractID sets the "contract_id" field.
 func (rpu *RegisteredProviderUpdate) SetContractID(s string) *RegisteredProviderUpdate {
 	rpu.mutation.SetContractID(s)
@@ -108,11 +102,6 @@ func (rpu *RegisteredProviderUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rpu *RegisteredProviderUpdate) check() error {
-	if v, ok := rpu.mutation.ParticipantName(); ok {
-		if err := registeredprovider.ParticipantNameValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
-		}
-	}
 	if v, ok := rpu.mutation.ContractID(); ok {
 		if err := registeredprovider.ContractIDValidator(v); err != nil {
 			return &ValidationError{Name: "contract_id", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.contract_id": %w`, err)}
@@ -138,9 +127,6 @@ func (rpu *RegisteredProviderUpdate) sqlSave(ctx context.Context) (n int, err er
 	}
 	if value, ok := rpu.mutation.URL(); ok {
 		_spec.SetField(registeredprovider.FieldURL, field.TypeJSON, value)
-	}
-	if value, ok := rpu.mutation.ParticipantName(); ok {
-		_spec.SetField(registeredprovider.FieldParticipantName, field.TypeString, value)
 	}
 	if value, ok := rpu.mutation.UpdatedAt(); ok {
 		_spec.SetField(registeredprovider.FieldUpdatedAt, field.TypeTime, value)
@@ -197,12 +183,6 @@ type RegisteredProviderUpdateOne struct {
 // SetURL sets the "url" field.
 func (rpuo *RegisteredProviderUpdateOne) SetURL(u *url.URL) *RegisteredProviderUpdateOne {
 	rpuo.mutation.SetURL(u)
-	return rpuo
-}
-
-// SetParticipantName sets the "participant_name" field.
-func (rpuo *RegisteredProviderUpdateOne) SetParticipantName(s string) *RegisteredProviderUpdateOne {
-	rpuo.mutation.SetParticipantName(s)
 	return rpuo
 }
 
@@ -285,11 +265,6 @@ func (rpuo *RegisteredProviderUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rpuo *RegisteredProviderUpdateOne) check() error {
-	if v, ok := rpuo.mutation.ParticipantName(); ok {
-		if err := registeredprovider.ParticipantNameValidator(v); err != nil {
-			return &ValidationError{Name: "participant_name", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.participant_name": %w`, err)}
-		}
-	}
 	if v, ok := rpuo.mutation.ContractID(); ok {
 		if err := registeredprovider.ContractIDValidator(v); err != nil {
 			return &ValidationError{Name: "contract_id", err: fmt.Errorf(`ent: validator failed for field "RegisteredProvider.contract_id": %w`, err)}
@@ -332,9 +307,6 @@ func (rpuo *RegisteredProviderUpdateOne) sqlSave(ctx context.Context) (_node *Re
 	}
 	if value, ok := rpuo.mutation.URL(); ok {
 		_spec.SetField(registeredprovider.FieldURL, field.TypeJSON, value)
-	}
-	if value, ok := rpuo.mutation.ParticipantName(); ok {
-		_spec.SetField(registeredprovider.FieldParticipantName, field.TypeString, value)
 	}
 	if value, ok := rpuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(registeredprovider.FieldUpdatedAt, field.TypeTime, value)
