@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"testing"
-	"time"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
 	"github.com/clpombo/search/internal/contract"
@@ -35,31 +34,24 @@ func TestBrokerChannel_Request(t *testing.T) {
 
 	// register dummy provider
 	_, err = client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
-		Contract: &pb.Contract{
+		Contract: &pb.LocalContract{
 			Contract: []byte(`--
-.outputs
-.state graph
-q0 1 ! hello q0
-.marking q0
-.end
-
 .outputs FooBar
 .state graph
 q0 0 ? hello q0
 .marking q0
 .end
 `),
-			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+			Format: pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
 		},
-		ProviderName: "FooBar",
-		Url:          "fakeurl",
+		Url: "fakeurl",
 	})
 	if err != nil {
 		log.Fatalf("ERROR RegisterProvider: %v", err)
 	}
 
 	// ask for channel brokerage
-	c := pb.Contract{
+	c := pb.GlobalContract{
 		Contract: []byte(`--
 		.outputs
 		.state graph
@@ -73,7 +65,8 @@ q0 0 ? hello q0
 		.marking q0
 		.end
 		`),
-		Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
+		InitiatorName: "0",
 	}
 	req := pb.BrokerChannelRequest{
 		Contract: &c,
@@ -109,30 +102,35 @@ func TestGetParticipantMapping(t *testing.T) {
 	}
 	defer conn.Close()
 	client := pb.NewBrokerServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
+	ctx := context.Background()
 
 	// register dummy provider
-	var dummyContract = []byte(`--
-.outputs
-.state graph
-q0 1 ! hello q0
-.marking q0
-.end
-
+	var dummyProvContract = []byte(`--
 .outputs FooBar
 .state graph
 q0 0 ? hello q0
 .marking q0
 .end
 `)
+	var dummyReqContract = []byte(`--
+.outputs Dummy
+.state graph
+q0 FooBar ! hello q0
+.marking q0
+.end
+
+.outputs FooBar
+.state graph
+q0 Dummy ? hello q0
+.marking q0
+.end
+`)
 	registrationResponse, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
-		Contract: &pb.Contract{
-			Contract: dummyContract,
-			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		Contract: &pb.LocalContract{
+			Contract: dummyProvContract,
+			Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
 		},
-		ProviderName: "0",
-		Url:          "fakeurl_for_provider",
+		Url: "fakeurl_for_provider",
 	})
 	if err != nil {
 		log.Fatalf("ERROR RegisterProvider: %v", err)
@@ -145,11 +143,11 @@ q0 0 ? hello q0
 	b.SetCompatFunc(mockTestGetParticipantMappingContractCompatChecker)
 	// test initiator mapping
 	_, err = client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
-		Contract: &pb.Contract{
-			Contract: dummyContract,
-			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		Contract: &pb.GlobalContract{
+			Contract:      dummyReqContract,
+			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
+			InitiatorName: "FooBar",
 		},
-		InitiatorName: "FooBar",
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			"FooBar": {
 				Url:   "foobar_fake_url",
@@ -170,15 +168,16 @@ q0 0 ? hello q0
 			AppId: registrationResponse.GetAppId(),
 		},
 	}
-	reqContract, err := contract.ConvertPBContract(&pb.Contract{
-		Contract: dummyContract,
-		Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+	reqContract, err := contract.ConvertPBGlobalContract(&pb.GlobalContract{
+		Contract:      dummyReqContract,
+		InitiatorName: "FooBar",
+		Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
 	})
 	if err != nil {
 		t.Error("error converting contract")
 	}
 
-	_, err = b.getBestCandidate(context.Background(), nil, nil, "other")
+	_, err = b.getBestCandidate(context.Background(), reqContract, "FooBar")
 	if err != nil {
 		t.Error("error running getBestCandidate")
 	}
@@ -206,10 +205,9 @@ q0 0 ? hello q0
 	b.Stop()
 }
 
-func mockTestGetParticipantMappingContractCompatChecker(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error) {
+func mockTestGetParticipantMappingContractCompatChecker(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
 	mapping := map[string]string{
-		"0":      "FooBar",
-		"FooBar": "0",
+		"0": "Dummy",
 	}
 	return true, mapping, nil
 }
