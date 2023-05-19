@@ -32,7 +32,7 @@ q0 0 ? world q1
 	}
 	defer exampleFile.Close()
 
-	sys, err := ParseFSAFile(exampleFile)
+	sys, err := ParseSystemCFSMsFSA(exampleFile)
 	if err != nil {
 		t.Errorf("Error parsing FSA: %s", err)
 	}
@@ -93,7 +93,7 @@ func TestPingPongFSAParser(t *testing.T) {
 	}
 	defer exampleFile.Close()
 
-	sys, err := ParseFSAFile(exampleFile)
+	sys, err := ParseSystemCFSMsFSA(exampleFile)
 	if err != nil {
 		t.Errorf("Error parsing FSA: %s", err)
 	}
