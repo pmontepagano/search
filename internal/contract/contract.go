@@ -30,9 +30,9 @@ type LocalContract interface {
 type GlobalContract interface {
 	Contract
 	GetFormat() pb.GlobalContractFormat
-	GetParticipants() []string       // Returns the names of all participants in this contract.
-	GetLocalParticipantName() string // Returns the name of the local participant of this contract.
-	GetProjection(string) (LocalContract, error)
+	GetParticipants() []string                   // Returns the names of all participants in this contract.
+	GetLocalParticipantName() string             // Returns the name of the local participant of this contract.
+	GetProjection(string) (LocalContract, error) // Returns the LocalContract for the given participant name.
 }
 
 type LocalCFSMContract struct {
@@ -127,10 +127,16 @@ func ConvertPBGlobalContract(pbContract *pb.GlobalContract) (GlobalContract, err
 		if err != nil {
 			return nil, err
 		}
-		contract := GlobalCFSMContract{
-			System: cfsmSystem,
+		for _, m := range cfsmSystem.CFSMs {
+			if m.Name == pbContract.InitiatorName {
+				contract := GlobalCFSMContract{
+					System:           cfsmSystem,
+					localParticipant: m,
+				}
+				return &contract, nil
+			}
 		}
-		return &contract, nil
+		return nil, fmt.Errorf("initiator name not found in contract")
 	}
 	return nil, fmt.Errorf("not implemented")
 }
