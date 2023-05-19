@@ -42,8 +42,7 @@ message AppRecvRequest {
 
 message RegisterChannelRequest {
     GlobalContract requirements_contract = 1;
-    string initiator_name = 2; // The name of the initiator in the contract.
-    map<string, RemoteParticipant> preset_participants = 3;  // Mapping of participants that we don't want brokered.
+    map<string, RemoteParticipant> preset_participants = 2;  // Mapping of participants that we don't want brokered.
 }
 
 message RegisterChannelResponse {
