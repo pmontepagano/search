@@ -410,7 +410,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 		return nil, fmt.Errorf("failed to parse contract")
 	}
 	presetParticipants := request.GetPresetParticipants()
-	initiatorName := request.GetInitiatorName()
+	initiatorName := request.Contract.GetInitiatorName()
 
 	for _, pName := range reqContract.GetRemoteParticipantNames() {
 		if _, ok := presetParticipants[pName]; !ok {
@@ -493,22 +493,30 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 	return &pb.RegisterProviderResponse{AppId: appID.String()}, nil
 }
 
-// NewBrokerServer brokerServer constructor
-func NewBrokerServer(databasePath string) *brokerServer {
-	s := &brokerServer{}
-
+func setUpDB(databasePath string) *ent.Client {
 	dbClient, err := ent.Open("sqlite3", databasePath)
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	s.dbClient = dbClient
 	if err := dbClient.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
+	return dbClient
+}
+
+// NewBrokerServer brokerServer constructor
+func NewBrokerServer(databasePath string) *brokerServer {
+	s := &brokerServer{}
+
+	s.dbClient = setUpDB(databasePath)
 	s.compatFunc = computeCompatibility
 
 	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)
 	return s
+}
+
+func newTestBrokerServer() *brokerServer {
+	return NewBrokerServer("file:ent?mode=memory&_fk=1")
 }
 
 func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string) {
