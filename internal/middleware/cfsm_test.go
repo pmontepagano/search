@@ -178,7 +178,7 @@ func TestTravelClient(t *testing.T) {
 
 		// Register the HotelService
 		req := pb.RegisterAppRequest{
-			ProviderContract: &pb.Contract{
+			ProviderContract: &pb.LocalContract{
 				Contract: []byte("Serialized HotelService CFSM."), // TODO: replace with fsa
 			},
 		}
