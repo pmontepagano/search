@@ -53,11 +53,11 @@ func TestRegisterChannel(t *testing.T) {
 	`)
 
 	req := pb.RegisterChannelRequest{
-		RequirementsContract: &pb.Contract{
-			Contract: dummyContract,
-			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		RequirementsContract: &pb.GlobalContract{
+			Contract:      dummyContract,
+			InitiatorName: "0",
+			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
 		},
-		InitiatorName: "pepito",
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
@@ -123,7 +123,7 @@ func TestCircle(t *testing.T) {
 
 			// register dummy app with provider middleware
 			req := pb.RegisterAppRequest{
-				ProviderContract: &pb.Contract{
+				ProviderContract: &pb.LocalContract{
 					Contract: []byte(`
 .outputs self
 .state graph
@@ -131,21 +131,9 @@ q0 sender ? word q1
 q1 receiver ! word q0
 .marking q0
 .end
-
-.outputs sender
-.state graph
-q0 self ! word q0
-.marking q0
-.end
-
-.outputs receiver
-.state graph
-q0 self ? word q0
-.marking q0
-.end`),
-					Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+`),
+					Format: pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
 				},
-				ProviderName: "self",
 			}
 
 			streamCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -213,7 +201,7 @@ q0 self ? word q0
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	req := pb.RegisterChannelRequest{
-		RequirementsContract: &pb.Contract{
+		RequirementsContract: &pb.GlobalContract{
 			Contract: []byte(`
 			.outputs self
 			.state graph
@@ -243,9 +231,9 @@ q0 self ? word q0
 			.marking q0
 			.end
 			`),
-			Format: pb.ContractFormat_CONTRACT_FORMAT_FSA,
+			InitiatorName: "sender",
+			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
 		},
-		InitiatorName: "sender",
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
@@ -370,36 +358,13 @@ const pingContractFSA = `
 `
 
 // Mock function for checking contracts in TestPingPongFullExample.
-func pingPongContractCompatChecker(ctx context.Context, req contract.Contract, prov contract.Contract, reqParticipant string, provParticipant string) (bool, map[string]string, error) {
+func pingPongContractCompatChecker(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
 	log.Printf("Checking with pingPongContractCompatChecker...")
-	// pongContract, err := contract.ConvertPBContract(&pb.Contract{
-	// 	Contract: []byte(pongContractFSA),
-	// 	Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
-	// })
-	// if err != nil {
-	// 	return false, nil, err
-	// }
-	// pingContract, err := contract.ConvertPBContract(&pb.Contract{
-	// 	Contract: []byte(pingContractFSA),
-	// 	Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
-	// })
-	// if err != nil {
-	// 	return false, nil, err
-	// }
-	// if req.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(req.GetBytesRepr(), pingContract.GetBytesRepr()) &&
-	// 	prov.GetFormat() == pb.ContractFormat_CONTRACT_FORMAT_FSA && bytes.Equal(prov.GetBytesRepr(), pongContract.GetBytesRepr()) {
 	mapping := map[string]string{
 		"Other": "Ping",
 		"Pong":  "Pong",
 	}
-	if reqParticipant == "Ping" && provParticipant == "Other" {
-		return true, mapping, nil
-	}
-	if reqParticipant == "Pong" && provParticipant == "Pong" {
-		return true, mapping, nil
-	}
-	// }
-	return false, nil, nil
+	return true, mapping, nil
 }
 
 func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool, exitPong chan bool) {
@@ -420,11 +385,10 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 
 	// Register provider contract with registry.
 	req := pb.RegisterAppRequest{
-		ProviderContract: &pb.Contract{
+		ProviderContract: &pb.LocalContract{
 			Contract: []byte(pongContractFSA),
-			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+			Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
 		},
-		ProviderName: "Pong", // TODO: Is this really necessary? If we only send one CFSM as a provider contract, then it would be unnecesary.
 	}
 	streamCtx, streamCtxCancel := context.WithCancel(context.Background())
 	defer streamCtxCancel()
@@ -557,11 +521,11 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	req := pb.RegisterChannelRequest{
-		RequirementsContract: &pb.Contract{
-			Contract: []byte(pingContractFSA),
-			Format:   pb.ContractFormat_CONTRACT_FORMAT_FSA,
+		RequirementsContract: &pb.GlobalContract{
+			Contract:      []byte(pingContractFSA),
+			InitiatorName: "Ping",
+			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
 		},
-		InitiatorName: "Ping",
 	}
 	regResult, err := client.RegisterChannel(ctx, &req)
 	if err != nil {
