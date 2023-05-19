@@ -10,8 +10,13 @@ Por ahora habrá estos componentes en la arquitectura:
 
 ## Código generado (go protobufs y go-grpc)
 
+# Buf para protobufs y gRPC
+
   buf generate proto
 
+# Entgo para manejo de la base de datos del broker
+
+  go generate ./ent
 
 
 ## Comunicación entre componentes
