@@ -129,7 +129,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	// calculated compatibility, but in this case wait until either they all fail to find
 	// a compatible provider or we find one (and in that case we return the first one).
 	// FALTA FILTRAR POR LOS QUE TENGAN CONTRATO DE REQUERIMIENTO IGUAL AL QUE ESTAMOS PROCESANDO.
-	contractsToCalculate, err := s.dbClient.Debug().RegisteredContract.Query().
+	contractsToCalculate, err := s.dbClient.RegisteredContract.Query().
 		Where(func(s *sql.Selector) {
 			rpt := sql.Table(registeredprovider.Table)
 			crt := sql.Table(compatibilityresult.Table)
@@ -250,7 +250,7 @@ func (s *brokerServer) getParticipantMapping(req contract.Contract, initiatorMap
 		return nil, fmt.Errorf("receiver %s not present in initiator's mapping", receiver)
 	}
 
-	compatResult, err := s.dbClient.Debug().CompatibilityResult.Query().Where(
+	compatResult, err := s.dbClient.CompatibilityResult.Query().Where(
 		compatibilityresult.And(
 			compatibilityresult.HasRequirementContractWith(registeredcontract.ID(req.GetContractID())),
 			compatibilityresult.HasProviderContractWith(registeredcontract.ID(receiverRegisteredProvider.ContractID)),
