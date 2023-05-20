@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 	"testing"
 
+	"github.com/clpombo/search/ent"
+	"github.com/clpombo/search/ent/enttest"
 	pb "github.com/clpombo/search/gen/go/search/v1"
 	"github.com/clpombo/search/internal/contract"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -79,17 +83,19 @@ q0 0 ? hello q0
 	}
 	brokerresult, err := client.BrokerChannel(ctx, &req)
 	if err != nil {
-		t.Error("Received error from broker.")
+		t.Fatal("Received error from broker.")
 	}
 	if brokerresult.Result != pb.BrokerChannelResponse_RESULT_ACK {
-		t.Error("Non ACK return code from broker")
+		t.Fatal("Non ACK return code from broker")
 	}
 
+	*/
 	b.Stop()
 }
 
-func TestGetParticipantMapping(t *testing.T) {
-	b := newTestBrokerServer()
+func TestGetParticipantMappingIntegration(t *testing.T) {
+	tmpDir := t.TempDir()
+	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -181,7 +187,7 @@ q0 Dummy ? hello q0
 	if err != nil {
 		t.Fatal("error running getBestCandidate")
 	}
-	mapping, err := b.getParticipantMapping(reqContract, initiatorMapping, "0", "FooBar", provider)
+	mapping, err := b.getParticipantMapping(reqContract, initiatorMapping, "0", provider)
 	if err != nil {
 		t.Fatal("error getting participant mapping")
 	}
@@ -210,4 +216,108 @@ func mockTestGetParticipantMappingContractCompatChecker(ctx context.Context, req
 		"0": "Dummy",
 	}
 	return true, mapping, nil
+}
+
+func TestFilterParticipants(t *testing.T) {
+	tests := []struct {
+		name     string
+		orig     []string
+		r        map[string]*pb.RemoteParticipant
+		expected []string
+	}{
+		{
+			name:     "Filter some",
+			orig:     []string{"a", "b", "c", "d"},
+			r:        map[string]*pb.RemoteParticipant{"a": nil, "c": nil},
+			expected: []string{"b", "d"},
+		},
+		{
+			name:     "Empty",
+			orig:     []string{},
+			r:        map[string]*pb.RemoteParticipant{},
+			expected: []string{},
+		},
+		{
+			name:     "All filtered",
+			orig:     []string{"a", "b", "c"},
+			r:        map[string]*pb.RemoteParticipant{"a": nil, "b": nil, "c": nil},
+			expected: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := filterParticipants(tt.orig, tt.r)
+			require.ElementsMatch(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestGetParticipantMapping(t *testing.T) {
+	tests := []struct {
+		name            string
+		req             contract.GlobalContract
+		initiatorMap    map[string]*pb.RemoteParticipant
+		receiver        string
+		receiverRegProv *ent.RegisteredProvider
+		want            map[string]*pb.RemoteParticipant
+		wantErr         bool
+	}{
+		{
+			name: "receiver not in initiator map",
+			req:  contract.GlobalContract{ContractID: 1},
+			initiatorMap: map[string]*pb.RemoteParticipant{
+				"a": {Name: "a"},
+				"b": {Name: "b"},
+			},
+			receiver:        "c",
+			receiverRegProv: nil,
+			want:            nil,
+			wantErr:         true,
+		},
+		{
+			name: "compatibility result not found",
+			req:  contract.GlobalContract{ContractID: 1},
+			initiatorMap: map[string]*pb.RemoteParticipant{
+				"a": {Name: "a"},
+				"b": {Name: "b"},
+				"c": {Name: "c"},
+			},
+			receiver:        "c",
+			receiverRegProv: &ent.RegisteredProvider{ID: 1, ContractID: 2},
+			want:            nil,
+			wantErr:         true,
+		},
+		{
+			name: "success",
+			req:  contract.GlobalContract{ContractID: 1},
+			initiatorMap: map[string]*pb.RemoteParticipant{
+				"a": {Name: "a"},
+				"b": {Name: "b"},
+				"c": {Name: "c"},
+			},
+			receiver:        "c",
+			receiverRegProv: &ent.RegisteredProvider{ID: 1, ContractID: 1},
+			want: map[string]*pb.RemoteParticipant{
+				"a": {Name: "a"},
+				"b": {Name: "b"},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := brokerServer{
+				dbClient: enttest.NewClient(t),
+			}
+			got, err := s.getParticipantMapping(tt.req, tt.initiatorMap, tt.receiver, tt.receiverRegProv)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getParticipantMapping() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("getParticipantMapping() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

@@ -236,8 +236,8 @@ func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.
 // and returns a mapping between participant names and RemoteParticipant's but using the receiver's
 // perspective for participant names. The receiver has to be present in the registry because
 // we need to parse its contract to get the mapping.
-func (s *brokerServer) getParticipantMapping(req contract.Contract, initiatorMapping map[string]*pb.RemoteParticipant, receiver string,
-	initiatorName string, receiverRegisteredProvider *ent.RegisteredProvider) (map[string]*pb.RemoteParticipant, error) {
+func (s *brokerServer) getParticipantMapping(req contract.GlobalContract, initiatorMapping map[string]*pb.RemoteParticipant, receiver string,
+	receiverRegisteredProvider *ent.RegisteredProvider) (map[string]*pb.RemoteParticipant, error) {
 
 	s.logger.Printf("getParticipantMapping for %v", receiver)
 	_, ok := initiatorMapping[receiver]
@@ -323,7 +323,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 		if pname == initiatorName {
 			participantsMapping = allParticipants
 		} else {
-			participantsMapping, err = s.getParticipantMapping(reqContract, allParticipants, pname, initiatorName, candidates[pname])
+			participantsMapping, err = s.getParticipantMapping(reqContract, allParticipants, pname, candidates[pname])
 			if err != nil {
 				// TODO: proper error handling
 				s.logger.Panicf(err.Error())
