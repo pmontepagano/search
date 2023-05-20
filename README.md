@@ -19,6 +19,21 @@ Por ahora habrá estos componentes en la arquitectura:
   go generate ./ent
 
 
+## Useful commands for Entgo (database)
+
+### Show schema in CLI
+
+  go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
+
+### Show schema in [Atlas Cloud](https://gh.atlasgo.cloud/)
+
+  go run -mod=mod ariga.io/entviz ./ent/schema
+
+### Generate Entity Relation diagram locally
+
+  go run -mod=mod github.com/a8m/enter ./ent/schema
+
+
 ## Comunicación entre componentes
 
 ### gRPC 
