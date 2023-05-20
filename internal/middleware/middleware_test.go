@@ -27,7 +27,7 @@ func TestRegisterChannel(t *testing.T) {
 	mw.StartMiddlewareServer(&wg, "localhost", 4444, "localhost", 5555, false, "", "")
 
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial("localhost:5555", opts...)
 	if err != nil {
@@ -174,15 +174,18 @@ q1 receiver ! word q0
 			log.Printf("[PROVIDER] - Received message from sender: %s", res.Message.GetBody())
 			msg := string(res.Message.GetBody())
 			msg = msg + " dummy"
-			ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
-			defer cancel()
-			client.AppSend(ctx, &pb.AppSendRequest{
+			ctx, cancelSend := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancelSend()
+			appSendResp, err := client.AppSend(ctx, &pb.AppSendRequest{
 				ChannelId: channelID,
 				Recipient: "receiver",
 				Message: &pb.AppMessage{
 					Body: []byte(msg),
 				},
 			})
+			if err != nil || appSendResp.Result != pb.Result_OK {
+				t.Errorf("[PROVIDER] - Error sending message to receiver. Error: %v", err)
+			}
 
 		}(mw)
 	}
@@ -243,11 +246,14 @@ q1 receiver ! word q0
 	// AppSend to r1
 	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	_, err = client.AppSend(ctx, &pb.AppSendRequest{
+	sendRespR1, err := client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "r1_special",
 		Message:   &pb.AppMessage{Body: []byte("hola")},
 	})
+	if err != nil || sendRespR1.Result != pb.Result_OK {
+		t.Error("Could not send message to r1")
+	}
 
 	// receive from r3
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)

@@ -52,10 +52,6 @@ func getRemoteParticipant(r *ent.RegisteredProvider) *pb.RemoteParticipant {
 	return &res
 }
 
-func getProviderContract(r *ent.RegisteredProvider) (contract.LocalContract, error) {
-	return getContract(r.Edges.Contract)
-}
-
 func getContract(c *ent.RegisteredContract) (contract.LocalContract, error) {
 	return contract.ConvertPBLocalContract(&pb.LocalContract{
 		Contract: c.Contract,
@@ -88,14 +84,6 @@ func (s *brokerServer) getRegisteredProvider(appID string) (*ent.RegisteredProvi
 		return nil, fmt.Errorf("non registered appID %v", appID)
 	}
 	return prov, nil
-}
-
-func (s *brokerServer) getRandomRegisteredProvider() *ent.RegisteredProvider {
-	// TODO: this should actually have the number of participants as a parameter
-	// TODO: error handling
-	// TODO: context as param
-	r, _ := s.dbClient.RegisteredProvider.Query().First(context.TODO())
-	return r
 }
 
 func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.GlobalContract, p string) (*ent.RegisteredProvider, error) {
@@ -372,7 +360,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 		// TODO: refactor this repeated code
 		conn, err := grpc.Dial(
 			p.Url,
-			grpc.WithInsecure(), // TODO: use tls
+			grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO: use tls
 			grpc.WithBlock(),
 			grpc.FailOnNonTempDialError(true),
 		)
@@ -546,7 +534,9 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 	s.server = grpcServer
 	pb.RegisterBrokerServiceServer(grpcServer, s)
 	s.logger.Printf("Broker server starting...")
-	grpcServer.Serve(lis)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
 
 func (s *brokerServer) Stop() {

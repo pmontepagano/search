@@ -16,7 +16,7 @@ import (
 
 func TestBrokerChannel_Request(t *testing.T) {
 	// TODO: change this test and mock provider?
-	b := NewBrokerServer("file:ent?mode=memory&_fk=1")
+	b := newTestBrokerServer()
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -89,7 +89,7 @@ q0 0 ? hello q0
 }
 
 func TestGetParticipantMapping(t *testing.T) {
-	b := NewBrokerServer("file:ent?mode=memory&_fk=1")
+	b := newTestBrokerServer()
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -137,7 +137,7 @@ q0 Dummy ? hello q0
 	}
 	provider, err := b.getRegisteredProvider(registrationResponse.AppId)
 	if err != nil {
-		t.Error("error getting registered provider")
+		t.Fatal("error getting registered provider")
 	}
 
 	b.SetCompatFunc(mockTestGetParticipantMappingContractCompatChecker)
@@ -146,12 +146,12 @@ q0 Dummy ? hello q0
 		Contract: &pb.GlobalContract{
 			Contract:      dummyReqContract,
 			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
-			InitiatorName: "FooBar",
+			InitiatorName: "Dummy",
 		},
 		PresetParticipants: map[string]*pb.RemoteParticipant{
-			"FooBar": {
-				Url:   "foobar_fake_url",
-				AppId: "foobar_fake_appid",
+			"Dummy": {
+				Url:   "dummy_fake_url",
+				AppId: "dummy_fake_appid",
 			},
 		},
 	})
@@ -179,11 +179,11 @@ q0 Dummy ? hello q0
 
 	_, err = b.getBestCandidate(context.Background(), reqContract, "FooBar")
 	if err != nil {
-		t.Error("error running getBestCandidate")
+		t.Fatal("error running getBestCandidate")
 	}
 	mapping, err := b.getParticipantMapping(reqContract, initiatorMapping, "0", "FooBar", provider)
 	if err != nil {
-		t.Error("error getting participant mapping")
+		t.Fatal("error getting participant mapping")
 	}
 	expected := map[string]*pb.RemoteParticipant{
 		"0": {

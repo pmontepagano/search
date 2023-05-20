@@ -18,6 +18,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/testdata"
 
@@ -82,7 +83,7 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
 // Struct to represent each Service Provider that is registered in the middleware.
 // We notify to the local Service Provider that a new channel is being initiatied for it using the NotifyChan.
 type registeredApp struct {
-	Contract   pb.LocalContract
+	Contract   contract.LocalContract
 	NotifyChan *chan pb.InitChannelNotification
 }
 
@@ -141,7 +142,7 @@ func (mw *MiddlewareServer) newSEARCHChannel(c contract.Contract, pbContract *pb
 
 func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.ClientConn) {
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", s.brokerAddr, s.brokerPort), opts...)
 	if err != nil {
@@ -197,8 +198,13 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 	}
 
 	notifyInitChannel := make(chan pb.InitChannelNotification, bufferSize)
+	provContract, err := contract.ConvertPBLocalContract(req.ProviderContract)
+	if err != nil {
+		s.logger.Printf("Error parsing protobuf contract. %v", err)
+		return err
+	}
 	s.registeredApps[res.GetAppId()] = registeredApp{
-		Contract:   *req.ProviderContract,
+		Contract:   provContract,
 		NotifyChan: &notifyInitChannel,
 	}
 	for {
@@ -243,7 +249,7 @@ func (r *SEARCHChannel) sender(participant string) {
 	// connect and save stream in r.outStreams
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock())
-	opts = append(opts, grpc.WithInsecure()) // TODO: use tls
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials())) // TODO: use tls
 	provconn, err := grpc.Dial(r.addresses[participant].GetUrl(), opts...)
 	if err != nil {
 		r.mw.logger.Fatalf("fail to dial: %v", err)
@@ -263,7 +269,9 @@ func (r *SEARCHChannel) sender(participant string) {
 			ChannelId:   r.ID.String(),
 			RecipientId: r.addresses[participant].AppId,
 			Content:     msg}
-		stream.Send(&messageWithHeaders)
+		if err := stream.Send(&messageWithHeaders); err != nil {
+			r.mw.logger.Fatalf("failed to send message: %v", err)
+		}
 		msg = <-r.Outgoing[participant]
 	}
 }
@@ -376,12 +384,7 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
 		var err error
-		contract, err := contract.ConvertPBLocalContract(&regapp.Contract)
-		if err != nil {
-			s.logger.Printf("Error parsing protobuf contract. %v", err)
-			return nil, err
-		}
-		r, err = s.newSEARCHChannel(contract, nil)
+		r, err = s.newSEARCHChannel(regapp.Contract, nil)
 		if err != nil {
 			// TODO: return proper gRPC error
 			return nil, err
@@ -470,13 +473,17 @@ func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicHost 
 	go func() {
 		defer wg.Done()
 		// s.logger.Println("Waiting for SIGINT or SIGTERM on public server.")
-		publicGrpcServer.Serve(lisPub)
+		if err := publicGrpcServer.Serve(lisPub); err != nil {
+			s.logger.Fatalf("failed to serve: %v", err)
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
 		// s.logger.Println("Waiting for SIGINT or SIGTERM on private server.")
-		privateGrpcServer.Serve(lisPriv)
+		if err := privateGrpcServer.Serve(lisPriv); err != nil {
+			s.logger.Fatalf("failed to serve: %v", err)
+		}
 	}()
 
 }
