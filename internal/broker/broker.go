@@ -511,7 +511,7 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 }
 
 func setUpDB(databasePath string) *ent.Client {
-	dbClient, err := ent.Open("sqlite3", databasePath)
+	dbClient, err := openDB(databasePath)
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
@@ -519,6 +519,19 @@ func setUpDB(databasePath string) *ent.Client {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	return dbClient
+}
+
+// https://entgo.io/docs/sql-integration/
+func openDB(databaseFilePath string) (*ent.Client, error) {
+	dsn := fmt.Sprintf("file:%s?_fk=1&mode=rwc&busy_timeout=1000&cache=shared", databaseFilePath)
+	drv, err := sql.Open("sqlite3", dsn)
+	if err != nil {
+		return nil, err
+	}
+	// Get the underlying sql.DB object of the driver.
+	db := drv.DB()
+	db.SetMaxOpenConns(1)
+	return ent.NewClient(ent.Driver(drv)), nil
 }
 
 // NewBrokerServer brokerServer constructor
@@ -530,10 +543,6 @@ func NewBrokerServer(databasePath string) *brokerServer {
 
 	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)
 	return s
-}
-
-func newTestBrokerServer() *brokerServer {
-	return NewBrokerServer("file:ent?mode=memory&_fk=1")
 }
 
 func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string) {

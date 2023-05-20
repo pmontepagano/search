@@ -84,9 +84,9 @@ func TestRegisterChannel(t *testing.T) {
 func TestCircle(t *testing.T) {
 	brokerPort, p1Port, p2Port, p3Port, initiatorPort := 20000, 20001, 20003, 20005, 20007
 
-	// start broker
-	// bs := broker.NewBrokerServer(fmt.Sprintf("file:testcircle-%s.db?_fk=1&mode=rwc&busy_timeout=1000", time.Now().Format("2006-01-02T15:04:05")))
-	bs := broker.NewBrokerServer(fmt.Sprintf("file:testcircle-%s.db?_fk=1&mode=memory&busy_timeout=1000", time.Now().Format("2006-01-02T15:04:05")))
+	tmpDir := t.TempDir()
+	bs := broker.NewBrokerServer(fmt.Sprintf("%s/testcircle-%s.db", tmpDir, time.Now().Format("2006-01-02T15:04:05")))
+	bs.SetCompatFunc(circleContractCompatChecker)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 
 	var wg sync.WaitGroup
@@ -234,7 +234,7 @@ q1 receiver ! word q0
 			.marking q0
 			.end
 			`),
-			InitiatorName: "sender",
+			InitiatorName: "self",
 			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
 		},
 	}
@@ -269,6 +269,28 @@ q1 receiver ! word q0
 
 	initiatorMw.Stop()
 	wg.Wait()
+}
+
+// Mock function for checking contracts in TestCircle.
+func circleContractCompatChecker(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+	mapping := make(map[string]string)
+	if req.GetRemoteParticipantNames()[0] == "self" && req.GetRemoteParticipantNames()[1] == "r2_special" {
+		mapping["sender"] = "self"
+		mapping["receiver"] = "r2_special"
+	}
+	if req.GetRemoteParticipantNames()[0] == "r1_special" && req.GetRemoteParticipantNames()[1] == "r3_special" {
+		mapping["sender"] = "r1_special"
+		mapping["receiver"] = "r3_special"
+	}
+	if req.GetRemoteParticipantNames()[0] == "r2_special" && req.GetRemoteParticipantNames()[1] == "self" {
+		mapping["sender"] = "r2_special"
+		mapping["receiver"] = "self"
+	}
+	_, ok := mapping["sender"]
+	if !ok {
+		return false, nil, fmt.Errorf("Could not find mapping for sender")
+	}
+	return true, mapping, nil
 }
 
 func TestPingPongFullExample(t *testing.T) {

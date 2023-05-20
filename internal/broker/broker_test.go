@@ -20,7 +20,8 @@ import (
 
 func TestBrokerChannel_Request(t *testing.T) {
 	// TODO: change this test and mock provider?
-	b := newTestBrokerServer()
+	tmpDir := t.TempDir()
+	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
