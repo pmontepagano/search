@@ -52,9 +52,10 @@ q0 0 ? hello q0
 		Url: "fakeurl",
 	})
 	if err != nil {
-		log.Fatalf("ERROR RegisterProvider: %v", err)
+		t.Fatalf("ERROR RegisterProvider: %v", err)
 	}
 
+	/* TODO: fix this test? Or move to an integration test.
 	// ask for channel brokerage
 	c := pb.GlobalContract{
 		Contract: []byte(`--

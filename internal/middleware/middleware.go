@@ -180,7 +180,7 @@ func (r *SEARCHChannel) broker() {
 func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddlewareService_RegisterAppServer) error {
 	client, conn := s.connectBroker()
 	defer conn.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	res, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: req.ProviderContract,

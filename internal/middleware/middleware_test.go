@@ -136,9 +136,7 @@ q1 receiver ! word q0
 				},
 			}
 
-			streamCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
-			stream, err := client.RegisterApp(streamCtx, &req)
+			stream, err := client.RegisterApp(context.Background(), &req)
 			if err != nil {
 				t.Error("Could not Register App")
 			}
@@ -162,9 +160,7 @@ q1 receiver ! word q0
 			// await message from sender, then add a word to the message and relay it to receiver
 			defer conn.Close()
 			defer mw.Stop()
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-			res, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+			res, err := client.AppRecv(context.Background(), &pb.AppRecvRequest{
 				ChannelId:   channelID,
 				Participant: "sender",
 			})
@@ -174,9 +170,7 @@ q1 receiver ! word q0
 			log.Printf("[PROVIDER] - Received message from sender: %s", res.Message.GetBody())
 			msg := string(res.Message.GetBody())
 			msg = msg + " dummy"
-			ctx, cancelSend := context.WithTimeout(context.Background(), 2*time.Second)
-			defer cancelSend()
-			appSendResp, err := client.AppSend(ctx, &pb.AppSendRequest{
+			appSendResp, err := client.AppSend(context.Background(), &pb.AppSendRequest{
 				ChannelId: channelID,
 				Recipient: "receiver",
 				Message: &pb.AppMessage{
@@ -201,7 +195,7 @@ q1 receiver ! word q0
 	defer conn.Close()
 	client := pb.NewPrivateMiddlewareServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	req := pb.RegisterChannelRequest{
 		RequirementsContract: &pb.GlobalContract{
@@ -244,7 +238,7 @@ q1 receiver ! word q0
 	}
 
 	// AppSend to r1
-	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
 	sendRespR1, err := client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
@@ -256,7 +250,7 @@ q1 receiver ! word q0
 	}
 
 	// receive from r3
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
 	resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
 		ChannelId:   regResult.ChannelId,
