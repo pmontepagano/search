@@ -173,12 +173,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 						// TODO: proper error handler
 						return
 					}
-					_, err = s.dbClient.CompatibilityResult.Create().
-						SetRequirementContractID(rc.ID).
-						SetProviderContractID(c.ID).
-						SetResult(isCompatible).
-						SetMapping(mapping).
-						Save(ctx)
+					_, err = s.saveCompatibilityResult(ctx, rc, c, isCompatible, mapping)
 					if err != nil {
 						s.logger.Printf("error saving compatibility result: %v", err)
 						// TODO: proper error handler
@@ -447,6 +442,40 @@ func (s *brokerServer) getOrSaveContract(ctx context.Context, c contract.LocalCo
 		}
 	}
 	return rc, tx.Commit()
+}
+
+// Save compatibility result in the database.
+func (s *brokerServer) saveCompatibilityResult(ctx context.Context, req, prov *ent.RegisteredContract, areCompatible bool, mapping map[string]string) (*ent.CompatibilityResult, error) {
+	tx, err := s.dbClient.Tx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error starting a transaction: %w", err)
+	}
+	cr, err := tx.CompatibilityResult.Query().Where(compatibilityresult.And(
+		compatibilityresult.HasRequirementContractWith(registeredcontract.ID(req.ID)),
+		compatibilityresult.HasProviderContractWith(registeredcontract.ID(prov.ID))),
+	).First(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			cr, err = tx.CompatibilityResult.Create().
+				SetRequirementContract(req).
+				SetProviderContract(prov).
+				SetResult(areCompatible).
+				SetMapping(mapping).
+				Save(ctx)
+			if err != nil {
+				if rerr := tx.Rollback(); rerr != nil {
+					err = fmt.Errorf("%w: %v", err, rerr)
+				}
+				return nil, fmt.Errorf("database error saving compatibility result: %v", err)
+			}
+		} else {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return nil, fmt.Errorf("database error fetching existing compatibility result: %v", err)
+		}
+	}
+	return cr, tx.Commit()
 }
 
 // we receive a LocalContract and the url, and we assign an AppID to this provider
