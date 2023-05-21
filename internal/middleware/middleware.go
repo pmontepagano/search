@@ -32,9 +32,10 @@ type MiddlewareServer struct {
 	pb.UnimplementedPublicMiddlewareServiceServer
 	pb.UnimplementedPrivateMiddlewareServiceServer
 
-	// local provider apps. key: appID, value: RegisterAppServer (connection is kept open
+	// Local Service Providers. key: appID, value: RegisterAppServer (connection is kept open
 	// with each local app so as to notify new channels)
 	registeredApps map[string]registeredApp
+	providersLock  *sync.Mutex
 
 	// channels already brokered. key: ChannelID
 	brokeredChannels map[string]*SEARCHChannel
@@ -71,7 +72,8 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
 	s.brokeredChannels = make(map[string]*SEARCHChannel)   // channels already brokered (locally initiated or not)
 	s.unBrokeredChannels = make(map[string]*SEARCHChannel) // channels locally registered but not yet brokered
 	s.brokeringChannels = make(map[string]*SEARCHChannel)  // channels being brokered
-	s.channelLock = &sync.Mutex{}
+	s.channelLock = new(sync.Mutex)
+	s.providersLock = new(sync.Mutex)
 
 	s.brokerAddr = brokerAddr
 	s.brokerPort = brokerPort
@@ -202,10 +204,12 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 		s.logger.Printf("Error parsing protobuf contract. %v", err)
 		return err
 	}
+	s.providersLock.Lock()
 	s.registeredApps[res.GetAppId()] = registeredApp{
 		Contract:   provContract,
 		NotifyChan: &notifyInitChannel,
 	}
+	s.providersLock.Unlock()
 	for {
 		newChan := <-notifyInitChannel
 		msg := pb.RegisterAppResponse{
@@ -380,6 +384,8 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	s.channelLock.Lock()
 	defer s.channelLock.Unlock()
 	// InitChannelRequest: app_id, channel_id, participants (map[string]RemoteParticipant)
+	s.providersLock.Lock()
+	defer s.providersLock.Unlock()
 	if regapp, ok := s.registeredApps[icr.GetAppId()]; ok {
 		// create registered channel with channel_id
 		var err error
