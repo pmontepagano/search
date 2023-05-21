@@ -17,8 +17,8 @@ format:
   stage: test
   script:
     - go fmt ./...
-    - go test ./... -coverprofile=coverage.txt -covermode count
-    - go test -race ./...
+    - go test ./... -coverprofile=coverage.txt -covermode count -timeout 30s
+    - go test -race ./... -timeout 1m
     - go vet ./...
     - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
     - golangci-lint run
