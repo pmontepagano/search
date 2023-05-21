@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/clpombo/search/contract"
 	pb "github.com/clpombo/search/gen/go/search/v1"
 	"github.com/clpombo/search/internal/broker"
-	"github.com/clpombo/search/internal/contract"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

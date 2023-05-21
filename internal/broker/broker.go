@@ -23,11 +23,11 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/testdata"
 
+	"github.com/clpombo/search/contract"
 	"github.com/clpombo/search/ent"
 	"github.com/clpombo/search/ent/compatibilityresult"
 	"github.com/clpombo/search/ent/registeredcontract"
 	"github.com/clpombo/search/ent/registeredprovider"
-	"github.com/clpombo/search/internal/contract"
 
 	pb "github.com/clpombo/search/gen/go/search/v1"
 	_ "github.com/mattn/go-sqlite3"
@@ -245,9 +245,14 @@ func (s *brokerServer) getParticipantMapping(req contract.GlobalContract, initia
 		return nil, fmt.Errorf("receiver %s not present in initiator's mapping", receiver)
 	}
 
+	projectedReq, err := req.GetProjection(receiver)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get projection for %s", receiver)
+	}
+
 	compatResult, err := s.dbClient.CompatibilityResult.Query().Where(
 		compatibilityresult.And(
-			compatibilityresult.HasRequirementContractWith(registeredcontract.ID(req.GetContractID())),
+			compatibilityresult.HasRequirementContractWith(registeredcontract.ID(projectedReq.GetContractID())),
 			compatibilityresult.HasProviderContractWith(registeredcontract.ID(receiverRegisteredProvider.ContractID)),
 		),
 	).First(context.TODO())

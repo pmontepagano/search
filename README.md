@@ -18,6 +18,10 @@ Por ahora habrá estos componentes en la arquitectura:
 
   go generate ./ent
 
+# To generate mocks with [mockery](https://vektra.github.io/mockery/)
+
+  mockery --dir contract --all --with-expecter
+
 
 ## Useful commands for Entgo (database)
 
