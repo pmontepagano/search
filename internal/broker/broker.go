@@ -163,10 +163,12 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 		workers := pool.New()
 		for _, c := range contractsToCalculate {
 			for _, prov := range c.Edges.Providers {
+				thisContract := c
+				thisProv := prov
 				workers.Go(func() {
-					provContract, err := getContract(c)
+					provContract, err := getContract(thisContract)
 					if err != nil {
-						s.logger.Printf("error parsing registeredContract with ID %s", c.ID)
+						s.logger.Printf("error parsing registeredContract with ID %s", thisContract.ID)
 						// TODO: handle error properly
 						return
 					}
@@ -182,14 +184,14 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 						// TODO: proper error handler
 						return
 					}
-					_, err = s.saveCompatibilityResult(ctx, rc, c, isCompatible, mapping)
+					_, err = s.saveCompatibilityResult(ctx, rc, thisContract, isCompatible, mapping)
 					if err != nil {
 						s.logger.Printf("error saving compatibility result: %v", err)
 						// TODO: proper error handler
 						return
 					}
 					if isCompatible {
-						firstResult <- prov
+						firstResult <- thisProv
 					}
 				})
 

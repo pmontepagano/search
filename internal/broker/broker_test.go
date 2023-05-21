@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"sync"
 	"testing"
 
 	"github.com/clpombo/search/contract"
@@ -519,7 +520,7 @@ func TestGetBestCandidate_NoCompatibleResultsWithRegisteredProviders(t *testing.
 	}
 
 	provider3Contract := mocks.NewLocalContract(t)
-	provider3Contract.EXPECT().GetContractID().Return("6fd25e1f855b829140f15c23262ed0fa56015bed9725f7f91b35d42a0db88528951699f1946335b897dcb5e1cf3eeb8fac438b88ade847348d9ca7e8f5160c21")
+	provider3Contract.EXPECT().GetContractID().Return("bd128995fe64da655ccc27c5d07714cb76478ae749df31f867cdc7cb83a0cb868b076679dc3665142540359aa96faf8667fd015d846537c6403c695574a34fa0")
 	provider3Contract.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
 	provider3Contract.EXPECT().GetBytesRepr().Return([]byte(provider3FSA))
 	provider3RegisteredContract, err := b.getOrSaveContract(context.Background(), provider3Contract)
@@ -535,8 +536,11 @@ func TestGetBestCandidate_NoCompatibleResultsWithRegisteredProviders(t *testing.
 
 	// Set broker's compatibility function to a mock that returns false. We later want to assert how many times the function was called.
 	numberOfCallsToCompatFunc := 0
+	counterLock := sync.Mutex{}
 	b.SetCompatFunc(func(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+		counterLock.Lock()
 		numberOfCallsToCompatFunc++
+		counterLock.Unlock()
 		return false, nil, nil
 	})
 
@@ -547,6 +551,99 @@ func TestGetBestCandidate_NoCompatibleResultsWithRegisteredProviders(t *testing.
 	assert.Nil(t, result)
 	assert.Error(t, err)
 	assert.Equal(t, err.Error(), "no compatible provider found for participant test_participant_name")
-	// time.Sleep(2 * time.Second)
 	assert.Equal(t, 3, numberOfCallsToCompatFunc)
+	b.Stop()
+}
+
+func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
+	// Arrange
+	testDir := t.TempDir()
+	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+
+	// Requirement mocks.
+	participantName := "test_participant_name"
+	req := mocks.NewGlobalContract(t)
+	reqProjection := mocks.NewLocalContract(t)
+	req.EXPECT().GetProjection(participantName).Return(reqProjection, nil)
+	reqProjection.EXPECT().GetContractID().Return("1692526aab84461a8aebcefddcba2b33fb5897ab180c53e8b345ae125484d0aaa35baf60487050be21ed8909a48eace93851bf139087ce1f7a87d97b6120a651")
+	reqProjection.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
+	reqProjection.EXPECT().GetBytesRepr().Return([]byte(`dummy`))
+
+	// Save requirement projection.
+	_, err := b.getOrSaveContract(context.Background(), reqProjection)
+	if err != nil {
+		t.Fatalf("error saving contract: %v", err)
+	}
+
+	// Save three different providers in the database.
+	provider1Contract := mocks.NewLocalContract(t)
+	provider1Contract.EXPECT().GetContractID().Return("826516eb343f93d8f1ca808ef34b30deb024bffd05c1630e0eee81243faeca243e9ce0cf431d691ce63b2ebaf60e48e1220f1d4ab85731b5c2f591fe1e958043")
+	provider1Contract.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
+	provider1Contract.EXPECT().GetBytesRepr().Return([]byte(provider1FSA))
+	provider1RegisteredContract, err := b.getOrSaveContract(context.Background(), provider1Contract)
+	if err != nil {
+		t.Fatalf("error saving contract: %v", err)
+	}
+	provider1AppID, _ := uuid.Parse("285b25a8-6621-4abe-a18e-90cc896f3476")
+	provider1Url, _ := url.Parse("provider1.example.org:8080")
+	_, err = b.saveProvider(context.TODO(), provider1AppID, provider1Url, provider1RegisteredContract)
+	if err != nil {
+		t.Fatalf("error saving provider: %v", err)
+	}
+
+	provider2Contract := mocks.NewLocalContract(t)
+	provider2Contract.EXPECT().GetContractID().Return("64867f97a221cd291084fc7c27516fca3c3dfebaae7ec99f5f3f836c540fcec6978a3f8d7a98c3ca6ee8039e550ea125b88d369c033cc203820caa562f3c7986")
+	provider2Contract.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
+	provider2Contract.EXPECT().GetBytesRepr().Return([]byte(provider2FSA))
+	provider2RegisteredContract, err := b.getOrSaveContract(context.Background(), provider2Contract)
+	if err != nil {
+		t.Fatalf("error saving contract: %v", err)
+	}
+	provider2AppID, _ := uuid.Parse("4cda7849-2288-4d61-86df-1d98d273eb1e")
+	provider2Url, _ := url.Parse("provider2.example.org:8080")
+	_, err = b.saveProvider(context.TODO(), provider2AppID, provider2Url, provider2RegisteredContract)
+	if err != nil {
+		t.Fatalf("error saving provider: %v", err)
+	}
+
+	provider3Contract := mocks.NewLocalContract(t)
+	provider3Contract.EXPECT().GetContractID().Return("bd128995fe64da655ccc27c5d07714cb76478ae749df31f867cdc7cb83a0cb868b076679dc3665142540359aa96faf8667fd015d846537c6403c695574a34fa0")
+	provider3Contract.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
+	provider3Contract.EXPECT().GetBytesRepr().Return([]byte(provider3FSA))
+	provider3RegisteredContract, err := b.getOrSaveContract(context.Background(), provider3Contract)
+	if err != nil {
+		t.Fatalf("error saving contract: %v", err)
+	}
+	provider3AppID, _ := uuid.Parse("5aaca746-3008-4c0a-984c-a6a5c85ca6d3")
+	provider3Url, _ := url.Parse("provider3.example.org:8080")
+	provider3RegisteredProvider, err := b.saveProvider(context.TODO(), provider3AppID, provider3Url, provider3RegisteredContract)
+	if err != nil {
+		t.Fatalf("error saving provider: %v", err)
+	}
+
+	// Set broker's compatibility function to a mock that returns true for provider 3. We later want to assert how many times the function was called.
+	numberOfCallsToCompatFunc := 0
+	counterLock := sync.Mutex{}
+	b.SetCompatFunc(func(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+		counterLock.Lock()
+		numberOfCallsToCompatFunc++
+		counterLock.Unlock()
+		t.Logf("provID: %v, prov data: %s", prov.GetContractID(), prov.GetBytesRepr())
+		if prov.GetContractID() == "bd128995fe64da655ccc27c5d07714cb76478ae749df31f867cdc7cb83a0cb868b076679dc3665142540359aa96faf8667fd015d846537c6403c695574a34fa0" {
+			return true, map[string]string{"serviceClient": "dunno"}, nil
+		}
+		return false, nil, nil
+	})
+
+	// Act
+	result, err := b.getBestCandidate(context.TODO(), req, participantName)
+
+	// Assert
+	assert.Equal(t, provider3RegisteredProvider.ID, result.ID)
+	assert.Equal(t, provider3AppID, result.ID)
+	assert.Equal(t, provider3Url, result.URL)
+	assert.Equal(t, provider3RegisteredContract.ID, result.ContractID)
+	assert.Nil(t, err)
+	assert.Equal(t, 3, numberOfCallsToCompatFunc)
+	b.Stop()
 }
