@@ -252,6 +252,7 @@ func (s *brokerServer) getParticipantMapping(req contract.GlobalContract, initia
 
 	compatResult, err := s.dbClient.CompatibilityResult.Query().Where(
 		compatibilityresult.And(
+			compatibilityresult.Result(true),
 			compatibilityresult.HasRequirementContractWith(registeredcontract.ID(projectedReq.GetContractID())),
 			compatibilityresult.HasProviderContractWith(registeredcontract.ID(receiverRegisteredProvider.ContractID)),
 		),
