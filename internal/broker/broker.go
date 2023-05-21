@@ -494,11 +494,23 @@ func (s *brokerServer) saveCompatibilityResult(ctx context.Context, req, prov *e
 	return cr, tx.Commit()
 }
 
+// Save provider in the database.
+func (s *brokerServer) saveProvider(ctx context.Context, appID uuid.UUID, url *url.URL, rc *ent.RegisteredContract) (*ent.RegisteredProvider, error) {
+	prov, err := s.dbClient.RegisteredProvider.Create().
+		SetID(appID).
+		SetURL(url).
+		SetContract(rc).
+		Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("database error registering provider: %v", err)
+	}
+	return prov, nil
+}
+
 // we receive a LocalContract and the url, and we assign an AppID to this provider
 func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterProviderRequest) (*pb.RegisterProviderResponse, error) {
 	s.logger.Printf("Registering provider from URL: %s, contract '%s'", req.Url, req.Contract.Contract)
 
-	appID := uuid.New()
 	provContract, err := contract.ConvertPBLocalContract(req.GetContract())
 	if err != nil {
 		st := status.New(codes.InvalidArgument, "invalid contract or format")
@@ -513,15 +525,15 @@ func (s *brokerServer) RegisterProvider(ctx context.Context, req *pb.RegisterPro
 		return nil, status.New(codes.Internal, err.Error()).Err()
 	}
 
+	// Generate AppID for this new Service Provider.
+	appID := uuid.New()
+
 	// Save provider in the database.
-	_, err = s.dbClient.RegisteredProvider.Create().
-		SetID(appID).
-		SetURL(providerUrl).
-		SetContract(rc).
-		Save(ctx)
+	_, err = s.saveProvider(ctx, appID, providerUrl, rc)
 	if err != nil {
-		return nil, status.New(codes.Internal, "database error registering provider").Err()
+		return nil, status.New(codes.Internal, err.Error()).Err()
 	}
+	s.logger.Printf("Registered provider with URL %s and contract ID %v", providerUrl.String(), rc.ID)
 
 	return &pb.RegisterProviderResponse{AppId: appID.String()}, nil
 }
