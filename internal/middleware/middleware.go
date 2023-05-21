@@ -400,7 +400,7 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 			s.logger.Panicf("InitChannel with inexistent app_id: %s", icr.GetAppId())
 			// TODO: return error
 		}
-		s.logger.Printf("Received InitChannel for channel being brokered. %v", r.ID)
+		s.logger.Printf("Received InitChannel for channel being brokered. %v", r.LocalID)
 		delete(s.brokeringChannels, icr.AppId)
 	}
 	r.addresses = icr.GetParticipants()

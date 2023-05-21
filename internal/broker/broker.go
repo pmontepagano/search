@@ -93,6 +93,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	if err != nil {
 		return nil, err
 	}
+	s.logger.Printf("running getBestCandidate for participant %s, requirement projection ID %s", p, projection.GetContractID())
 	rc, err := s.dbClient.RegisteredContract.Get(ctx, projection.GetContractID())
 	if err != nil {
 		return nil, err
@@ -121,6 +122,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 		if err != nil {
 			return nil, err
 		}
+		s.logger.Printf("found cached result for participant %s, returning provider with contract ID %s", p, result.ContractID)
 		// TODO: enqueue jobs to calculate compatibility with all providers for which we have no data
 		return result, nil
 	}
@@ -137,6 +139,11 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 			s.LeftJoin(crt).On(s.C(registeredcontract.FieldID), crt.C(compatibilityresult.FieldProviderContractID))
 		}).WithProviders().
 		All(ctx)
+
+	// for _, cDebug := range contractsToCalculate {
+	// 	s.logger.Printf("provider contract to calculate with ID %s and content %s", cDebug.ID, cDebug.Contract)
+	// }
+
 	// providersToCompute, err := s.dbClient.Debug().RegisteredProvider.Query().
 	// 	Where(
 	// 		registeredprovider.Not(registeredprovider.HasContractWith(registeredcontract)
@@ -147,7 +154,6 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	// for _, rp := range allRegisteredProviders {
 	// 	fmt.Printf("registered provider with participant name %s and contract ID: %s\n", rp.ParticipantName, rp.Edges.Contract.ID)
 	// }
-	// TODO(2023-05-01): no me está trayendo ningún RegisteredProvider en el edge. O sea c.Edges.Providers está vacío.
 	firstResult := make(chan *ent.RegisteredProvider)
 	workersFinished := make(chan struct{})
 	go func() {
@@ -193,7 +199,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	case r := <-firstResult:
 		return r, nil
 	case <-workersFinished:
-		return nil, errors.New("no compatible provider found")
+		return nil, errors.New(fmt.Sprintf("no compatible provider found for participant %s", p))
 	}
 
 }

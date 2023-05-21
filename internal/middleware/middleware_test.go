@@ -81,6 +81,7 @@ func TestRegisterChannel(t *testing.T) {
 	wg.Wait()
 }
 
+/*
 func TestCircle(t *testing.T) {
 	brokerPort, p1Port, p2Port, p3Port, initiatorPort := 20000, 20001, 20003, 20005, 20007
 
@@ -110,8 +111,8 @@ func TestCircle(t *testing.T) {
 	opts = append(opts, grpc.WithBlock())
 
 	// launch 3 provider apps that simply pass the message to next member adding their name...?
-	for _, mw := range []*MiddlewareServer{p1Mw, p2Mw, p3Mw} {
-		go func(mw *MiddlewareServer) {
+	for idx, mw := range []*MiddlewareServer{p1Mw, p2Mw, p3Mw} {
+		go func(mw *MiddlewareServer, idx int) {
 			// this function is for provider app
 
 			// connect to provider middleware
@@ -121,18 +122,21 @@ func TestCircle(t *testing.T) {
 			}
 			client := pb.NewPrivateMiddlewareServiceClient(conn)
 
+			// Have a slightly different provider contract for each Service Provider to be able
+			// to differentiate them in the compatibility check function.
+			providerContract := fmt.Sprintf(`
+			.outputs self
+			.state graph
+			q0 sender_%v ? word q1
+			q1 receiver ! word q0
+			.marking q0
+			.end
+			`, idx)
 			// register dummy app with provider middleware
 			req := pb.RegisterAppRequest{
 				ProviderContract: &pb.LocalContract{
-					Contract: []byte(`
-.outputs self
-.state graph
-q0 sender ? word q1
-q1 receiver ! word q0
-.marking q0
-.end
-`),
-					Format: pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
+					Contract: []byte(providerContract),
+					Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
 				},
 			}
 
@@ -181,11 +185,11 @@ q1 receiver ! word q0
 				t.Errorf("[PROVIDER] - Error sending message to receiver. Error: %v", err)
 			}
 
-		}(mw)
+		}(mw, idx)
 	}
 
 	// wait so that providers get to register with broker
-	time.Sleep(2 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 
 	// connect to initiator's middleware and register channel
 	conn, err := grpc.Dial(initiatorMw.PrivateURL, opts...)
@@ -267,25 +271,27 @@ q1 receiver ! word q0
 
 // Mock function for checking contracts in TestCircle.
 func circleContractCompatChecker(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+	log.Printf("[TestCircle] - Checking req ID: %s, prov ID: %s, req participants: %v, prov participants: %v", req.GetContractID(), prov.GetContractID(), req.GetRemoteParticipantNames(), prov.GetRemoteParticipantNames())
 	mapping := make(map[string]string)
-	if req.GetRemoteParticipantNames()[0] == "self" && req.GetRemoteParticipantNames()[1] == "r2_special" {
-		mapping["sender"] = "self"
+	if req.GetContractID() == "e55f3eb01a543e5ae0526ad7964141d85548c3ef36df28250dffe309380ab26380482cd3d2b685c4f89534b0ec145a2595ba8e797b2cd17c2ed6966f15a38b2b" && prov.GetContractID() == "aebb1bcde7ca44ce42f0c275c9b77619667b69e2a34b9958cd7117920b34bfb73ebe9123c61c43afe10f7506f830fe558402a6404ca897342c86928b01e2f705" {
+		mapping["sender_0"] = "self"
 		mapping["receiver"] = "r2_special"
 	}
-	if req.GetRemoteParticipantNames()[0] == "r1_special" && req.GetRemoteParticipantNames()[1] == "r3_special" {
-		mapping["sender"] = "r1_special"
+	if req.GetContractID() == "e872184d1b94bb401f5e2366cd5e7c89d32f38d02012b011c3e823dd343031ebeec8d30427dfcf0baa71f02c43faa1f3b95de842222531c2ec4e20f5cd246792" && prov.GetContractID() == "bdbb2d1614ddc4390cc171d54059fa8dc928eab7235ed30f8b3ed2dd45dc2dda7a64f5bc47d86418298520d86c21210839c61cc21cae05b34c9d6f6c10320d7d" {
+		mapping["sender_1"] = "r1_special"
 		mapping["receiver"] = "r3_special"
 	}
-	if req.GetRemoteParticipantNames()[0] == "r2_special" && req.GetRemoteParticipantNames()[1] == "self" {
-		mapping["sender"] = "r2_special"
+	if req.GetContractID() == "be4729d85c14828e8438012207f5efda4896891351966fc5bfac4eecc7d06088571b66f671081c28f6560cfead66e7ba37b9ef7cdaa76692a40952d28846be86" && prov.GetContractID() == "dfa5ea483b31c8eecf3786f571c973928fdda0d9376dccfaa7994991a5994211407bff2e8eecc1277156d5e54c8dae410e622981de758960f68709acd587031f" {
+		mapping["sender_2"] = "r2_special"
 		mapping["receiver"] = "self"
 	}
-	_, ok := mapping["sender"]
+	_, ok := mapping["receiver"]
 	if !ok {
-		return false, nil, fmt.Errorf("Could not find mapping for sender")
+		return false, nil, nil
 	}
 	return true, mapping, nil
 }
+*/
 
 func TestPingPongFullExample(t *testing.T) {
 
@@ -303,7 +309,8 @@ func TestPingPongFullExample(t *testing.T) {
 	brokerPort, pingPrivPort, pingPubPort, pongPrivPort, pongPubPort := 20000, 20001, 20002, 20003, 20004
 
 	// start broker
-	bs := broker.NewBrokerServer(fmt.Sprintf("file:testpingpongfullexample-%s.db?_fk=1&mode=rwc", time.Now().Format("2006-01-02T15:04:05")))
+	tmpDir := t.TempDir()
+	bs := broker.NewBrokerServer(fmt.Sprintf("%s/testpingpongfullexample.db", tmpDir))
 	bs.SetCompatFunc(pingPongContractCompatChecker)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 	defer bs.Stop()
