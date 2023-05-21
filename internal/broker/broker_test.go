@@ -358,7 +358,10 @@ func TestGetParticipantMapping(t *testing.T) {
 						t.Fatalf("error saving contract: %v", err)
 					}
 					// Save compatibility result in the database.
-					b.saveCompatibilityResult(context.Background(), projReqReg, provReg, tt.compatResult, tt.compatResultMapping)
+					_, err = b.saveCompatibilityResult(context.Background(), projReqReg, provReg, tt.compatResult, tt.compatResultMapping)
+					if err != nil {
+						t.Fatalf("error saving compatibility result: %v", err)
+					}
 				}
 			}
 
