@@ -15,6 +15,7 @@ stages:
 
 format:
   stage: test
+  coverage: '/coverage: \d+.\d+% of statements/'
   script:
     - go fmt ./...
     - go test ./... -coverprofile=coverage.txt -covermode count -timeout 30s
