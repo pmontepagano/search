@@ -16,9 +16,19 @@ stages:
 format:
   stage: test
   script:
-    - go fmt $(go list ./... | grep -v /vendor/)
-    - go test -race $(go list ./... | grep -v /vendor/)
-    - go vet $(go list ./... | grep -v /vendor/)
+    - go fmt ./...
+    - go test ./... -coverprofile=coverage.txt -covermode count
+    - go get github.com/boumenot/gocover-cobertura
+    - go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
+    - go test -race ./...
+    - go vet ./...
+    - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+    - golangci-lint run
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 compile:
   stage: build
@@ -27,6 +37,6 @@ compile:
     - go build -o bin ./...
   artifacts:
     paths:
-      - mybinaries
+      - bin
 
 
