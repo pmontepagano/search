@@ -154,12 +154,15 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	// for _, rp := range allRegisteredProviders {
 	// 	fmt.Printf("registered provider with participant name %s and contract ID: %s\n", rp.ParticipantName, rp.Edges.Contract.ID)
 	// }
+	if len(contractsToCalculate) == 0 {
+		return nil, errors.New("no compatible provider found and no potential candidates to calculate compatibility")
+	}
 	firstResult := make(chan *ent.RegisteredProvider)
 	workersFinished := make(chan struct{})
 	go func() {
+		workers := pool.New()
 		for _, c := range contractsToCalculate {
 			for _, prov := range c.Edges.Providers {
-				workers := pool.New()
 				workers.Go(func() {
 					provContract, err := getContract(c)
 					if err != nil {
@@ -189,10 +192,11 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 						firstResult <- prov
 					}
 				})
-				workers.Wait()
-				workersFinished <- struct{}{}
+
 			}
 		}
+		workers.Wait()
+		workersFinished <- struct{}{}
 	}()
 
 	select {
