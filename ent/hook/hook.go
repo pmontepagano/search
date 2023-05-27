@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/clpombo/search/ent"
+	"github.com/pmontepagano/search/ent"
 )
 
 // The CompatibilityResultFunc type is an adapter to allow the use of ordinary

@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/clpombo/search/ent/predicate"
-	"github.com/clpombo/search/ent/registeredprovider"
+	"github.com/pmontepagano/search/ent/predicate"
+	"github.com/pmontepagano/search/ent/registeredprovider"
 )
 
 // RegisteredProviderDelete is the builder for deleting a RegisteredProvider entity.

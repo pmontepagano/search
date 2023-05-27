@@ -1,4 +1,4 @@
-## `clpombo/search/cfsm` is a CFSMs library in Go.
+## `pmontepagano/search/cfsm` is a CFSMs library in Go.
 
 This library was forked from [`nickng/cfsm`](https://github.com/nickng/cfsm).
 

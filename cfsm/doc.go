@@ -14,4 +14,4 @@
 
 // Package cfsm is a library for working with Communicating Finite State
 // Machines.
-package cfsm // import "github.com/clpombo/search/cfsm"
+package cfsm // import "github.com/pmontepagano/search/cfsm"

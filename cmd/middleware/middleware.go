@@ -4,7 +4,7 @@ import (
 	"flag"
 	"sync"
 
-	"github.com/clpombo/search/internal/middleware"
+	"github.com/pmontepagano/search/internal/middleware"
 )
 
 var (

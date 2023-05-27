@@ -3,7 +3,7 @@ package middleware
 import (
 	"testing"
 
-	"github.com/clpombo/search/cfsm"
+	"github.com/pmontepagano/search/cfsm"
 )
 
 func TestTravelClient(t *testing.T) {

@@ -12,12 +12,12 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/clpombo/search/ent/compatibilityresult"
-	"github.com/clpombo/search/ent/predicate"
-	"github.com/clpombo/search/ent/registeredcontract"
-	"github.com/clpombo/search/ent/registeredprovider"
-	"github.com/clpombo/search/ent/schema"
 	"github.com/google/uuid"
+	"github.com/pmontepagano/search/ent/compatibilityresult"
+	"github.com/pmontepagano/search/ent/predicate"
+	"github.com/pmontepagano/search/ent/registeredcontract"
+	"github.com/pmontepagano/search/ent/registeredprovider"
+	"github.com/pmontepagano/search/ent/schema"
 )
 
 const (

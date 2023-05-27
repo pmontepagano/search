@@ -3,7 +3,7 @@ package contract
 import (
 	"testing"
 
-	pb "github.com/clpombo/search/gen/go/search/v1"
+	pb "github.com/pmontepagano/search/gen/go/search/v1"
 	"github.com/stretchr/testify/require"
 )
 

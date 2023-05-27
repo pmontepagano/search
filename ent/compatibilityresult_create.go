@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/clpombo/search/ent/compatibilityresult"
-	"github.com/clpombo/search/ent/registeredcontract"
-	"github.com/clpombo/search/ent/schema"
+	"github.com/pmontepagano/search/ent/compatibilityresult"
+	"github.com/pmontepagano/search/ent/registeredcontract"
+	"github.com/pmontepagano/search/ent/schema"
 )
 
 // CompatibilityResultCreate is the builder for creating a CompatibilityResult entity.

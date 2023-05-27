@@ -11,9 +11,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/clpombo/search/ent/registeredcontract"
-	"github.com/clpombo/search/ent/registeredprovider"
 	"github.com/google/uuid"
+	"github.com/pmontepagano/search/ent/registeredcontract"
+	"github.com/pmontepagano/search/ent/registeredprovider"
 )
 
 // RegisteredProvider is the model entity for the RegisteredProvider schema.

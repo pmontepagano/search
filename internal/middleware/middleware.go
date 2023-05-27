@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/clpombo/search/contract"
-	pb "github.com/clpombo/search/gen/go/search/v1"
+	"github.com/pmontepagano/search/contract"
+	pb "github.com/pmontepagano/search/gen/go/search/v1"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/codes"

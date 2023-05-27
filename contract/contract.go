@@ -5,9 +5,9 @@ import (
 	"crypto/sha512"
 	"fmt"
 
-	"github.com/clpombo/search/cfsm"
+	"github.com/pmontepagano/search/cfsm"
 
-	pb "github.com/clpombo/search/gen/go/search/v1"
+	pb "github.com/pmontepagano/search/gen/go/search/v1"
 )
 
 type Contract interface {

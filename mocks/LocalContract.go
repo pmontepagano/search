@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	v1 "github.com/clpombo/search/gen/go/search/v1"
+	v1 "github.com/pmontepagano/search/gen/go/search/v1"
 	mock "github.com/stretchr/testify/mock"
 )
 

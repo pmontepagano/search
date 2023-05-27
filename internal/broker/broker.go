@@ -23,14 +23,14 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/testdata"
 
-	"github.com/clpombo/search/contract"
-	"github.com/clpombo/search/ent"
-	"github.com/clpombo/search/ent/compatibilityresult"
-	"github.com/clpombo/search/ent/registeredcontract"
-	"github.com/clpombo/search/ent/registeredprovider"
+	"github.com/pmontepagano/search/contract"
+	"github.com/pmontepagano/search/ent"
+	"github.com/pmontepagano/search/ent/compatibilityresult"
+	"github.com/pmontepagano/search/ent/registeredcontract"
+	"github.com/pmontepagano/search/ent/registeredprovider"
 
-	pb "github.com/clpombo/search/gen/go/search/v1"
 	_ "github.com/mattn/go-sqlite3"
+	pb "github.com/pmontepagano/search/gen/go/search/v1"
 )
 
 type brokerServer struct {

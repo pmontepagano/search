@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/clpombo/search/ent/compatibilityresult"
-	"github.com/clpombo/search/ent/predicate"
-	"github.com/clpombo/search/ent/registeredcontract"
-	"github.com/clpombo/search/ent/registeredprovider"
+	"github.com/pmontepagano/search/ent/compatibilityresult"
+	"github.com/pmontepagano/search/ent/predicate"
+	"github.com/pmontepagano/search/ent/registeredcontract"
+	"github.com/pmontepagano/search/ent/registeredprovider"
 )
 
 // RegisteredContractQuery is the builder for querying RegisteredContract entities.

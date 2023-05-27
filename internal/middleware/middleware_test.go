@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/clpombo/search/contract"
-	pb "github.com/clpombo/search/gen/go/search/v1"
-	"github.com/clpombo/search/internal/broker"
 	"github.com/google/uuid"
+	"github.com/pmontepagano/search/contract"
+	pb "github.com/pmontepagano/search/gen/go/search/v1"
+	"github.com/pmontepagano/search/internal/broker"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
