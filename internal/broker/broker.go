@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/sourcegraph/conc"
 	"github.com/sourcegraph/conc/iter"
 	"github.com/sourcegraph/conc/pool"
 	"google.golang.org/grpc"
@@ -40,8 +41,9 @@ type brokerServer struct {
 	dbClient   *ent.Client
 	compatFunc ContractCompatibilityFunc
 
-	PublicURL string
-	logger    *log.Logger
+	PublicURL             string
+	logger                *log.Logger
+	compatChecksWaitGroup *conc.WaitGroup
 }
 
 // TODO: move this into an ent template? https://entgo.io/docs/templates
@@ -147,9 +149,9 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	if len(contractsToCalculate) == 0 {
 		return nil, errors.New("no compatible provider found and no potential candidates to calculate compatibility")
 	}
-	firstResult := make(chan *ent.RegisteredProvider)
-	workersFinished := make(chan struct{})
-	go func() {
+	firstResult := make(chan *ent.RegisteredProvider, 1)
+	workersFinished := make(chan struct{}, 1)
+	s.compatChecksWaitGroup.Go(func() {
 		workers := pool.New()
 		for _, c := range contractsToCalculate {
 			for _, prov := range c.Edges.Providers {
@@ -181,15 +183,20 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 						return
 					}
 					if isCompatible {
+						s.logger.Printf("found compatible provider %s, returning early...", thisProv.ID)
 						firstResult <- thisProv
+						return
 					}
+					return
 				})
-
 			}
 		}
+		s.logger.Printf("waiting for workers to finish...")
 		workers.Wait()
+		s.logger.Print("workers finished")
 		workersFinished <- struct{}{}
-	}()
+		s.logger.Printf("Exiting routine for getBestCandidate with req %s and participant %s", req.GetContractID(), p)
+	})
 
 	select {
 	case r := <-firstResult:
@@ -484,7 +491,12 @@ func (s *brokerServer) saveCompatibilityResult(ctx context.Context, req, prov *e
 			return nil, fmt.Errorf("database error fetching existing compatibility result: %v", err)
 		}
 	}
-	return cr, tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("database error commiting compatibility result: %v", err)
+	}
+	s.logger.Printf("saved compatibility result between requirement projection %s and provider contract %s", req.ID, prov.ID)
+	return cr, nil
 }
 
 // Save provider in the database.
@@ -561,6 +573,7 @@ func NewBrokerServer(databasePath string) *brokerServer {
 
 	s.dbClient = setUpDB(databasePath)
 	s.compatFunc = computeCompatibility
+	s.compatChecksWaitGroup = conc.NewWaitGroup()
 
 	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)
 	return s
@@ -598,6 +611,8 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 }
 
 func (s *brokerServer) Stop() {
+	s.logger.Printf("Broker server stopping...")
+	s.compatChecksWaitGroup.Wait()
 	if s.server != nil {
 		s.server.Stop()
 	}

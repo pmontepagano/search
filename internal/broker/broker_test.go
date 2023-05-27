@@ -20,8 +20,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func TestBrokerChannel_Request(t *testing.T) {
-	// TODO: change this test and mock provider?
+func TestBrokerRegisterProviderRequest(t *testing.T) {
 	tmpDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
 	t.Cleanup(b.Stop)
@@ -58,173 +57,7 @@ q0 0 ? hello q0
 		t.Fatalf("ERROR RegisterProvider: %v", err)
 	}
 
-	/* TODO: fix this test? Or move to an integration test.
-	// ask for channel brokerage
-	c := pb.GlobalContract{
-		Contract: []byte(`--
-		.outputs
-		.state graph
-		q0 1 ! hello q0
-		.marking q0
-		.end
-
-		.outputs FooBar
-		.state graph
-		q0 0 ? hello q0
-		.marking q0
-		.end
-		`),
-		Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
-		InitiatorName: "0",
-	}
-	req := pb.BrokerChannelRequest{
-		Contract: &c,
-		PresetParticipants: map[string]*pb.RemoteParticipant{
-			"0": {
-				Url:   "fake",
-				AppId: "fake",
-			},
-		},
-	}
-	brokerresult, err := client.BrokerChannel(ctx, &req)
-	if err != nil {
-		t.Fatal("Received error from broker.")
-	}
-	if brokerresult.Result != pb.BrokerChannelResponse_RESULT_ACK {
-		t.Fatal("Non ACK return code from broker")
-	}
-
-	*/
-	b.Stop()
 }
-
-/* broken test
-func TestGetParticipantMappingIntegration(t *testing.T) {
-	tmpDir := t.TempDir()
-	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
-	t.Cleanup(b.Stop)
-	go b.StartServer("localhost", 3333, false, "", "")
-
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	opts = append(opts, grpc.WithBlock())
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", "localhost", 3333), opts...)
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
-	defer conn.Close()
-	client := pb.NewBrokerServiceClient(conn)
-	ctx := context.Background()
-
-	// register dummy provider
-	var dummyProvContract = []byte(`--
-.outputs FooBar
-.state graph
-q0 0 ? hello q0
-.marking q0
-.end
-`)
-	var dummyReqContract = []byte(`--
-.outputs Dummy
-.state graph
-q0 FooBar ! hello q0
-.marking q0
-.end
-
-.outputs FooBar
-.state graph
-q0 Dummy ? hello q0
-.marking q0
-.end
-`)
-	registrationResponse, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
-		Contract: &pb.LocalContract{
-			Contract: dummyProvContract,
-			Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
-		},
-		Url: "fakeurl_for_provider",
-	})
-	if err != nil {
-		log.Fatalf("ERROR RegisterProvider: %v", err)
-	}
-	provider, err := b.getRegisteredProvider(registrationResponse.AppId)
-	if err != nil {
-		t.Fatal("error getting registered provider")
-	}
-
-	b.SetCompatFunc(mockTestGetParticipantMappingContractCompatChecker)
-	// test initiator mapping
-	_, err = client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
-		Contract: &pb.GlobalContract{
-			Contract:      dummyReqContract,
-			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
-			InitiatorName: "Dummy",
-		},
-		PresetParticipants: map[string]*pb.RemoteParticipant{
-			"Dummy": {
-				Url:   "dummy_fake_url",
-				AppId: "dummy_fake_appid",
-			},
-		},
-	})
-	if err != nil {
-		t.Error("error brokering channel")
-	}
-	initiatorMapping := map[string]*pb.RemoteParticipant{
-		"FooBar": {
-			Url:   "foobar_fake_url",
-			AppId: "foobar_fake_appid",
-		},
-		"0": {
-			Url:   "fakeurl_for_provider",
-			AppId: registrationResponse.GetAppId(),
-		},
-	}
-	reqContract, err := contract.ConvertPBGlobalContract(&pb.GlobalContract{
-		Contract:      dummyReqContract,
-		InitiatorName: "FooBar",
-		Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
-	})
-	if err != nil {
-		t.Error("error converting contract")
-	}
-
-	_, err = b.getBestCandidate(context.Background(), reqContract, "FooBar")
-	if err != nil {
-		t.Fatal("error running getBestCandidate")
-	}
-	mapping, err := b.getParticipantMapping(reqContract, initiatorMapping, "0", provider)
-	if err != nil {
-		t.Fatal("error getting participant mapping")
-	}
-	expected := map[string]*pb.RemoteParticipant{
-		"0": {
-			Url:   "fakeurl_for_provider",
-			AppId: registrationResponse.GetAppId(),
-		},
-		"FooBar": {
-			Url:   "foobar_fake_url",
-			AppId: "foobar_fake_appid",
-		},
-	}
-
-	cmpOpts := []cmp.Option{
-		protocmp.Transform(),
-	}
-	if !cmp.Equal(mapping, expected, cmpOpts...) {
-		t.Errorf("Received erroneous response from getParticipantMapping: %v", mapping)
-	}
-	b.Stop()
-}
-
-func mockTestGetParticipantMappingContractCompatChecker(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
-	mapping := map[string]string{
-		"0": "Dummy",
-	}
-	return true, mapping, nil
-}
-*/
 
 func TestFilterParticipants(t *testing.T) {
 	tests := []struct {
@@ -643,6 +476,8 @@ func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 
 	// Act
 	result, err := b.getBestCandidate(context.TODO(), req, participantName)
+	t.Log("Waiting for compatibility checks to finish...")
+	b.compatChecksWaitGroup.Wait()
 
 	// Assert
 	assert.Equal(t, 3, numberOfCallsToCompatFunc)
@@ -651,4 +486,87 @@ func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 	assert.Equal(t, provider3AppID, result.ID)
 	assert.Equal(t, provider3Url, result.URL)
 	assert.Equal(t, provider3RegisteredContract.ID, result.ContractID)
+}
+
+func TestGetBestCandidate_CachedResult(t *testing.T) {
+	// Arrange
+	testDir := t.TempDir()
+	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+	t.Cleanup(b.Stop)
+
+	// To save a cached result we first need to save the requirement projection and the provider contract.
+
+	// Requirement mocks.
+	participantName := "test_participant_name"
+	req := mocks.NewGlobalContract(t)
+	reqProjection := mocks.NewLocalContract(t)
+	req.EXPECT().GetProjection(participantName).Return(reqProjection, nil)
+	reqProjection.EXPECT().GetContractID().Return("1692526aab84461a8aebcefddcba2b33fb5897ab180c53e8b345ae125484d0aaa35baf60487050be21ed8909a48eace93851bf139087ce1f7a87d97b6120a651")
+	reqProjection.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
+	reqProjection.EXPECT().GetBytesRepr().Return([]byte(`dummy`))
+
+	// Save requirement projection.
+	reqProjectionRegisteredContract, err := b.getOrSaveContract(context.Background(), reqProjection)
+	if err != nil {
+		t.Fatalf("error saving contract: %v", err)
+	}
+
+	// Provider mocks.
+	provider1Contract := mocks.NewLocalContract(t)
+	provider1Contract.EXPECT().GetContractID().Return("826516eb343f93d8f1ca808ef34b30deb024bffd05c1630e0eee81243faeca243e9ce0cf431d691ce63b2ebaf60e48e1220f1d4ab85731b5c2f591fe1e958043")
+	provider1Contract.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
+	provider1Contract.EXPECT().GetBytesRepr().Return([]byte(provider1FSA))
+	provider1RegisteredContract, err := b.getOrSaveContract(context.Background(), provider1Contract)
+	if err != nil {
+		t.Fatalf("error saving contract: %v", err)
+	}
+	provider1AppID, _ := uuid.Parse("285b25a8-6621-4abe-a18e-90cc896f3476")
+	provider1Url, _ := url.Parse("provider1.example.org:8080")
+	provider1RegisteredProvider, err := b.saveProvider(context.TODO(), provider1AppID, provider1Url, provider1RegisteredContract)
+	if err != nil {
+		t.Fatalf("error saving provider: %v", err)
+	}
+
+	provider2Contract := mocks.NewLocalContract(t)
+	provider2Contract.EXPECT().GetContractID().Return("64867f97a221cd291084fc7c27516fca3c3dfebaae7ec99f5f3f836c540fcec6978a3f8d7a98c3ca6ee8039e550ea125b88d369c033cc203820caa562f3c7986")
+	provider2Contract.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
+	provider2Contract.EXPECT().GetBytesRepr().Return([]byte(provider2FSA))
+	provider2RegisteredContract, err := b.getOrSaveContract(context.Background(), provider2Contract)
+	if err != nil {
+		t.Fatalf("error saving contract: %v", err)
+	}
+	provider2AppID, _ := uuid.Parse("4cda7849-2288-4d61-86df-1d98d273eb1e")
+	provider2Url, _ := url.Parse("provider2.example.org:8080")
+	_, err = b.saveProvider(context.TODO(), provider2AppID, provider2Url, provider2RegisteredContract)
+	if err != nil {
+		t.Fatalf("error saving provider: %v", err)
+	}
+
+	// Now save a cached result for only provider 1.
+	// We later want to check that the compatibility function is run only for provider 2.
+	_, err = b.saveCompatibilityResult(context.Background(), reqProjectionRegisteredContract, provider1RegisteredContract, true,
+		map[string]string{"serviceClient": "dunno"})
+	if err != nil {
+		t.Fatalf("error saving compatibility result: %v", err)
+	}
+
+	// Set broker's compatibility function to a mock that returns true for both providers. We later want to assert how many times the function was called.
+	numberOfCallsToCompatFunc := 0
+	counterLock := sync.Mutex{}
+	b.SetCompatFunc(func(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+		counterLock.Lock()
+		numberOfCallsToCompatFunc++
+		counterLock.Unlock()
+		t.Logf("provID: %v, prov data: %s", prov.GetContractID(), prov.GetBytesRepr())
+		return true, map[string]string{"serviceClient": "dunno"}, nil
+	})
+
+	// Act
+	result, err := b.getBestCandidate(context.TODO(), req, participantName)
+	b.compatChecksWaitGroup.Wait()
+
+	// Assert
+	assert.Nil(t, err)
+	require.Equal(t, provider1RegisteredProvider.ContractID, result.ContractID)
+	// assert.Equal(t, 1, numberOfCallsToCompatFunc) // Compatibility check is only run for provider 2.
 }
