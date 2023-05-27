@@ -317,6 +317,7 @@ func TestGetBestCandidate_NoCompatibleResultsWithRegisteredProviders(t *testing.
 	req := mocks.NewGlobalContract(t)
 	reqProjection := mocks.NewLocalContract(t)
 	req.EXPECT().GetProjection(participantName).Return(reqProjection, nil)
+	req.EXPECT().GetContractID().Return("5cd3d822b5cb3383b8027750e0d8d2ccfc48a5d87020500d5c2c786f934a6937b6481b17bb0baa535cc24d55e68f0e6c87ee800e8053085d0b223cc5458c63b3")
 	reqProjection.EXPECT().GetContractID().Return("1692526aab84461a8aebcefddcba2b33fb5897ab180c53e8b345ae125484d0aaa35baf60487050be21ed8909a48eace93851bf139087ce1f7a87d97b6120a651")
 	reqProjection.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
 	reqProjection.EXPECT().GetBytesRepr().Return([]byte(`dummy`))
@@ -385,6 +386,7 @@ func TestGetBestCandidate_NoCompatibleResultsWithRegisteredProviders(t *testing.
 
 	// Act
 	result, err := b.getBestCandidate(context.TODO(), req, participantName)
+	b.compatChecksWaitGroup.Wait()
 
 	// Assert
 	assert.Nil(t, result)
@@ -404,6 +406,7 @@ func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 	req := mocks.NewGlobalContract(t)
 	reqProjection := mocks.NewLocalContract(t)
 	req.EXPECT().GetProjection(participantName).Return(reqProjection, nil)
+	req.EXPECT().GetContractID().Return("5cd3d822b5cb3383b8027750e0d8d2ccfc48a5d87020500d5c2c786f934a6937b6481b17bb0baa535cc24d55e68f0e6c87ee800e8053085d0b223cc5458c63b3")
 	reqProjection.EXPECT().GetContractID().Return("1692526aab84461a8aebcefddcba2b33fb5897ab180c53e8b345ae125484d0aaa35baf60487050be21ed8909a48eace93851bf139087ce1f7a87d97b6120a651")
 	reqProjection.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
 	reqProjection.EXPECT().GetBytesRepr().Return([]byte(`dummy`))
