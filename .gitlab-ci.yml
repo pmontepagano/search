@@ -15,10 +15,11 @@ stages:
 
 format:
   stage: test
-  coverage: '/coverage: \d+.\d+% of statements/'
+  coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
   script:
     - go fmt ./...
     - go test ./... -coverprofile=coverage.txt -covermode count -timeout 30s
+    - go tool cover -func coverage.txt
     - go test -race ./... -timeout 1m
     - go vet ./...
     - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
