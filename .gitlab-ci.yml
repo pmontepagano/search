@@ -13,17 +13,21 @@ stages:
   - test
   - build
 
-format:
+lint-and-format:
   stage: test
-  coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
   script:
     - go fmt ./...
-    - go test ./... -coverprofile=coverage.txt -covermode count -timeout 30s
-    - go tool cover -func coverage.txt
-    - go test -race ./... -timeout 1m
     - go vet ./...
     - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
     - golangci-lint run
+
+test:
+  stage: test
+  coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
+  script:
+    - go test ./... -coverprofile=coverage.txt -covermode count -timeout 30s
+    - go tool cover -func coverage.txt
+    - go test -race ./... -timeout 1m
   after_script:
     - go get github.com/boumenot/gocover-cobertura
     - go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
