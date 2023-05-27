@@ -183,9 +183,9 @@ func (m *CFSM) bytesBuffer() *bytes.Buffer {
 		Comment: m.Comment,
 	}
 	for _, st := range m.states {
-		for tr, st2 := range st.edges {
+		for _, tr := range st.sortedEdges {
 			mach.Edges = append(mach.Edges, fmt.Sprintf("q%d%d %s q%d%d\n",
-				m.ID, st.ID, petrify.Encode(tr.Label()), m.ID, st2.ID))
+				m.ID, st.ID, petrify.Encode(tr.Label()), m.ID, st.edges[tr].ID))
 		}
 	}
 	err := t.Execute(&buf, mach)
@@ -226,7 +226,8 @@ type State struct {
 	ID    int    // Unique identifier.
 	Label string // Free form text label.
 
-	edges map[Transition]*State
+	edges       map[Transition]*State
+	sortedEdges []Transition // Transitions sorted by insertion order. This is needed to keep a deterministic order when printing the CFSM.
 }
 
 // NewState creates a new State independent from any CFSM.
@@ -242,17 +243,12 @@ func (s *State) Name() string {
 // AddTransition adds a transition to the current State.
 func (s *State) AddTransition(t Transition) {
 	s.edges[t] = t.State()
+	s.sortedEdges = append(s.sortedEdges, t)
 }
 
 // Transitions returns a list of transitions.
 func (s *State) Transitions() []Transition {
-	ts := make([]Transition, len(s.edges))
-	i := 0
-	for t := range s.edges {
-		ts[i] = t
-		i++
-	}
-	return ts
+	return s.sortedEdges
 }
 
 // Transition is a transition from a State to another State.

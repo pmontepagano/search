@@ -5,8 +5,10 @@ package petrify // import "github.com/clpombo/search/cfsm/petrify"
 import "strings"
 
 const Tmpl = `
--- Machines #{{ .ID }}
+-- Machine #{{ .ID }}
+{{- if .Comment -}}
 -- {{ multiline .Comment }}
+{{- end }}
 .outputs {{ .Name }}
 .state graph
 {{ range .Edges -}}{{ . }}{{- end }}

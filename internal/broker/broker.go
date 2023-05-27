@@ -423,6 +423,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 			if err != nil {
 				return nil, status.New(codes.Internal, err.Error()).Err()
 			}
+			s.logger.Printf("Saved requirement projection for participant %s with ID %s", pName, participantContract.GetContractID())
 		}
 	}
 
@@ -577,9 +578,8 @@ func NewBrokerServer(databasePath string) *brokerServer {
 
 func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string) {
 	s.PublicURL = fmt.Sprintf("%s:%d", host, port)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix)
-	// s.logger.Printf("Delaying broker start 5 seconds to test something...")
-	// time.Sleep(5 * time.Second)
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
+
 	lis, err := net.Listen("tcp", s.PublicURL)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)
