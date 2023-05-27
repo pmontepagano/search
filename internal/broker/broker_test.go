@@ -607,7 +607,7 @@ func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 	}
 
 	provider3Contract := mocks.NewLocalContract(t)
-	provider3Contract.EXPECT().GetContractID().Return("bd128995fe64da655ccc27c5d07714cb76478ae749df31f867cdc7cb83a0cb868b076679dc3665142540359aa96faf8667fd015d846537c6403c695574a34fa0")
+	provider3Contract.EXPECT().GetContractID().Return("a62c6b1ee8a142d1086ffa68acc298705a293fcb09cf58784c0e390e44feafd8457d199b2bd239ac01f42f4939658927b68a43214f38d7a5e7a703da437374b8")
 	provider3Contract.EXPECT().GetFormat().Return(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA)
 	provider3Contract.EXPECT().GetBytesRepr().Return([]byte(provider3FSA))
 	provider3RegisteredContract, err := b.getOrSaveContract(context.Background(), provider3Contract)
@@ -629,7 +629,7 @@ func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 		numberOfCallsToCompatFunc++
 		counterLock.Unlock()
 		t.Logf("provID: %v, prov data: %s", prov.GetContractID(), prov.GetBytesRepr())
-		if prov.GetContractID() == "bd128995fe64da655ccc27c5d07714cb76478ae749df31f867cdc7cb83a0cb868b076679dc3665142540359aa96faf8667fd015d846537c6403c695574a34fa0" {
+		if prov.GetContractID() == "a62c6b1ee8a142d1086ffa68acc298705a293fcb09cf58784c0e390e44feafd8457d199b2bd239ac01f42f4939658927b68a43214f38d7a5e7a703da437374b8" {
 			return true, map[string]string{"serviceClient": "dunno"}, nil
 		}
 		return false, nil, nil
@@ -639,11 +639,12 @@ func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 	result, err := b.getBestCandidate(context.TODO(), req, participantName)
 
 	// Assert
+	assert.Equal(t, 3, numberOfCallsToCompatFunc)
+	require.Nil(t, err)
 	assert.Equal(t, provider3RegisteredProvider.ID, result.ID)
 	assert.Equal(t, provider3AppID, result.ID)
 	assert.Equal(t, provider3Url, result.URL)
 	assert.Equal(t, provider3RegisteredContract.ID, result.ContractID)
-	assert.Nil(t, err)
-	assert.Equal(t, 3, numberOfCallsToCompatFunc)
+
 	b.Stop()
 }
