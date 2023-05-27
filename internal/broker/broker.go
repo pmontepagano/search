@@ -76,16 +76,6 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 	return result
 }
 
-func (s *brokerServer) getRegisteredProvider(appID string) (*ent.RegisteredProvider, error) {
-	// TODO: add context as param
-	// TODO: replace string param with uuid
-	prov, err := s.dbClient.RegisteredProvider.Get(context.TODO(), uuid.MustParse(appID))
-	if err != nil {
-		return nil, fmt.Errorf("non registered appID %v", appID)
-	}
-	return prov, nil
-}
-
 func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.GlobalContract, p string) (*ent.RegisteredProvider, error) {
 	// Get from the database the projection of the requirement contract (it should have been saved when handling BrokerChannelRequest).
 	// rc *ent.RegisteredContract
@@ -205,7 +195,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	case r := <-firstResult:
 		return r, nil
 	case <-workersFinished:
-		return nil, errors.New(fmt.Sprintf("no compatible provider found for participant %s", p))
+		return nil, fmt.Errorf("no compatible provider found for participant %s", p)
 	}
 
 }
