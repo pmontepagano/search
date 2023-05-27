@@ -20,7 +20,22 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v3.4.0
     - name: Test
       run: go test ./... -cover -v -timeout 30s
+    - name: Test with race detector
+      run: go test -race ./... -timeout 1m -v
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 'stable'
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3.4.0
+    - name: Run go vet
+      run: go vet ./...
+    - name: Run gofmt
+      run: go fmt ./...
