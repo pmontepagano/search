@@ -24,6 +24,7 @@ func TestBrokerChannel_Request(t *testing.T) {
 	// TODO: change this test and mock provider?
 	tmpDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
+	t.Cleanup(b.Stop)
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -101,6 +102,7 @@ q0 0 ? hello q0
 func TestGetParticipantMappingIntegration(t *testing.T) {
 	tmpDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
+	t.Cleanup(b.Stop)
 	go b.StartServer("localhost", 3333, false, "", "")
 
 	var opts []grpc.DialOption
@@ -343,6 +345,7 @@ func TestGetParticipantMapping(t *testing.T) {
 
 			testDir := t.TempDir()
 			b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+			t.Cleanup(b.Stop)
 
 			if tt.req != nil {
 				// Project requirement from Global Contract.
@@ -401,6 +404,7 @@ func TestGetBestCandidate_UnregisteredRequirementContract(t *testing.T) {
 	// Arrange
 	testDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+	t.Cleanup(b.Stop)
 
 	participantName := "test_participant_name"
 	req := mocks.NewGlobalContract(t)
@@ -421,6 +425,7 @@ func TestGetBestCandidate_NoCompatibilityResults(t *testing.T) {
 	// Arrange
 	testDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+	t.Cleanup(b.Stop)
 
 	participantName := "test_participant_name"
 	req := mocks.NewGlobalContract(t)
@@ -472,6 +477,7 @@ func TestGetBestCandidate_NoCompatibleResultsWithRegisteredProviders(t *testing.
 	// Arrange
 	testDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+	t.Cleanup(b.Stop)
 
 	// Requirement mocks.
 	participantName := "test_participant_name"
@@ -552,13 +558,13 @@ func TestGetBestCandidate_NoCompatibleResultsWithRegisteredProviders(t *testing.
 	assert.Error(t, err)
 	assert.Equal(t, err.Error(), "no compatible provider found for participant test_participant_name")
 	assert.Equal(t, 3, numberOfCallsToCompatFunc)
-	b.Stop()
 }
 
 func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 	// Arrange
 	testDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+	t.Cleanup(b.Stop)
 
 	// Requirement mocks.
 	participantName := "test_participant_name"
@@ -645,6 +651,4 @@ func TestGetBestCandidate_OnlyOneCompatibleResult(t *testing.T) {
 	assert.Equal(t, provider3AppID, result.ID)
 	assert.Equal(t, provider3Url, result.URL)
 	assert.Equal(t, provider3RegisteredContract.ID, result.ContractID)
-
-	b.Stop()
 }

@@ -149,6 +149,7 @@ func TestTravelClient(t *testing.T) {
 
 	// Start broker
 	bs := broker.NewBrokerServer("file:ent?mode=memory&_fk=1")
+	t.Cleanup(b.Stop)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 	defer bs.Stop()
 

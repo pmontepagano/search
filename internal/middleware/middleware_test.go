@@ -87,6 +87,7 @@ func TestCircle(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	bs := broker.NewBrokerServer(fmt.Sprintf("%s/testcircle-%s.db", tmpDir, time.Now().Format("2006-01-02T15:04:05")))
+	t.Cleanup(bs.Stop)
 	bs.SetCompatFunc(circleContractCompatChecker)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 
@@ -311,6 +312,7 @@ func TestPingPongFullExample(t *testing.T) {
 	// start broker
 	tmpDir := t.TempDir()
 	bs := broker.NewBrokerServer(fmt.Sprintf("%s/testpingpongfullexample.db", tmpDir))
+	t.Cleanup(bs.Stop)
 	bs.SetCompatFunc(pingPongContractCompatChecker)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 	defer bs.Stop()
