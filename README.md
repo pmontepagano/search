@@ -22,6 +22,10 @@ Por ahora habrá estos componentes en la arquitectura:
 
   mockery --dir contract --all --with-expecter
 
+# To get a report of code coverage
+
+    go test ./... -coverprofile=coverage.txt -covermode atomic -race -timeout 4s
+    go tool cover -html=coverage.txt
 
 ## Useful commands for Entgo (database)
 
