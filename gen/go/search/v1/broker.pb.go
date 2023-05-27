@@ -178,7 +178,7 @@ type RegisterProviderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Contract *LocalContract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract,omitempty"` // TODO: we only support CFSM format for this currently.
+	Contract *LocalContract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract,omitempty"`
 	Url      string         `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
 }
 

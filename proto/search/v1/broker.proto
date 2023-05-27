@@ -28,7 +28,7 @@ message BrokerChannelResponse {
 }
 
 message RegisterProviderRequest {
-    LocalContract contract = 1;  // TODO: we only support CFSM format for this currently.
+    LocalContract contract = 1;
     string url = 2;
 }
 

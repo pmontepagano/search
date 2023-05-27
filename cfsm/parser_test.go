@@ -52,10 +52,6 @@ q0 0 ? world q1
 		t.Errorf("Expected start state of first CFSM to be 'q0'. Found %s instead", firstCFSM.Start.Label)
 	}
 
-	// TODO: we should add a test to check output format.
-	// outString := sys.String()
-	// require.Equal(t, exampleFSAContent, outString)
-
 }
 
 func TestPingPongFSAParser(t *testing.T) {
