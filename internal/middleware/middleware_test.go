@@ -125,13 +125,13 @@ func TestCircle(t *testing.T) {
 			// Have a slightly different provider contract for each Service Provider to be able
 			// to differentiate them in the compatibility check function.
 			providerContract := fmt.Sprintf(`
-			.outputs self
+			.outputs msg_passer_%v
 			.state graph
 			q0 sender_%v ? word q1
 			q1 receiver ! word q0
 			.marking q0
 			.end
-			`, idx)
+			`, idx, idx)
 			// register dummy app with provider middleware
 			req := pb.RegisterAppRequest{
 				ProviderContract: &pb.LocalContract{
@@ -273,15 +273,15 @@ func TestCircle(t *testing.T) {
 func circleContractCompatChecker(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
 	log.Printf("[TestCircle] - Checking req ID: %s, prov ID: %s, req participants: %v, prov participants: %v", req.GetContractID(), prov.GetContractID(), req.GetRemoteParticipantNames(), prov.GetRemoteParticipantNames())
 	mapping := make(map[string]string)
-	if req.GetContractID() == "e55f3eb01a543e5ae0526ad7964141d85548c3ef36df28250dffe309380ab26380482cd3d2b685c4f89534b0ec145a2595ba8e797b2cd17c2ed6966f15a38b2b" && prov.GetContractID() == "aebb1bcde7ca44ce42f0c275c9b77619667b69e2a34b9958cd7117920b34bfb73ebe9123c61c43afe10f7506f830fe558402a6404ca897342c86928b01e2f705" {
+	if req.GetContractID() == "c6c64de47a8ca6293d5bfc108b47c8982c6ebc178b7d6cb5bcd22581685b1ce7b512c62e78ea8badaff14df89075d06186da982ae0a0719b651174f7031bcb92" && prov.GetContractID() == "6f970689b5f60afc5c6d5b5244f6e4fe83cf3af1e8cc153fe1877a1d8b76c004206a6d264a3e2d4d83dd3277eb28da4e0a57ff5b38061c5b7f533771904a8425" {
 		mapping["sender_0"] = "self"
 		mapping["receiver"] = "r2_special"
 	}
-	if req.GetContractID() == "e872184d1b94bb401f5e2366cd5e7c89d32f38d02012b011c3e823dd343031ebeec8d30427dfcf0baa71f02c43faa1f3b95de842222531c2ec4e20f5cd246792" && prov.GetContractID() == "bdbb2d1614ddc4390cc171d54059fa8dc928eab7235ed30f8b3ed2dd45dc2dda7a64f5bc47d86418298520d86c21210839c61cc21cae05b34c9d6f6c10320d7d" {
+	if req.GetContractID() == "0b719e3ea36cac5dbbd0d3efdb36ade1de42ceaf267dc978c49018be7dc4aa51aa60133c756ca552cb378970220dd59d6c70a650eabb9f97f80f176027ef7c44" && prov.GetContractID() == "a5f8cb87e049fa7bb4e6c4342f0c023a47525837b0fe7eb461a3e58f40a624b66c1e8ea58391e6caef48aa1fedee9b857ce69aaf3bec2a30dec1a9164d385ce3" {
 		mapping["sender_1"] = "r1_special"
 		mapping["receiver"] = "r3_special"
 	}
-	if req.GetContractID() == "be4729d85c14828e8438012207f5efda4896891351966fc5bfac4eecc7d06088571b66f671081c28f6560cfead66e7ba37b9ef7cdaa76692a40952d28846be86" && prov.GetContractID() == "dfa5ea483b31c8eecf3786f571c973928fdda0d9376dccfaa7994991a5994211407bff2e8eecc1277156d5e54c8dae410e622981de758960f68709acd587031f" {
+	if req.GetContractID() == "cbe93c0bf4e2e1f8340e8febdc1b7bea9290aec3cfa66ca616e1c815f9efa34a1ae8b762c3118703ad47f0cee341ced5a2949a07c42e2afecb088ed4c8852642" && prov.GetContractID() == "db02a17429e4f057337d1a4da9a668dfa50b7574948dc2bff9a8b6548f7500abdc5ad9bc1072ddbb34d144cd1a3469ba332d0a36786ce2f8ad88bd5e281237e6" {
 		mapping["sender_2"] = "r2_special"
 		mapping["receiver"] = "self"
 	}
