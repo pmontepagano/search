@@ -185,9 +185,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 					if isCompatible {
 						s.logger.Printf("found compatible provider %s, returning early...", thisProv.ID)
 						firstResult <- thisProv
-						return
 					}
-					return
 				})
 			}
 		}
