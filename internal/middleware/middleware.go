@@ -240,7 +240,6 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 		}
 		// TODO: in which case do I break the loop? We need to listen for disconnects from the provider app and/or add a msg to unregister.
 	}
-	return nil
 }
 
 // Invoked by local Service Client with a requirements contract.
