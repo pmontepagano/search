@@ -447,9 +447,11 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 	c, ok := s.brokeredChannels[req.ChannelId]
 	s.channelLock.Unlock()
 	if !ok {
+		// TODO: change this and return error.
 		s.logger.Panicf("Received StartChannel on non brokered ChannelID: %s", req.ChannelId)
 	}
 	for _, p := range c.Contract.GetRemoteParticipantNames() {
+		// TODO: Use a conc.Pool or something similar to manage these goroutines and signal to stop them when this channel is closed.
 		go c.sender(p)
 	}
 	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_ACK}, nil

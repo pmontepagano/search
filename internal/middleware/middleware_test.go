@@ -160,7 +160,7 @@ func TestCircle(t *testing.T) {
 				t.Errorf("Error receiving notification from RegisterApp: %v", err)
 			}
 			channelID := new.GetNotification().GetChannelId()
-			log.Printf("[PROVIDER %s] - Received Notification. ChannelID: %s", appID, channelID)
+			log.Printf("[PROVIDER msg_passer_%v - %s] - Received Notification. ChannelID: %s", idx, appID, channelID)
 
 			// await message from sender, then add a word to the message and relay it to receiver
 			res, err := client.AppRecv(context.Background(), &pb.AppRecvRequest{
@@ -168,9 +168,9 @@ func TestCircle(t *testing.T) {
 				Participant: "sender",
 			})
 			if err != nil {
-				t.Errorf("[PROVIDER] - Error reading AppRecv. Error: %v", err)
+				t.Errorf("[PROVIDER msg_passer_%v - %s] - Error reading AppRecv. Error: %v", idx, appID, err)
 			}
-			log.Printf("[PROVIDER] - Received message from sender: %s", res.Message.GetBody())
+			log.Printf("[PROVIDER msg_passer_%v - %s] - Received message from sender: %s", idx, appID, res.Message.GetBody())
 			msg := string(res.Message.GetBody())
 			msg = msg + " dummy"
 			appSendResp, err := client.AppSend(context.Background(), &pb.AppSendRequest{
@@ -181,8 +181,10 @@ func TestCircle(t *testing.T) {
 				},
 			})
 			if err != nil || appSendResp.Result != pb.Result_OK {
-				t.Errorf("[PROVIDER] - Error sending message to receiver. Error: %v", err)
+				t.Errorf("[PROVIDER msg_passer_%v - %s] - Error sending message to receiver. Error: %v", idx, appID, err)
 			}
+			log.Printf("[PROVIDER msg_passer_%v - %s] - Sent message to receiver: %s", idx, appID, msg)
+			log.Printf("[PROVIDER msg_passer_%v - %s] - Exiting...", idx, appID)
 
 		}(mw, idx)
 	}

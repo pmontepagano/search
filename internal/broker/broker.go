@@ -361,8 +361,14 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 		}
 	}
 
-	// second round: when all responded ACK, signal them all to start choreography
+	// Second round: when all responded ACK, signal them all to start choreography with StartChannelRequest.
+	// Middlewares allow receiving messages on the channel after responding to the first round.
+	// But the second round (StartChannel) is required to start the sender routines in all middlewares.
+
+	// TODO: We could maybe improve this by only notifying the participants that can send a message from their start state.
+	//   This would require that Middlewares also start the sender routines when they receive a message from the channel.
 	s.logger.Printf("Brokering: second round...")
+	// TODO: Do this concurrently.
 	for pname, p := range allParticipants {
 		s.logger.Printf("Sending StartChannel to: %s", p.AppId)
 		// TODO: refactor this repeated code
