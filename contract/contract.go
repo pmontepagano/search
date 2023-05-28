@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha512"
 	"fmt"
+	"sync"
 
 	"github.com/pmontepagano/search/cfsm"
 
@@ -38,30 +39,46 @@ type GlobalContract interface {
 type LocalCFSMContract struct {
 	*cfsm.CFSM
 	id string
+	sync.Mutex
 }
 
 type GlobalCFSMContract struct {
 	*cfsm.System
 	id               string
 	localParticipant *cfsm.CFSM
+	sync.Mutex
 }
 
 func (c *LocalCFSMContract) GetContractID() string {
-	if c.id != "" {
-		return c.id
+	locked := c.TryLock()
+	if locked {
+		defer c.Unlock()
+		if c.id != "" {
+			return c.id
+		}
 	}
 	contractHash := sha512.Sum512(c.GetBytesRepr())
-	c.id = fmt.Sprintf("%x", contractHash[:])
-	return c.id
+	id := fmt.Sprintf("%x", contractHash[:])
+	if locked {
+		c.id = id
+	}
+	return id
 }
 
 func (c *GlobalCFSMContract) GetContractID() string {
-	if c.id != "" {
-		return c.id
+	locked := c.TryLock()
+	if locked {
+		defer c.Unlock()
+		if c.id != "" {
+			return c.id
+		}
 	}
 	contractHash := sha512.Sum512(c.GetBytesRepr())
-	c.id = fmt.Sprintf("%x", contractHash[:])
-	return c.id
+	id := fmt.Sprintf("%x", contractHash[:])
+	if locked {
+		c.id = id
+	}
+	return id
 }
 
 func (lc *LocalCFSMContract) GetRemoteParticipantNames() []string {
