@@ -85,7 +85,12 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
 // We notify to the local Service Provider that a new channel is being initiatied for it using the NotifyChan.
 type registeredApp struct {
 	Contract   contract.LocalContract
-	NotifyChan *chan pb.InitChannelNotification
+	NotifyChan *chan initChannelNotification // Each message in the channel is a Channel ID (extracted from pb.InitChannelNotification).
+}
+
+// We use this struct internally to avoid copying the protobuf structure with its lock.
+type initChannelNotification struct {
+	ChannelID string
 }
 
 type messageExchangeStream interface {
@@ -178,12 +183,21 @@ func (r *SEARCHChannel) broker() {
 	}
 }
 
-// invoked by local provider app with a provision contract
+// RegisterApp is invoked by Service Providers on the private interface in order to register their service with
+// the broker. This function keeps the connection open between the middleware and the local Service Provider
+// to notify it of new channels being initiated for it.
 func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddlewareService_RegisterAppServer) error {
+	// Connect to broker.
 	client, conn := s.connectBroker()
 	defer conn.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// We lock here because we need this blocked in case the broker sends an InitChannel
+	// before we have saved the local app in our internal structures.
+	s.providersLock.Lock()
+
+	// Send contract to broker.
 	res, err := client.RegisterProvider(ctx, &pb.RegisterProviderRequest{
 		Contract: req.ProviderContract,
 		Url:      s.PublicURL,
@@ -191,6 +205,7 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 	if err != nil {
 		s.logger.Fatalf("ERROR RegisterApp: %v", err)
 	}
+	// Send ACK to local app via the stream.
 	ack := pb.RegisterAppResponse{
 		AckOrNew: &pb.RegisterAppResponse_AppId{
 			AppId: res.GetAppId()}}
@@ -198,23 +213,28 @@ func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.Pri
 		return err
 	}
 
-	notifyInitChannel := make(chan pb.InitChannelNotification, bufferSize)
+	// Save local app in middleware's internal structures.
+	notifyInitChannel := make(chan initChannelNotification, bufferSize)
 	provContract, err := contract.ConvertPBLocalContract(req.ProviderContract)
 	if err != nil {
 		s.logger.Printf("Error parsing protobuf contract. %v", err)
 		return err
 	}
-	s.providersLock.Lock()
 	s.registeredApps[res.GetAppId()] = registeredApp{
 		Contract:   provContract,
 		NotifyChan: &notifyInitChannel,
 	}
 	s.providersLock.Unlock()
+
 	for {
 		newChan := <-notifyInitChannel
 		msg := pb.RegisterAppResponse{
 			AckOrNew: &pb.RegisterAppResponse_Notification{
-				Notification: &newChan}}
+				Notification: &pb.InitChannelNotification{
+					ChannelId: newChan.ChannelID,
+				},
+			},
+		}
 		if err := stream.Send(&msg); err != nil {
 			return err
 		}
@@ -399,7 +419,7 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 		r.LocalID = uuid.MustParse(icr.GetChannelId()) // in non locally initiated channels, LocalID == ID
 
 		// notify local provider app
-		*regapp.NotifyChan <- pb.InitChannelNotification{ChannelId: icr.GetChannelId()}
+		*regapp.NotifyChan <- initChannelNotification{ChannelID: icr.GetChannelId()}
 	} else {
 		r, ok = s.brokeringChannels[icr.AppId]
 		if !ok {
