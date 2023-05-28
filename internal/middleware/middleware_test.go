@@ -81,7 +81,6 @@ func TestRegisterChannel(t *testing.T) {
 	wg.Wait()
 }
 
-/*
 func TestCircle(t *testing.T) {
 	brokerPort, p1Port, p2Port, p3Port, initiatorPort := 20000, 20001, 20003, 20005, 20007
 
@@ -115,12 +114,13 @@ func TestCircle(t *testing.T) {
 	for idx, mw := range []*MiddlewareServer{p1Mw, p2Mw, p3Mw} {
 		go func(mw *MiddlewareServer, idx int) {
 			// this function is for provider app
-
+			defer mw.Stop()
 			// connect to provider middleware
 			conn, err := grpc.Dial(mw.PrivateURL, opts...)
 			if err != nil {
 				t.Error("Could not contact local private middleware server.")
 			}
+			defer conn.Close()
 			client := pb.NewPrivateMiddlewareServiceClient(conn)
 
 			// Have a slightly different provider contract for each Service Provider to be able
@@ -128,11 +128,11 @@ func TestCircle(t *testing.T) {
 			providerContract := fmt.Sprintf(`
 			.outputs msg_passer_%v
 			.state graph
-			q0 sender_%v ? word q1
+			q0 sender ? word q1
 			q1 receiver ! word q0
 			.marking q0
 			.end
-			`, idx, idx)
+			`, idx)
 			// register dummy app with provider middleware
 			req := pb.RegisterAppRequest{
 				ProviderContract: &pb.LocalContract{
@@ -163,8 +163,6 @@ func TestCircle(t *testing.T) {
 			log.Printf("[PROVIDER %s] - Received Notification. ChannelID: %s", appID, channelID)
 
 			// await message from sender, then add a word to the message and relay it to receiver
-			defer conn.Close()
-			defer mw.Stop()
 			res, err := client.AppRecv(context.Background(), &pb.AppRecvRequest{
 				ChannelId:   channelID,
 				Participant: "sender",
@@ -274,16 +272,16 @@ func TestCircle(t *testing.T) {
 func circleContractCompatChecker(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
 	log.Printf("[TestCircle] - Checking req ID: %s, prov ID: %s, req participants: %v, prov participants: %v", req.GetContractID(), prov.GetContractID(), req.GetRemoteParticipantNames(), prov.GetRemoteParticipantNames())
 	mapping := make(map[string]string)
-	if req.GetContractID() == "c6c64de47a8ca6293d5bfc108b47c8982c6ebc178b7d6cb5bcd22581685b1ce7b512c62e78ea8badaff14df89075d06186da982ae0a0719b651174f7031bcb92" && prov.GetContractID() == "6f970689b5f60afc5c6d5b5244f6e4fe83cf3af1e8cc153fe1877a1d8b76c004206a6d264a3e2d4d83dd3277eb28da4e0a57ff5b38061c5b7f533771904a8425" {
-		mapping["sender_0"] = "self"
+	if req.GetContractID() == "c6c64de47a8ca6293d5bfc108b47c8982c6ebc178b7d6cb5bcd22581685b1ce7b512c62e78ea8badaff14df89075d06186da982ae0a0719b651174f7031bcb92" && prov.GetContractID() == "bc15e8c84c7ef522602bafb1da221735198067c825dc5ee2d2af2ba5d3f5e87d5b0c3385b65fd49752d0c18025177db1cdc13d831909ae0b6a59aa3b84df9ee2" {
+		mapping["sender"] = "self"
 		mapping["receiver"] = "r2_special"
 	}
-	if req.GetContractID() == "0b719e3ea36cac5dbbd0d3efdb36ade1de42ceaf267dc978c49018be7dc4aa51aa60133c756ca552cb378970220dd59d6c70a650eabb9f97f80f176027ef7c44" && prov.GetContractID() == "a5f8cb87e049fa7bb4e6c4342f0c023a47525837b0fe7eb461a3e58f40a624b66c1e8ea58391e6caef48aa1fedee9b857ce69aaf3bec2a30dec1a9164d385ce3" {
-		mapping["sender_1"] = "r1_special"
+	if req.GetContractID() == "0b719e3ea36cac5dbbd0d3efdb36ade1de42ceaf267dc978c49018be7dc4aa51aa60133c756ca552cb378970220dd59d6c70a650eabb9f97f80f176027ef7c44" && prov.GetContractID() == "af79e694939e2ea7fb836ebbe96c4aadb07177dd0646d9ab4b482741065dba7c3dd7556a03617d55201595f3a19d7f5de174eedfa7e8dd5981ffb5bdd76d007d" {
+		mapping["sender"] = "r1_special"
 		mapping["receiver"] = "r3_special"
 	}
-	if req.GetContractID() == "cbe93c0bf4e2e1f8340e8febdc1b7bea9290aec3cfa66ca616e1c815f9efa34a1ae8b762c3118703ad47f0cee341ced5a2949a07c42e2afecb088ed4c8852642" && prov.GetContractID() == "db02a17429e4f057337d1a4da9a668dfa50b7574948dc2bff9a8b6548f7500abdc5ad9bc1072ddbb34d144cd1a3469ba332d0a36786ce2f8ad88bd5e281237e6" {
-		mapping["sender_2"] = "r2_special"
+	if req.GetContractID() == "cbe93c0bf4e2e1f8340e8febdc1b7bea9290aec3cfa66ca616e1c815f9efa34a1ae8b762c3118703ad47f0cee341ced5a2949a07c42e2afecb088ed4c8852642" && prov.GetContractID() == "f83914e510d991a1da253701150c9cc51f9d85743d9d30bfecfe9fcfd24f1e39e87643689b23cf2ccfa08987bb4cdea90e30caa1eeb6ba5f1ab58eb094e97e72" {
+		mapping["sender"] = "r2_special"
 		mapping["receiver"] = "self"
 	}
 	_, ok := mapping["receiver"]
@@ -292,7 +290,6 @@ func circleContractCompatChecker(ctx context.Context, req contract.LocalContract
 	}
 	return true, mapping, nil
 }
-*/
 
 func TestPingPongFullExample(t *testing.T) {
 
