@@ -17,6 +17,9 @@ service PrivateMiddlewareService {
 
     // This is used by provider services to register their provision contract with the Registry/Broker.
     rpc RegisterApp(RegisterAppRequest) returns (stream RegisterAppResponse) {}
+
+    // This is used by local app (be it a Service Client or a Service Provider) to close a channel.
+    rpc CloseChannel(CloseChannelRequest) returns (CloseChannelResponse);
     
     // This is used by the local app to communicate with other participants in an already
     // initiated or registered channel
@@ -106,4 +109,20 @@ message StartChannelResponse {
         ERR = 1;
     }
     Result result = 1;
+}
+
+message CloseChannelRequest {
+    string channel_id = 1;
+}
+
+message CloseChannelResponse {
+    enum Result {
+        RESULT_UNSPECIFIED = 0;
+        RESULT_CLOSED = 1;
+        RESULT_PENDING_INBOUND = 2;
+        RESULT_PENDING_OUTBOUND = 3;
+    }
+    Result result = 1;
+    string error_message = 2;
+    repeated string participants_with_pending_inbound = 3;
 }

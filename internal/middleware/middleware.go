@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/sourcegraph/conc/pool"
 
 	"github.com/pmontepagano/search/contract"
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
@@ -116,6 +117,9 @@ type SEARCHChannel struct {
 	// buffers for incoming/outgoing messages from/to each participant
 	Outgoing map[string]chan *pb.AppMessage
 	Incoming map[string]chan *pb.AppMessage
+
+	sendersPool           *pool.ContextPool  // pool of workers for sending outbound messages.
+	sendersPoolCancelFunc context.CancelFunc // cancel function for the pool of workers that send outbound messages.
 
 	// pointer to middleware
 	mw *MiddlewareServer
@@ -264,37 +268,56 @@ func (s *MiddlewareServer) RegisterChannel(ctx context.Context, in *pb.RegisterC
 }
 
 // routine that actually sends messages to remote particpant on a channel
-func (r *SEARCHChannel) sender(participant string) {
+func (r *SEARCHChannel) sender(ctx context.Context, participant string) error {
 	r.mw.logger.Printf("Started sender routine for channel %s, participant %s\n", r.ID, participant)
 	// wait for first message
-	msg := <-r.Outgoing[participant]
+	var msg *pb.AppMessage
+	select {
+	case <-ctx.Done():
+		r.mw.logger.Printf("Context cancelled (cause: %s). Closing sender routine for channel %s, participant %s. No connection established to remote Service Provider.", context.Cause(ctx), r.ID, participant)
+		return nil
+	case msg = <-r.Outgoing[participant]:
+		r.mw.logger.Printf("Received first outbound message to send on channel %s for participant %s. Opening connection to remote Service Provider...", r.ID, participant)
+		break
+	}
 	// connect and save stream in r.outStreams
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock())
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials())) // TODO: use tls
 	provconn, err := grpc.Dial(r.addresses[participant].GetUrl(), opts...)
 	if err != nil {
-		r.mw.logger.Fatalf("fail to dial: %v", err)
+		return fmt.Errorf("fail to dial: %v", err)
 	}
 	defer provconn.Close()
 	provClient := pb.NewPublicMiddlewareServiceClient(provconn)
 
-	stream, err := provClient.MessageExchange(context.Background())
+	provClientctx, provClientCancel := context.WithCancel(context.Background())
+	defer provClientCancel()
+	stream, err := provClient.MessageExchange(provClientctx)
 	if err != nil {
-		r.mw.logger.Fatalf("failed to establish MessageExchange")
+		return fmt.Errorf("failed to establish MessageExchange")
 	}
-	r.outStreams[participant] = stream
+	r.mw.logger.Printf("Established connection to remote Service Provider for channel %s, participant %s\n", r.ID, participant)
+	r.outStreams[participant] = stream // TODO: does it make sense to save the stream here? We don't use it anywhere else.
 	for {
-		// TODO: there has to be a way to stop this goroutine
 		messageWithHeaders := pb.ApplicationMessageWithHeaders{
 			SenderId:    r.AppID.String(),
 			ChannelId:   r.ID.String(),
 			RecipientId: r.addresses[participant].AppId,
 			Content:     msg}
 		if err := stream.Send(&messageWithHeaders); err != nil {
-			r.mw.logger.Fatalf("failed to send message: %v", err)
+			return fmt.Errorf("failed to send message: %v", err)
 		}
-		msg = <-r.Outgoing[participant]
+		r.mw.logger.Printf("Sent message to remote Service Provider for channel %s, participant %s\n", r.ID, participant)
+		select {
+		case msg = <-r.Outgoing[participant]:
+			r.mw.logger.Printf("Received outbound message to send on channel %s for participant %s\n", r.ID, participant)
+			break
+		case <-ctx.Done():
+			r.mw.logger.Printf("Context cancelled. Closing sender routine for channel %s, participant %s\n", r.ID, participant)
+			close(r.Outgoing[participant])
+			return nil
+		}
 	}
 }
 
@@ -341,6 +364,54 @@ func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 		ChannelId: req.ChannelId,
 		Sender:    req.Participant,
 		Message:   msg,
+	}, nil
+}
+
+func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChannelRequest) (*pb.CloseChannelResponse, error) {
+	// We have to check if the channel has messages in the buffers.
+	s.logger.Printf("CloseChannel. ChannelID: %s", req.ChannelId)
+	s.channelLock.Lock()
+	defer s.channelLock.Unlock()
+	c, ok := s.brokeredChannels[req.ChannelId]
+	if !ok {
+		return nil, fmt.Errorf("CloseChannel invoked on an inexistent or unbrokered channel ID %s", req.ChannelId)
+	}
+
+	// Check that there are no inbound messages in the buffers of the channel.
+	participantsWithIncoming := make([]string, 0)
+	for participant, chMsg := range c.Incoming {
+		if len(chMsg) > 0 {
+			participantsWithIncoming = append(participantsWithIncoming, participant)
+		} else {
+			// close channel
+			close(chMsg)
+			delete(c.Incoming, participant)
+		}
+	}
+	if len(participantsWithIncoming) > 0 {
+		return &pb.CloseChannelResponse{
+			Result:                         pb.CloseChannelResponse_RESULT_PENDING_INBOUND,
+			ErrorMessage:                   fmt.Sprintf("There are still messages inbound messages to receive!"),
+			ParticipantsWithPendingInbound: participantsWithIncoming,
+		}, nil
+	}
+
+	// We cancel the sender goroutines.
+	// TODO: it would be nice if we could wait (with a deadline) for them to finish?
+	if c.sendersPoolCancelFunc != nil {
+		c.sendersPoolCancelFunc()
+	}
+	err := c.sendersPool.Wait()
+	if err != nil {
+		return &pb.CloseChannelResponse{
+			// TODO: is this the right error code? Does it make sense to indicate that we have pending outbound?
+			Result:       pb.CloseChannelResponse_RESULT_PENDING_OUTBOUND,
+			ErrorMessage: err.Error(),
+		}, err
+	}
+
+	return &pb.CloseChannelResponse{
+		Result: pb.CloseChannelResponse_RESULT_CLOSED,
 	}, nil
 }
 
@@ -450,9 +521,14 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 		// TODO: change this and return error.
 		s.logger.Panicf("Received StartChannel on non brokered ChannelID: %s", req.ChannelId)
 	}
+	sendersCtx, cancel := context.WithCancel(context.Background())
+	c.sendersPoolCancelFunc = cancel
+	c.sendersPool = pool.New().WithContext(sendersCtx).WithCancelOnError()
 	for _, p := range c.Contract.GetRemoteParticipantNames() {
-		// TODO: Use a conc.Pool or something similar to manage these goroutines and signal to stop them when this channel is closed.
-		go c.sender(p)
+		thisP := p
+		c.sendersPool.Go(func(cont context.Context) error {
+			return c.sender(cont, thisP)
+		})
 	}
 	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_ACK}, nil
 }

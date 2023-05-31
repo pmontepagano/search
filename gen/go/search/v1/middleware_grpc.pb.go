@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	PrivateMiddlewareService_RegisterChannel_FullMethodName = "/search.v1.PrivateMiddlewareService/RegisterChannel"
 	PrivateMiddlewareService_RegisterApp_FullMethodName     = "/search.v1.PrivateMiddlewareService/RegisterApp"
+	PrivateMiddlewareService_CloseChannel_FullMethodName    = "/search.v1.PrivateMiddlewareService/CloseChannel"
 	PrivateMiddlewareService_AppSend_FullMethodName         = "/search.v1.PrivateMiddlewareService/AppSend"
 	PrivateMiddlewareService_AppRecv_FullMethodName         = "/search.v1.PrivateMiddlewareService/AppRecv"
 )
@@ -33,6 +34,8 @@ type PrivateMiddlewareServiceClient interface {
 	RegisterChannel(ctx context.Context, in *RegisterChannelRequest, opts ...grpc.CallOption) (*RegisterChannelResponse, error)
 	// This is used by provider services to register their provision contract with the Registry/Broker.
 	RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (PrivateMiddlewareService_RegisterAppClient, error)
+	// This is used by local app (be it a Service Client or a Service Provider) to close a channel.
+	CloseChannel(ctx context.Context, in *CloseChannelRequest, opts ...grpc.CallOption) (*CloseChannelResponse, error)
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel
 	AppSend(ctx context.Context, in *AppSendRequest, opts ...grpc.CallOption) (*AppSendResponse, error)
@@ -88,6 +91,15 @@ func (x *privateMiddlewareServiceRegisterAppClient) Recv() (*RegisterAppResponse
 	return m, nil
 }
 
+func (c *privateMiddlewareServiceClient) CloseChannel(ctx context.Context, in *CloseChannelRequest, opts ...grpc.CallOption) (*CloseChannelResponse, error) {
+	out := new(CloseChannelResponse)
+	err := c.cc.Invoke(ctx, PrivateMiddlewareService_CloseChannel_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *privateMiddlewareServiceClient) AppSend(ctx context.Context, in *AppSendRequest, opts ...grpc.CallOption) (*AppSendResponse, error) {
 	out := new(AppSendResponse)
 	err := c.cc.Invoke(ctx, PrivateMiddlewareService_AppSend_FullMethodName, in, out, opts...)
@@ -114,6 +126,8 @@ type PrivateMiddlewareServiceServer interface {
 	RegisterChannel(context.Context, *RegisterChannelRequest) (*RegisterChannelResponse, error)
 	// This is used by provider services to register their provision contract with the Registry/Broker.
 	RegisterApp(*RegisterAppRequest, PrivateMiddlewareService_RegisterAppServer) error
+	// This is used by local app (be it a Service Client or a Service Provider) to close a channel.
+	CloseChannel(context.Context, *CloseChannelRequest) (*CloseChannelResponse, error)
 	// This is used by the local app to communicate with other participants in an already
 	// initiated or registered channel
 	AppSend(context.Context, *AppSendRequest) (*AppSendResponse, error)
@@ -130,6 +144,9 @@ func (UnimplementedPrivateMiddlewareServiceServer) RegisterChannel(context.Conte
 }
 func (UnimplementedPrivateMiddlewareServiceServer) RegisterApp(*RegisterAppRequest, PrivateMiddlewareService_RegisterAppServer) error {
 	return status.Errorf(codes.Unimplemented, "method RegisterApp not implemented")
+}
+func (UnimplementedPrivateMiddlewareServiceServer) CloseChannel(context.Context, *CloseChannelRequest) (*CloseChannelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CloseChannel not implemented")
 }
 func (UnimplementedPrivateMiddlewareServiceServer) AppSend(context.Context, *AppSendRequest) (*AppSendResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AppSend not implemented")
@@ -190,6 +207,24 @@ func (x *privateMiddlewareServiceRegisterAppServer) Send(m *RegisterAppResponse)
 	return x.ServerStream.SendMsg(m)
 }
 
+func _PrivateMiddlewareService_CloseChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloseChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateMiddlewareServiceServer).CloseChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PrivateMiddlewareService_CloseChannel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateMiddlewareServiceServer).CloseChannel(ctx, req.(*CloseChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PrivateMiddlewareService_AppSend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AppSendRequest)
 	if err := dec(in); err != nil {
@@ -236,6 +271,10 @@ var PrivateMiddlewareService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterChannel",
 			Handler:    _PrivateMiddlewareService_RegisterChannel_Handler,
+		},
+		{
+			MethodName: "CloseChannel",
+			Handler:    _PrivateMiddlewareService_CloseChannel_Handler,
 		},
 		{
 			MethodName: "AppSend",

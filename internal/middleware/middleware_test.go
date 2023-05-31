@@ -112,7 +112,7 @@ func TestCircle(t *testing.T) {
 
 	// launch 3 provider apps that simply pass the message to next member adding their name...?
 	for idx, mw := range []*MiddlewareServer{p1Mw, p2Mw, p3Mw} {
-		go func(mw *MiddlewareServer, idx int) {
+		go func(t *testing.T, mw *MiddlewareServer, idx int) {
 			// this function is for provider app
 			defer mw.Stop()
 			// connect to provider middleware
@@ -186,10 +186,19 @@ func TestCircle(t *testing.T) {
 			log.Printf("[PROVIDER msg_passer_%v - %s] - Sent message to receiver: %s", idx, appID, msg)
 			log.Printf("[PROVIDER msg_passer_%v - %s] - Exiting...", idx, appID)
 
-		}(mw, idx)
+			closeChannelResponse, err := client.CloseChannel(context.Background(), &pb.CloseChannelRequest{ChannelId: channelID})
+			if err != nil {
+				t.Fatalf("error closing channel: %v", err)
+			}
+			if closeChannelResponse.Result != pb.CloseChannelResponse_RESULT_CLOSED {
+				t.Fatal("channel was not closed")
+			}
+
+		}(t, mw, idx)
 	}
 
 	// wait so that providers get to register with broker
+	// TODO: fix this with a syncroization channel.
 	time.Sleep(100 * time.Millisecond)
 
 	// connect to initiator's middleware and register channel
@@ -266,8 +275,8 @@ func TestCircle(t *testing.T) {
 	}
 	log.Printf("Received message from r3: %s", resp.Message)
 
-	initiatorMw.Stop()
 	wg.Wait()
+	initiatorMw.Stop()
 }
 
 // Mock function for checking contracts in TestCircle.
@@ -306,7 +315,7 @@ func TestPingPongFullExample(t *testing.T) {
 	// 4. goroutine for Pong.
 	// 5. Broker. Runs in gorotine.
 
-	brokerPort, pingPrivPort, pingPubPort, pongPrivPort, pongPubPort := 20000, 20001, 20002, 20003, 20004
+	brokerPort, pingPrivPort, pingPubPort, pongPrivPort, pongPubPort := 30000, 30001, 30002, 30003, 30004
 
 	// start broker
 	tmpDir := t.TempDir()
