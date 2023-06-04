@@ -35,6 +35,8 @@ jobs:
         go-version: 'stable'
     - name: Install buf
       uses: bufbuild/buf-setup-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
     - uses: bufbuild/buf-lint-action@v1
       with:
         input: proto
