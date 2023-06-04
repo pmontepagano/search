@@ -354,7 +354,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 			s.logger.Printf("Error doing InitChannel")
 			return
 		}
-		if res.Result != pb.InitChannelResponse_ACK {
+		if res.Result != pb.InitChannelResponse_RESULT_ACK {
 			// TODO: ??
 			s.logger.Printf("Received non-ACK response to InitChannel")
 			return
@@ -396,7 +396,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 			s.logger.Printf("Error doing StartChannel")
 			return
 		}
-		if res.Result != pb.StartChannelResponse_ACK {
+		if res.Result != pb.StartChannelResponse_RESULT_ACK {
 			// TODO: ??
 			s.logger.Printf("Received non-ACK response to StartChannel")
 			return

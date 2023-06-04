@@ -179,7 +179,7 @@ func TestCircle(t *testing.T) {
 					Body: []byte(msg),
 				},
 			})
-			if err != nil || appSendResp.Result != pb.Result_OK {
+			if err != nil || appSendResp.Result != pb.AppSendResponse_RESULT_OK {
 				t.Errorf("[PROVIDER msg_passer_%v - %s] - Error sending message to receiver. Error: %v", idx, appID, err)
 			}
 			log.Printf("[PROVIDER msg_passer_%v - %s] - Sent message to receiver: %s", idx, appID, msg)
@@ -261,7 +261,7 @@ func TestCircle(t *testing.T) {
 		Recipient: "r1_special",
 		Message:   &pb.AppMessage{Body: []byte("hola")},
 	})
-	if err != nil || sendRespR1.Result != pb.Result_OK {
+	if err != nil || sendRespR1.Result != pb.AppSendResponse_RESULT_OK {
 		t.Error("Could not send message to r1")
 	}
 	t.Log("Sent message to r1.")
@@ -515,7 +515,7 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 								Type: "pong",
 							},
 						})
-						if err != nil || sendResponse.Result != pb.Result_OK {
+						if err != nil || sendResponse.Result != pb.AppSendResponse_RESULT_OK {
 							t.Errorf("Failed to AppSend")
 						}
 					case "bye":
@@ -528,7 +528,7 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 								Body: []byte("exiting..."),
 							},
 						})
-						if err != nil || sendResponse.Result != pb.Result_OK {
+						if err != nil || sendResponse.Result != pb.AppSendResponse_RESULT_OK {
 							t.Errorf("Failed to AppSend")
 						}
 						loop = false
@@ -589,7 +589,7 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 			Type: "ping",
 		},
 	})
-	if err != nil || sendResponse.Result != pb.Result_OK {
+	if err != nil || sendResponse.Result != pb.AppSendResponse_RESULT_OK {
 		t.Errorf("Failed to AppSend")
 	}
 
@@ -619,7 +619,7 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 			Type: "bye",
 		},
 	})
-	if err != nil || sendResponse.Result != pb.Result_OK {
+	if err != nil || sendResponse.Result != pb.AppSendResponse_RESULT_OK {
 		t.Errorf("Failed to AppSend")
 	}
 

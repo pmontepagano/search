@@ -289,7 +289,7 @@ func (r *SEARCHChannel) sender(ctx context.Context, participant string) error {
 	}
 	r.mw.logger.Printf("Established connection to remote Service Provider for channel %s, participant %s\n", r.ID, participant)
 	for {
-		messageWithHeaders := pb.ApplicationMessageWithHeaders{
+		messageWithHeaders := pb.MessageExchangeRequest{
 			SenderId:    r.AppID.String(),
 			ChannelId:   r.ID.String(),
 			RecipientId: r.addresses[participant].AppId,
@@ -352,7 +352,7 @@ func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.AppSendRequest) 
 	c.Outgoing[req.Recipient] <- req.GetMessage() // enqueue message in outgoing buffer
 	s.logger.Printf("Enqueued message of type %s in outgoing buffer for channel %s, participant %s\n", req.Message.GetType(), req.ChannelId, req.Recipient)
 	// TODO: reply with error code in case there is an error. eg buffer full.
-	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
+	return &pb.AppSendResponse{Result: pb.AppSendResponse_RESULT_OK}, nil
 }
 
 func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.AppRecvResponse, error) {
@@ -517,7 +517,7 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 	s.brokeredChannels[icr.GetChannelId()] = r
 	s.localChannels.Insert(r.LocalID.String(), r.ID.String())
 
-	return &pb.InitChannelResponse{Result: pb.InitChannelResponse_ACK}, nil
+	return &pb.InitChannelResponse{Result: pb.InitChannelResponse_RESULT_ACK}, nil
 }
 
 // StartChannel is fired by the broker and sent to all participants (initiator included) to signal that
@@ -540,7 +540,7 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 			return c.sender(cont, thisP)
 		})
 	}
-	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_ACK}, nil
+	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_RESULT_ACK}, nil
 }
 
 // StartServer starts gRPC middleware server

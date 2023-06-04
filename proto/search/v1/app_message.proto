@@ -4,7 +4,7 @@ option go_package = "github.com/pmontepagano/search/gen/go/v1";
 
 
 // This is what will be exchanged between middlewares
-message ApplicationMessageWithHeaders {
+message MessageExchangeRequest {
     string channel_id = 1;  // We'll use UUIDv4. It's a global ID shared by all participants
     
     // This is necessary because URLs don't univocally determine apps. There can be multiple applications

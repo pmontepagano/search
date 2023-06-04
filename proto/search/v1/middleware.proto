@@ -29,12 +29,12 @@ service PrivateMiddlewareService {
     
 }
 
-enum Result {
-    OK = 0;
-    ERR = 1;
-}
-
 message AppSendResponse {
+    enum Result {
+        RESULT_UNSPECIFIED = 0;
+        RESULT_OK = 1;
+        RESULT_ERR = 2;
+    }
     Result result = 1;
 }
 
@@ -78,7 +78,7 @@ service PublicMiddlewareService {
     // The Broker, when a new channel is registered, signals all participants with this
     rpc InitChannel(InitChannelRequest) returns(InitChannelResponse) {}
     rpc StartChannel(StartChannelRequest) returns(StartChannelResponse) {}
-    rpc MessageExchange (stream ApplicationMessageWithHeaders) returns (MessageExchangeResponse) {}
+    rpc MessageExchange (stream MessageExchangeRequest) returns (MessageExchangeResponse) {}
 }
 
 
@@ -92,8 +92,9 @@ message InitChannelRequest {
 
 message InitChannelResponse {
     enum Result {
-        ACK = 0;
-        ERR = 1;
+        RESULT_UNSPECIFIED = 0;
+        RESULT_ACK = 1;
+        RESULT_ERR = 2;
     }
     Result result = 1;
 }
@@ -105,8 +106,9 @@ message StartChannelRequest {
 
 message StartChannelResponse {
     enum Result {
-        ACK = 0;
-        ERR = 1;
+        RESULT_UNSPECIFIED = 0;
+        RESULT_ACK = 1;
+        RESULT_ERR = 2;
     }
     Result result = 1;
 }

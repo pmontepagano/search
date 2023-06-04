@@ -347,7 +347,7 @@ func (c *publicMiddlewareServiceClient) MessageExchange(ctx context.Context, opt
 }
 
 type PublicMiddlewareService_MessageExchangeClient interface {
-	Send(*ApplicationMessageWithHeaders) error
+	Send(*MessageExchangeRequest) error
 	CloseAndRecv() (*MessageExchangeResponse, error)
 	grpc.ClientStream
 }
@@ -356,7 +356,7 @@ type publicMiddlewareServiceMessageExchangeClient struct {
 	grpc.ClientStream
 }
 
-func (x *publicMiddlewareServiceMessageExchangeClient) Send(m *ApplicationMessageWithHeaders) error {
+func (x *publicMiddlewareServiceMessageExchangeClient) Send(m *MessageExchangeRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
@@ -451,7 +451,7 @@ func _PublicMiddlewareService_MessageExchange_Handler(srv interface{}, stream gr
 
 type PublicMiddlewareService_MessageExchangeServer interface {
 	SendAndClose(*MessageExchangeResponse) error
-	Recv() (*ApplicationMessageWithHeaders, error)
+	Recv() (*MessageExchangeRequest, error)
 	grpc.ServerStream
 }
 
@@ -463,8 +463,8 @@ func (x *publicMiddlewareServiceMessageExchangeServer) SendAndClose(m *MessageEx
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *publicMiddlewareServiceMessageExchangeServer) Recv() (*ApplicationMessageWithHeaders, error) {
-	m := new(ApplicationMessageWithHeaders)
+func (x *publicMiddlewareServiceMessageExchangeServer) Recv() (*MessageExchangeRequest, error) {
+	m := new(MessageExchangeRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
