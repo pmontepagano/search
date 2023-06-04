@@ -313,9 +313,15 @@ func (r *SEARCHChannel) sender(ctx context.Context, participant string) error {
 		case msg = <-r.Outgoing[participant]:
 			r.mw.logger.Printf("Received outbound message to send on channel %s for participant %s\n", r.ID, participant)
 			break
-		case <-ctx.Done():
-			r.mw.logger.Printf("Context cancelled. Closing sender routine for channel %s, participant %s\n", r.ID, participant)
+		default:
+			<-ctx.Done()
+			r.mw.logger.Printf("Context cancelled (cause: %s). Closing sender routine for channel %s, participant %s\n", context.Cause(ctx), r.ID, participant)
 			close(r.Outgoing[participant])
+			err = stream.CloseSend()
+			if err != nil {
+				r.mw.logger.Printf("Error closing stream. %v", err)
+				return err
+			}
 			return nil
 		}
 	}
@@ -421,11 +427,14 @@ func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChanne
 // the corresponding local app can receive it
 func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_MessageExchangeServer) error {
 	s.logger.Print("Received MessageExchange...")
+	// Acá se está colgando cuando se cierra el stream desde el otro lado.
 	in, err := stream.Recv()
 	if err == io.EOF {
+		s.logger.Print("Received EOF in MessageExchange...")
 		return nil
 	}
 	if err != nil {
+		s.logger.Printf("Error in MessageExchange when attempting to recv from stream: %s", err)
 		return err // TODO: what should we do here?
 	}
 	s.logger.Print("Attempting to obtain channelLock...")
