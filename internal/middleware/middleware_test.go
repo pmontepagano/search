@@ -412,12 +412,8 @@ func pingPongContractCompatChecker(ctx context.Context, req contract.LocalContra
 	return true, mapping, nil
 }
 
+// Auxiliary function for TestPingPongFullExample.
 func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool, exitPong chan bool) {
-	// Auxiliary function for TestPingPongFullExample.
-
-	// TODO: is it valid to send a single CFSM? The 'Other' machine is undefined in this example.
-	// For now, I'll send both CFSMs, because otherwise the FSA parser fails.
-
 	// Connect to the middleware and instantiate client.
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -500,6 +496,7 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 
 				for loop := true; loop; {
 					// Receive ping, finished or bye request.
+					t.Log("Waiting for ping/bye/finished...")
 					recvResponse, err := client.AppRecv(ctx, &pb.AppRecvRequest{
 						ChannelId:   channelID,
 						Participant: "Other",
@@ -597,6 +594,7 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 	}
 
 	// Receive a pong message.
+	t.Log("Sent ping, waiting for pong reply...")
 	recvResponse, err := client.AppRecv(ctx, &pb.AppRecvRequest{
 		ChannelId:   channelID,
 		Participant: "Pong",
@@ -610,6 +608,7 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 	if !bytes.Equal(recvResponse.Message.GetBody(), []byte("hello")) {
 		t.Error("Received different pong body that what we originally sent.")
 	}
+	t.Log("Successfully received pong reply.")
 
 	// Send bye message.
 	sendResponse, err = client.AppSend(ctx, &pb.AppSendRequest{
@@ -625,6 +624,7 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 	}
 
 	// Recieve bye response.
+	t.Log("Successfully sent bye message. Waiting for response...")
 	recvResponse, err = client.AppRecv(ctx, &pb.AppRecvRequest{
 		ChannelId:   channelID,
 		Participant: "Pong",
@@ -635,6 +635,7 @@ func pingProgram(t *testing.T, middlewareURL string, registeredPong chan bool) {
 	if recvResponse.Message.Type != "bye" {
 		t.Errorf("Received unexpected message of type %v", recvResponse.Message.Type)
 	}
+	t.Log("Successfully received bye response.")
 
 	// Tell pong program to stop
 }

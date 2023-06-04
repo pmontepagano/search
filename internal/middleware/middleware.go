@@ -302,8 +302,7 @@ func (r *SEARCHChannel) sender(ctx context.Context, participant string) error {
 		case msg = <-r.Outgoing[participant]:
 			r.mw.logger.Printf("Received outbound message to send on channel %s for participant %s\n", r.ID, participant)
 			break
-		default:
-			<-ctx.Done()
+		case <-ctx.Done():
 			r.mw.logger.Printf("Context cancelled (cause: %s). Closing sender routine for channel %s, participant %s\n", context.Cause(ctx), r.ID, participant)
 			close(r.Outgoing[participant])
 			reply, err := stream.CloseAndRecv()
@@ -351,7 +350,7 @@ func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.AppSendRequest) (*pb.AppSendResponse, error) {
 	c := s.getChannelForUsage(req.ChannelId)
 	c.Outgoing[req.Recipient] <- req.GetMessage() // enqueue message in outgoing buffer
-
+	s.logger.Printf("Enqueued message of type %s in outgoing buffer for channel %s, participant %s\n", req.Message.GetType(), req.ChannelId, req.Recipient)
 	// TODO: reply with error code in case there is an error. eg buffer full.
 	return &pb.AppSendResponse{Result: pb.Result_OK}, nil
 }
@@ -403,13 +402,15 @@ func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChanne
 	if c.sendersPoolCancelFunc != nil {
 		c.sendersPoolCancelFunc()
 	}
-	err := c.sendersPool.Wait()
-	if err != nil {
-		return &pb.CloseChannelResponse{
-			// TODO: is this the right error code? Does it make sense to indicate that we have pending outbound?
-			Result:       pb.CloseChannelResponse_RESULT_PENDING_OUTBOUND,
-			ErrorMessage: err.Error(),
-		}, err
+	if c.sendersPool != nil {
+		err := c.sendersPool.Wait()
+		if err != nil {
+			return &pb.CloseChannelResponse{
+				// TODO: is this the right error code? Does it make sense to indicate that we have pending outbound?
+				Result:       pb.CloseChannelResponse_RESULT_PENDING_OUTBOUND,
+				ErrorMessage: err.Error(),
+			}, err
+		}
 	}
 
 	return &pb.CloseChannelResponse{
@@ -446,10 +447,11 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 	// TODO: must check in.RecipientId... we could be hosting two different apps from same channel
 	participantName := c.participants[in.SenderId]
 
-	s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
+	s.logger.Printf("Received message from %s of type %s", in.SenderId, in.Content.Type)
 	c.Incoming[participantName] <- in.Content
 
 	for {
+		s.logger.Printf("Waiting for next message from %s...", participantName)
 		in, err := stream.Recv()
 		if err == io.EOF {
 			s.logger.Print("Received EOF in MessageExchange...")
