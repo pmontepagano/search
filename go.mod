@@ -1,6 +1,6 @@
 module github.com/pmontepagano/search
 
-go 1.19
+go 1.20
 
 require (
 	entgo.io/ent v0.12.2
