@@ -94,11 +94,6 @@ type initChannelNotification struct {
 	ChannelID string
 }
 
-type messageExchangeStream interface {
-	Send(*pb.ApplicationMessageWithHeaders) error
-	Recv() (*pb.ApplicationMessageWithHeaders, error)
-}
-
 // SEARCHChannel represents what we call a "channel" in SEARCH
 type SEARCHChannel struct {
 	LocalID    uuid.UUID // the identifier the local app uses to identify the channel
@@ -110,9 +105,6 @@ type SEARCHChannel struct {
 	// localParticipant string                           // Name of the local participant in the contract.
 	addresses    map[string]*pb.RemoteParticipant // map participant names to remote URLs and AppIDs, indexed by participant name
 	participants map[string]string                // participant names indexed by AppID
-
-	outStreams map[string]messageExchangeStream // map participant names to outgoing streams
-	inStreams  map[string]messageExchangeStream // map participant names to incoming streams
 
 	// buffers for incoming/outgoing messages from/to each participant
 	Outgoing map[string]chan *pb.AppMessage
@@ -137,8 +129,6 @@ func (mw *MiddlewareServer) newSEARCHChannel(c contract.Contract, pbContract *pb
 	r.ContractPB = pbContract
 	r.addresses = make(map[string]*pb.RemoteParticipant)
 	r.participants = make(map[string]string)
-	r.outStreams = make(map[string]messageExchangeStream)
-	r.inStreams = make(map[string]messageExchangeStream)
 
 	r.Outgoing = make(map[string]chan *pb.AppMessage)
 	r.Incoming = make(map[string]chan *pb.AppMessage)
@@ -298,7 +288,6 @@ func (r *SEARCHChannel) sender(ctx context.Context, participant string) error {
 		return fmt.Errorf("failed to establish MessageExchange")
 	}
 	r.mw.logger.Printf("Established connection to remote Service Provider for channel %s, participant %s\n", r.ID, participant)
-	r.outStreams[participant] = stream // TODO: does it make sense to save the stream here? We don't use it anywhere else.
 	for {
 		messageWithHeaders := pb.ApplicationMessageWithHeaders{
 			SenderId:    r.AppID.String(),
@@ -317,11 +306,16 @@ func (r *SEARCHChannel) sender(ctx context.Context, participant string) error {
 			<-ctx.Done()
 			r.mw.logger.Printf("Context cancelled (cause: %s). Closing sender routine for channel %s, participant %s\n", context.Cause(ctx), r.ID, participant)
 			close(r.Outgoing[participant])
-			err = stream.CloseSend()
+			reply, err := stream.CloseAndRecv()
 			if err != nil {
-				r.mw.logger.Printf("Error closing stream. %v", err)
+				r.mw.logger.Printf("%v.CloseAndRecv() got error %v, want %v", stream, err, nil)
 				return err
 			}
+			if reply.Result != pb.MessageExchangeResponse_RESULT_OK {
+				r.mw.logger.Printf("Error in MessageExchange when attempting to close stream: %s", reply.ErrorMessage)
+				return fmt.Errorf("Error in MessageExchange when attempting to close stream: %s", reply.ErrorMessage)
+			}
+			r.mw.logger.Printf("Closed sender stream for channel %s, participant %s\n", r.ID, participant)
 			return nil
 		}
 	}
@@ -430,8 +424,8 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 	// Acá se está colgando cuando se cierra el stream desde el otro lado.
 	in, err := stream.Recv()
 	if err == io.EOF {
-		s.logger.Print("Received EOF in MessageExchange...")
-		return nil
+		s.logger.Print("Received EOF in MessageExchange without receiving any message...")
+		return err
 	}
 	if err != nil {
 		s.logger.Printf("Error in MessageExchange when attempting to recv from stream: %s", err)
@@ -451,7 +445,6 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 	s.logger.Print("Released channelLock...")
 	// TODO: must check in.RecipientId... we could be hosting two different apps from same channel
 	participantName := c.participants[in.SenderId]
-	c.inStreams[participantName] = stream
 
 	s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
 	c.Incoming[participantName] <- in.Content
@@ -459,24 +452,22 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
+			s.logger.Print("Received EOF in MessageExchange...")
+			err = stream.SendAndClose(&pb.MessageExchangeResponse{Result: pb.MessageExchangeResponse_RESULT_OK})
+			if err != nil {
+				s.logger.Printf("Error when closing MessageExchange after receiving EOF: %s", err)
+				return err
+			}
+			s.logger.Print("Successful close of MessageExchange after receiving EOF. Exiting MessageExchange...")
 			return nil
 		}
 		if err != nil {
+			s.logger.Printf("Error attempting to receive msg from %s in MessageExchange: %s", participantName, err)
 			return err
 		}
 
 		s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
 		c.Incoming[participantName] <- in.Content
-
-		// ack := pb.ApplicationMessageWithHeaders{
-		// 	ChannelId:   in.ChannelId,
-		// 	RecipientId: in.SenderId,
-		// 	SenderId:    "provmwID-44",
-		// 	Content:     &pb.MessageContent{Body: []byte("ack")}}
-
-		// if err := stream.Send(&ack); err != nil {
-		// 	return err
-		// }
 	}
 }
 

@@ -90,19 +90,17 @@ func TestCircle(t *testing.T) {
 	bs.SetCompatFunc(circleContractCompatChecker)
 	go bs.StartServer("localhost", brokerPort, false, "", "")
 
-	var wg sync.WaitGroup
+	var wgProviders sync.WaitGroup
+	var wgInitiator sync.WaitGroup
 	// start middlewares
 	p1Mw := NewMiddlewareServer("localhost", brokerPort)
-	p1Mw.StartMiddlewareServer(&wg, "localhost", p1Port, "localhost", p1Port+1, false, "", "")
+	p1Mw.StartMiddlewareServer(&wgProviders, "localhost", p1Port, "localhost", p1Port+1, false, "", "")
 	p2Mw := NewMiddlewareServer("localhost", brokerPort)
-	p2Mw.StartMiddlewareServer(&wg, "localhost", p2Port, "localhost", p2Port+1, false, "", "")
+	p2Mw.StartMiddlewareServer(&wgProviders, "localhost", p2Port, "localhost", p2Port+1, false, "", "")
 	p3Mw := NewMiddlewareServer("localhost", brokerPort)
-	p3Mw.StartMiddlewareServer(&wg, "localhost", p3Port, "localhost", p3Port+1, false, "", "")
+	p3Mw.StartMiddlewareServer(&wgProviders, "localhost", p3Port, "localhost", p3Port+1, false, "", "")
 	initiatorMw := NewMiddlewareServer("localhost", brokerPort)
-	initiatorMw.StartMiddlewareServer(&wg, "localhost", initiatorPort, "localhost", initiatorPort+1, false, "", "")
-	defer p1Mw.Stop()
-	defer p2Mw.Stop()
-	defer p3Mw.Stop()
+	initiatorMw.StartMiddlewareServer(&wgInitiator, "localhost", initiatorPort, "localhost", initiatorPort+1, false, "", "")
 	defer initiatorMw.Stop()
 
 	// common grpc.DialOption
@@ -283,7 +281,7 @@ func TestCircle(t *testing.T) {
 
 	// time.Sleep(5 * time.Second)
 	log.Printf("Waiting for providers to exit...")
-	wg.Wait()
+	wgProviders.Wait()
 	initiatorMw.Stop()
 }
 

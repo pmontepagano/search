@@ -78,7 +78,7 @@ service PublicMiddlewareService {
     // The Broker, when a new channel is registered, signals all participants with this
     rpc InitChannel(InitChannelRequest) returns(InitChannelResponse) {}
     rpc StartChannel(StartChannelRequest) returns(StartChannelResponse) {}
-    rpc MessageExchange (stream ApplicationMessageWithHeaders) returns (stream ApplicationMessageWithHeaders) {}
+    rpc MessageExchange (stream ApplicationMessageWithHeaders) returns (MessageExchangeResponse) {}
 }
 
 
@@ -125,4 +125,14 @@ message CloseChannelResponse {
     Result result = 1;
     string error_message = 2;
     repeated string participants_with_pending_inbound = 3;
+}
+
+message MessageExchangeResponse {
+    enum Result {
+        RESULT_UNSPECIFIED = 0;
+        RESULT_OK = 1;
+        RESULT_ERROR = 2;
+    }
+    Result result = 1;
+    string error_message = 2;
 }
