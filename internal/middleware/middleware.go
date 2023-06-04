@@ -46,7 +46,7 @@ type MiddlewareServer struct {
 
 	// channels being brokered
 	brokeringChannels map[string]*SEARCHChannel
-	channelLock       *sync.Mutex
+	channelLock       *sync.RWMutex
 
 	// mapping of channels' LocalID <--> ID (global)
 	localChannels *bimap.BiMap
@@ -73,7 +73,7 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
 	s.brokeredChannels = make(map[string]*SEARCHChannel)   // channels already brokered (locally initiated or not)
 	s.unBrokeredChannels = make(map[string]*SEARCHChannel) // channels locally registered but not yet brokered
 	s.brokeringChannels = make(map[string]*SEARCHChannel)  // channels being brokered
-	s.channelLock = new(sync.Mutex)
+	s.channelLock = new(sync.RWMutex)
 	s.providersLock = new(sync.Mutex)
 
 	s.brokerAddr = brokerAddr
@@ -370,12 +370,14 @@ func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChannelRequest) (*pb.CloseChannelResponse, error) {
 	// We have to check if the channel has messages in the buffers.
 	s.logger.Printf("CloseChannel. ChannelID: %s", req.ChannelId)
-	s.channelLock.Lock()
-	defer s.channelLock.Unlock()
+	s.channelLock.RLock()
+
 	c, ok := s.brokeredChannels[req.ChannelId]
 	if !ok {
+		s.channelLock.RUnlock()
 		return nil, fmt.Errorf("CloseChannel invoked on an inexistent or unbrokered channel ID %s", req.ChannelId)
 	}
+	s.channelLock.RUnlock()
 
 	// Check that there are no inbound messages in the buffers of the channel.
 	participantsWithIncoming := make([]string, 0)
@@ -426,15 +428,21 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 	if err != nil {
 		return err // TODO: what should we do here?
 	}
-	s.channelLock.Lock()
+	s.logger.Print("Attempting to obtain channelLock...")
+	s.channelLock.RLock()
+	s.logger.Print("Obtained the channelLock...")
 	c, ok := s.brokeredChannels[in.GetChannelId()]
 	if !ok {
 		s.logger.Printf("Received MessageExchange with ChannelID %s but it is not a brokered Channel in this middleware.", in.GetChannelId())
+		s.channelLock.RUnlock()
+		s.logger.Print("Released channelLock...")
+		return fmt.Errorf("Received MessageExchange with ChannelID %s but it is not a brokered Channel in this middleware.", in.GetChannelId())
 	}
+	s.channelLock.RUnlock()
+	s.logger.Print("Released channelLock...")
 	// TODO: must check in.RecipientId... we could be hosting two different apps from same channel
 	participantName := c.participants[in.SenderId]
 	c.inStreams[participantName] = stream
-	s.channelLock.Unlock()
 
 	s.logger.Printf("Received message from %s: %s", in.SenderId, string(in.Content.Body))
 	c.Incoming[participantName] <- in.Content
@@ -514,9 +522,9 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 // all participants are ready and communication can start.
 func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChannelRequest) (*pb.StartChannelResponse, error) {
 	s.logger.Printf("StartChannel. ChannelID: %s. AppID: %s", req.ChannelId, req.AppId)
-	s.channelLock.Lock()
+	s.channelLock.RLock()
 	c, ok := s.brokeredChannels[req.ChannelId]
-	s.channelLock.Unlock()
+	s.channelLock.RUnlock()
 	if !ok {
 		// TODO: change this and return error.
 		s.logger.Panicf("Received StartChannel on non brokered ChannelID: %s", req.ChannelId)

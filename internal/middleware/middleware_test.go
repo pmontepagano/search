@@ -163,6 +163,7 @@ func TestCircle(t *testing.T) {
 			log.Printf("[PROVIDER msg_passer_%v - %s] - Received Notification. ChannelID: %s", idx, appID, channelID)
 
 			// await message from sender, then add a word to the message and relay it to receiver
+			log.Printf("[PROVIDER msg_passer_%v - %s] - Awaiting message from sender. ChannelID: %s", idx, appID, channelID)
 			res, err := client.AppRecv(context.Background(), &pb.AppRecvRequest{
 				ChannelId:   channelID,
 				Participant: "sender",
@@ -184,7 +185,7 @@ func TestCircle(t *testing.T) {
 				t.Errorf("[PROVIDER msg_passer_%v - %s] - Error sending message to receiver. Error: %v", idx, appID, err)
 			}
 			log.Printf("[PROVIDER msg_passer_%v - %s] - Sent message to receiver: %s", idx, appID, msg)
-			log.Printf("[PROVIDER msg_passer_%v - %s] - Exiting...", idx, appID)
+			log.Printf("[PROVIDER msg_passer_%v - %s] - Closing channel...", idx, appID)
 
 			closeChannelResponse, err := client.CloseChannel(context.Background(), &pb.CloseChannelRequest{ChannelId: channelID})
 			if err != nil {
@@ -193,12 +194,14 @@ func TestCircle(t *testing.T) {
 			if closeChannelResponse.Result != pb.CloseChannelResponse_RESULT_CLOSED {
 				t.Fatal("channel was not closed")
 			}
+			log.Printf("[PROVIDER msg_passer_%v - %s] - Closed channel, exiting... ChannelID: %s", idx, appID, channelID)
 
 		}(t, mw, idx)
 	}
 
 	// wait so that providers get to register with broker
 	// TODO: fix this with a syncroization channel.
+	t.Log("Waiting for providers to register with broker...")
 	time.Sleep(100 * time.Millisecond)
 
 	// connect to initiator's middleware and register channel
@@ -252,6 +255,7 @@ func TestCircle(t *testing.T) {
 	}
 
 	// AppSend to r1
+	t.Log("Sending message to r1...")
 	ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
 	sendRespR1, err := client.AppSend(ctx, &pb.AppSendRequest{
@@ -262,8 +266,10 @@ func TestCircle(t *testing.T) {
 	if err != nil || sendRespR1.Result != pb.Result_OK {
 		t.Error("Could not send message to r1")
 	}
+	t.Log("Sent message to r1.")
 
 	// receive from r3
+	t.Log("Awaiting message from r3...")
 	ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
 	resp, err := client.AppRecv(ctx, &pb.AppRecvRequest{
@@ -275,6 +281,8 @@ func TestCircle(t *testing.T) {
 	}
 	log.Printf("Received message from r3: %s", resp.Message)
 
+	// time.Sleep(5 * time.Second)
+	log.Printf("Waiting for providers to exit...")
 	wg.Wait()
 	initiatorMw.Stop()
 }
