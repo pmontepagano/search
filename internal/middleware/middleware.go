@@ -392,7 +392,7 @@ func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChanne
 	if len(participantsWithIncoming) > 0 {
 		return &pb.CloseChannelResponse{
 			Result:                         pb.CloseChannelResponse_RESULT_PENDING_INBOUND,
-			ErrorMessage:                   fmt.Sprintf("There are still messages inbound messages to receive!"),
+			ErrorMessage:                   "There are still messages inbound messages to receive!",
 			ParticipantsWithPendingInbound: participantsWithIncoming,
 		}, nil
 	}

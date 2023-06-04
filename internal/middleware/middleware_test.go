@@ -187,10 +187,10 @@ func TestCircle(t *testing.T) {
 
 			closeChannelResponse, err := client.CloseChannel(context.Background(), &pb.CloseChannelRequest{ChannelId: channelID})
 			if err != nil {
-				t.Fatalf("error closing channel: %v", err)
+				t.Errorf("error closing channel: %v", err)
 			}
 			if closeChannelResponse.Result != pb.CloseChannelResponse_RESULT_CLOSED {
-				t.Fatal("channel was not closed")
+				t.Error("channel was not closed")
 			}
 			log.Printf("[PROVIDER msg_passer_%v - %s] - Closed channel, exiting... ChannelID: %s", idx, appID, channelID)
 
