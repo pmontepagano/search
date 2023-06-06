@@ -25,7 +25,7 @@ test:
   stage: test
   coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
   script:
-    - go test ./... -coverprofile=coverage.txt -covermode count -timeout 30s
+    - go test ./... -coverprofile=coverage.txt -covermode count -coverpkg=./cfsm/...,./internal/...,./contract -timeout 30s
     - go tool cover -func coverage.txt
     - go test -race ./... -timeout 1m
   after_script:

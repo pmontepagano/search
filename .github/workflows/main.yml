@@ -21,7 +21,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Test
-      run: go test ./... -cover -v -timeout 30s
+      run: go test ./... -coverprofile=coverage.txt -covermode count -coverpkg=./cfsm/...,./internal/...,./contract -timeout 30s
+    - name: Print coverage info
+      run: go tool cover -func coverage.txt
     - name: Test with race detector
       run: go test -race ./... -timeout 1m -v
   lint-and-format:
