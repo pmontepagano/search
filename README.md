@@ -4,76 +4,53 @@
 
 Por ahora habrá estos componentes en la arquitectura:
 
-- broker + repository (posiblemente después lo parta en dos)
-- client middleware (está en un requires point)
-- server middleware (está en un provides point)
+- broker + repository
+- middleware
 
 ## Código generado (go protobufs y go-grpc)
 
-# Buf para protobufs y gRPC
+### Buf para protobufs y gRPC
 
-  buf generate proto
+    buf generate proto
 
-# Entgo para manejo de la base de datos del broker
+### Entgo para manejo de la base de datos del broker
 
-  go generate ./ent
+    go generate ./ent
 
-# To generate mocks with [mockery](https://vektra.github.io/mockery/)
+### Para regenerar mocks con [mockery](https://vektra.github.io/mockery/)
 
-  mockery --dir contract --all --with-expecter
+    mockery --dir contract --all --with-expecter
 
-# To get a report of code coverage
+## Comandos varios
+
+### To get a report of code coverage
 
     go test ./... -coverprofile=coverage.txt -covermode atomic -race -timeout 4s
     go tool cover -html=coverage.txt
 
-## Useful commands for Entgo (database)
+### Para correr los tests
 
-### Show schema in CLI
+    go test ./...
 
-  go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
+Y con el [race detector](https://go.dev/doc/articles/race_detector):
 
-### Show schema in [Atlas Cloud](https://gh.atlasgo.cloud/)
+    go test ./... -count=1 -race
 
-  go run -mod=mod ariga.io/entviz ./ent/schema
+### Para compilar los binarios de broker y middleware
 
-### Generate Entity Relation diagram locally
+    go build ./cmd/broker ./cmd/middleware
 
-  go run -mod=mod github.com/a8m/enter ./ent/schema
+### Comandos útiles de Entgo (ORM)
 
+#### Show schema in CLI
 
-## Comunicación entre componentes
+    go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
 
-### gRPC 
+#### Show schema in [Atlas Cloud](https://gh.atlasgo.cloud/)
 
-Me permite utilizar ProtoBuf para definir los tipos de los mensajes, su encoding y serialización en un stream de bits, definir las signaturas de los mensajes RPC (no define coreografías).
+    go run -mod=mod ariga.io/entviz ./ent/schema
 
+#### Generate Entity Relation diagram locally
 
-## Cómo ejecutar para entorno de desarrollo
+    go run -mod=mod github.com/a8m/enter ./ent/schema
 
-Alcanza con tener Go instalado y ejecutar:
-
-    go run broker/broker.go
-
-En otra terminal:
-
-
-    go run clientmiddleware/clientmiddleware.go
-
-
-Y en otra:
-
-
-    go run providermiddleware/providermiddleware.go
-
-
-## Organización del código
-
-
-En el directorio `protobuf` se encuentan los archivos `.proto` donde definimos los tipos de mensajes y los servicios. Esos archivos se compilan con [protoc](https://developers.google.com/protocol-buffers/docs/overview) y generan los archivos `.pb.go`.
-
-
-# Building in Docker
-
-- https://www.docker.com/blog/containerize-your-go-developer-environment-part-1/
-- https://www.docker.com/blog/docker-golang/
