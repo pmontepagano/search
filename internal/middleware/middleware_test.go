@@ -368,16 +368,6 @@ const pongContractFSA = `
 0 Other ? finished 3
 .marking 0
 .end
-
-.outputs Other
-.state graph
-0 Other ! ping 1
-0 Other ! bye 2
-0 Other ! finished 3
-2 Other ? bye 3
-1 Other ? pong 0
-.marking 0
-.end
 `
 
 const pingContractFSA = `
@@ -451,7 +441,7 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 		err        error
 	}
 	recvChan := make(chan NewSessionNotification)
-	go func(stream pb.PrivateMiddlewareService_RegisterAppClient, recvChan chan NewSessionNotification) {
+	go func(t *testing.T, stream pb.PrivateMiddlewareService_RegisterAppClient, recvChan chan NewSessionNotification) {
 		// We make a goroutine to have a channel interface instead of a blocking Recv()
 		// https://github.com/grpc/grpc-go/issues/465#issuecomment-179414474
 		for {
@@ -460,8 +450,12 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 				regappResp: newResponse,
 				err:        err,
 			}
+			if err != nil {
+				t.Errorf("Error receiving RegisterApp notification in pongProgram: %v", err)
+				return
+			}
 		}
-	}(stream, recvChan)
+	}(t, stream, recvChan)
 	for mainloop := true; mainloop; {
 		select {
 		case <-exitPong:
