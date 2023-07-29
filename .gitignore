@@ -1,3 +1,4 @@
 *.db
 *.db-journal
 coverage.txt
+__pycache__
