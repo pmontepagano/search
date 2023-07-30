@@ -54,3 +54,10 @@ Y con el [race detector](https://go.dev/doc/articles/race_detector):
 
     go run -mod=mod github.com/a8m/enter ./ent/schema
 
+
+## Run ChorGram's gc2fsa
+
+After `--` you send the parameters. In this example, we simply pass the input file name.
+
+    wasmtime --dir=. gc2fsa.wasm -- pingpong.gc
+
