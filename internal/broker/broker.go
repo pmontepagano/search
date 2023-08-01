@@ -368,7 +368,7 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 	// TODO: We could maybe improve this by only notifying the participants that can send a message from their start state.
 	//   This would require that Middlewares also start the sender routines when they receive a message from the channel.
 	s.logger.Printf("Brokering: second round...")
-	// TODO: Do this concurrently.
+	// TODO: Do this concurrently (send StartChannel to all participants in parallel).
 	for pname, p := range allParticipants {
 		s.logger.Printf("Sending StartChannel to: %s", p.AppId)
 		// TODO: refactor this repeated code

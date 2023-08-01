@@ -349,7 +349,7 @@ func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
 func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.AppSendRequest) (*pb.AppSendResponse, error) {
 	c := s.getChannelForUsage(req.ChannelId)
-	c.Outgoing[req.Recipient] <- req.GetMessage() // enqueue message in outgoing buffer
+	c.Outgoing[req.Recipient] <- req.GetMessage() // enqueue message in outgoing buffer. This will block if the buffer is full.
 	s.logger.Printf("Enqueued message of type %s in outgoing buffer for channel %s, participant %s\n", req.Message.GetType(), req.ChannelId, req.Recipient)
 	// TODO: reply with error code in case there is an error. eg buffer full.
 	return &pb.AppSendResponse{Result: pb.AppSendResponse_RESULT_OK}, nil
