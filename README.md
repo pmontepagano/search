@@ -1,12 +1,5 @@
 # Implementación de SEArch
 
-## Componentes
-
-Por ahora habrá estos componentes en la arquitectura:
-
-- broker + repository
-- middleware
-
 ## Código generado (go protobufs y go-grpc)
 
 ### Buf para protobufs y gRPC
