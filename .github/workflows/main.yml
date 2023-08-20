@@ -35,6 +35,12 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 'stable'
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3.4.0
+    - name: Run go vet
+      run: go vet ./...
+    - name: Run gofmt
+      run: go fmt ./...
     - name: Install buf
       uses: bufbuild/buf-setup-action@v1
       with:
@@ -47,9 +53,3 @@ jobs:
         # The 'main' branch of the GitHub repository that defines the module.
         against: "https://github.com/${GITHUB_REPOSITORY}.git#branch=main,subdir=proto"
         input: proto
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v3.4.0
-    - name: Run go vet
-      run: go vet ./...
-    - name: Run gofmt
-      run: go fmt ./...
