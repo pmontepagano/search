@@ -165,16 +165,27 @@ func (r *SEARCHChannel) broker() {
 		PresetParticipants: map[string]*pb.RemoteParticipant{
 			r.ContractPB.InitiatorName: {
 				Url:   r.mw.PublicURL,
-				AppId: r.LocalID.String(), // we use channels LocalID as AppID for initiator apps
+				AppId: r.LocalID.String(), // we use the channel's LocalID as AppID for Service Clients.
 			},
 		},
 	})
 	if err != nil {
+		// TODO: we have to notify Service Client of error.
 		r.mw.logger.Fatalf("%v.BrokerChannel(_) = _, %v: ", client, err)
 	}
-	if brokerresult.Result != pb.BrokerChannelResponse_RESULT_ACK {
-		r.mw.logger.Fatalf("Non ACK return code when trying to broker channel.")
+	r.mw.channelLock.Lock()
+	defer r.mw.channelLock.Unlock()
+
+	r.addresses = brokerresult.GetParticipants()
+	for k, v := range r.addresses {
+		r.participants[v.AppId] = k
 	}
+	r.ID = uuid.MustParse(brokerresult.GetChannelId())
+	r.mw.brokeredChannels[brokerresult.GetChannelId()] = r
+	r.mw.localChannels.Insert(r.LocalID.String(), r.ID.String())
+	delete(r.mw.brokeringChannels, r.LocalID.String())
+
+	r.startSenderRoutines()
 }
 
 // RegisterApp is invoked by Service Providers on the private interface in order to register their service with
@@ -437,6 +448,8 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 	s.logger.Print("Obtained the channelLock...")
 	c, ok := s.brokeredChannels[in.GetChannelId()]
 	if !ok {
+		// TODO: attempt to get the channel from s.brokeringChannels (this can happen when some provider starts sending messages to the Service Client
+		// before we have finished processing the BrokerChannelResponse)
 		s.logger.Printf("Received MessageExchange with ChannelID %s but it is not a brokered Channel in this middleware.", in.GetChannelId())
 		s.channelLock.RUnlock()
 		s.logger.Print("Released channelLock...")
@@ -473,10 +486,8 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 	}
 }
 
-// rpc invoked by broker when initializing channel
-// There are two options: a) the broker has matched one of our registered (provider) apps with a requirements contract
-// or b) the broker is responding to a brokerage request we sent to it. If this is the case, then AppID should
-// match the LocalID we generated for that channel of which we requested brokerage.
+// rpc invoked by broker when initializing channel for a Service Provider that this middleware represents. This is received
+// when the broker has matched one of our registered (provider) apps with a requirements contract.
 func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelRequest) (*pb.InitChannelResponse, error) {
 	s.logger.Printf("Received InitChannel. ChannelID: %s. AppID: %s", icr.ChannelId, icr.AppId)
 	s.logger.Printf("InitChannel mapping received:%v", icr.GetParticipants())
@@ -501,13 +512,8 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 		// notify local provider app
 		*regapp.NotifyChan <- initChannelNotification{ChannelID: icr.GetChannelId()}
 	} else {
-		r, ok = s.brokeringChannels[icr.AppId]
-		if !ok {
-			s.logger.Panicf("InitChannel with inexistent app_id: %s", icr.GetAppId())
-			// TODO: return error
-		}
-		s.logger.Printf("Received InitChannel for channel being brokered. %v", r.LocalID)
-		delete(s.brokeringChannels, icr.AppId)
+		// TODO: improve error message, return proper gRPC error.
+		return nil, fmt.Errorf("Received InitChannel for invalid AppID %s", icr.GetAppId())
 	}
 	r.addresses = icr.GetParticipants()
 	for k, v := range r.addresses {
@@ -531,6 +537,12 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 		// TODO: change this and return error.
 		s.logger.Panicf("Received StartChannel on non brokered ChannelID: %s", req.ChannelId)
 	}
+	c.startSenderRoutines()
+
+	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_RESULT_ACK}, nil
+}
+
+func (c *SEARCHChannel) startSenderRoutines() {
 	sendersCtx, cancel := context.WithCancel(context.Background())
 	c.sendersPoolCancelFunc = cancel
 	c.sendersPool = pool.New().WithContext(sendersCtx).WithCancelOnError()
@@ -540,7 +552,6 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 			return c.sender(cont, thisP)
 		})
 	}
-	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_RESULT_ACK}, nil
 }
 
 // StartServer starts gRPC middleware server
