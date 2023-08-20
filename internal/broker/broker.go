@@ -441,7 +441,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 	//   This would require that Middlewares also start the sender routines when they receive a message from the channel.
 	s.logger.Printf("Brokering: second round...")
 
-	startChannelCtx, _ := context.WithTimeout(context.Background(), 60*time.Second)
+	startChannelCtx, startChannelCancel := context.WithTimeout(context.Background(), 60*time.Second)
 	startChannelPool := pool.New().WithContext(startChannelCtx)
 
 	for pname, p := range allParticipants {
@@ -471,7 +471,15 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 			return nil
 		})
 	}
-	go startChannelPool.Wait()
+	go func() {
+		defer startChannelCancel()
+		err := startChannelPool.Wait()
+		if err != nil {
+			// TODO: at this point, we can no longer recover. In the future we can implement a mechanism to notify the Service Client
+			//   that this channel should be teared down.
+			s.logger.Printf("Error sending StartChannel to at least one participant")
+		}
+	}()
 
 	return &pb.BrokerChannelResponse{
 		ChannelId:    channelID.String(),
