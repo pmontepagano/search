@@ -44,12 +44,16 @@ type MiddlewareServer struct {
 	// channels registered by local apps that have not yet been brokered. key: LocalID
 	unBrokeredChannels map[string]*SEARCHChannel
 
-	// channels being brokered
+	// channels being brokered. key: LocalID
 	brokeringChannels map[string]*SEARCHChannel
-	channelLock       *sync.RWMutex
+
+	// channles for which brokering failed. key: LocalID
+	brokeringFailedChannels map[string]*SEARCHChannel
 
 	// mapping of channels' LocalID <--> ID (global)
+	// This only makes sense for already brokered channels.
 	localChannels *bimap.BiMap
+	channelLock   *sync.RWMutex // protects all previous maps/bimaps for channels
 
 	brokerAddr string // maybe replace with net.url.URL type?
 
@@ -69,9 +73,10 @@ func NewMiddlewareServer(brokerAddr string) *MiddlewareServer {
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
 
-	s.brokeredChannels = make(map[string]*SEARCHChannel)   // channels already brokered (locally initiated or not)
-	s.unBrokeredChannels = make(map[string]*SEARCHChannel) // channels locally registered but not yet brokered
-	s.brokeringChannels = make(map[string]*SEARCHChannel)  // channels being brokered
+	s.brokeredChannels = make(map[string]*SEARCHChannel)        // channels already brokered (locally initiated or not)
+	s.unBrokeredChannels = make(map[string]*SEARCHChannel)      // channels locally registered but not yet brokered
+	s.brokeringChannels = make(map[string]*SEARCHChannel)       // channels being brokered
+	s.brokeringFailedChannels = make(map[string]*SEARCHChannel) // channels for which brokering failed
 	s.channelLock = new(sync.RWMutex)
 	s.providersLock = new(sync.Mutex)
 
@@ -167,12 +172,14 @@ func (r *SEARCHChannel) broker() {
 			},
 		},
 	})
-	if err != nil {
-		// TODO: we have to notify Service Client of error.
-		r.mw.logger.Fatalf("%v.BrokerChannel(_) = _, %v: ", client, err)
-	}
 	r.mw.channelLock.Lock()
 	defer r.mw.channelLock.Unlock()
+	if err != nil {
+		r.mw.logger.Printf("brokering failed for channel with LocalID %s. broker err: %v", r.LocalID.String(), err)
+		r.mw.brokeringFailedChannels[r.LocalID.String()] = r
+		delete(r.mw.brokeringChannels, r.LocalID.String())
+		return
+	}
 
 	r.addresses = brokerresult.GetParticipants()
 	for k, v := range r.addresses {
@@ -383,6 +390,13 @@ func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChanne
 	c, ok := s.brokeredChannels[req.ChannelId]
 	if !ok {
 		s.channelLock.RUnlock()
+		s.channelLock.Lock()
+		defer s.channelLock.Unlock()
+		if c, ok = s.brokeringFailedChannels[req.ChannelId]; ok {
+			// TODO: send names of participants that failed to broker.
+			delete(s.brokeringFailedChannels, req.ChannelId)
+			return nil, fmt.Errorf("CloseChannel invoked on a channel that failed to broker: %s", req.ChannelId)
+		}
 		return nil, fmt.Errorf("CloseChannel invoked on an inexistent or unbrokered channel ID %s", req.ChannelId)
 	}
 	s.channelLock.RUnlock()

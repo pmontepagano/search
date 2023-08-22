@@ -81,7 +81,6 @@ func TestRegisterChannel(t *testing.T) {
 	wg.Wait()
 }
 
-/*
 func TestNoCompatibleProviders(t *testing.T) {
 	tmpDir := t.TempDir()
 	bs := broker.NewBrokerServer(fmt.Sprintf("%s/testnocompatibleproviders-%s.db", tmpDir, time.Now().Format("2006-01-02T15:04:05")))
@@ -138,7 +137,7 @@ func TestNoCompatibleProviders(t *testing.T) {
 	}
 	t.Logf("Received ChannelID: %s", regResult.ChannelId)
 
-	// Send a message to FooBar to trigger brokerage of channel.
+	// Send a message to FooBar to trigger brokerage of channel. This send will succeed.
 	appSendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
 		ChannelId: regResult.ChannelId,
 		Recipient: "FooBar",
@@ -153,11 +152,17 @@ func TestNoCompatibleProviders(t *testing.T) {
 		t.Errorf("Received non-OK result when sending message to FooBar")
 	}
 
-	time.Sleep(10 * time.Second)
+	// Close the channel. This should fail because the brokerage failed.
+	closeResponse, err := client.CloseChannel(ctx, &pb.CloseChannelRequest{ChannelId: regResult.ChannelId})
+	if err == nil {
+		t.Errorf("Received no error when closing channel")
+	}
+	if closeResponse != nil && closeResponse.Result == pb.CloseChannelResponse_RESULT_CLOSED {
+		t.Errorf("Received proper close when no provider is compatible...")
+	}
 
-	wgServiceClient.Wait()
+	// wgServiceClient.Wait()
 }
-*/
 
 func TestCircle(t *testing.T) {
 	p1Port, p2Port, p3Port, initiatorPort := 20001, 20003, 20005, 20007
