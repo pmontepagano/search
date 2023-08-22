@@ -51,8 +51,7 @@ type MiddlewareServer struct {
 	// mapping of channels' LocalID <--> ID (global)
 	localChannels *bimap.BiMap
 
-	brokerAddr string
-	brokerPort int
+	brokerAddr string // maybe replace with net.url.URL type?
 
 	// pointers to gRPC servers
 	publicServer  *grpc.Server
@@ -65,7 +64,7 @@ type MiddlewareServer struct {
 }
 
 // NewMiddlewareServer is MiddlewareServer's constructor
-func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
+func NewMiddlewareServer(brokerAddr string) *MiddlewareServer {
 	var s MiddlewareServer
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
@@ -77,7 +76,6 @@ func NewMiddlewareServer(brokerAddr string, brokerPort int) *MiddlewareServer {
 	s.providersLock = new(sync.Mutex)
 
 	s.brokerAddr = brokerAddr
-	s.brokerPort = brokerPort
 	s.logger = log.New(os.Stderr, "[MIDDLEWARE] - ", log.LstdFlags|log.Lmsgprefix)
 	return &s
 }
@@ -144,9 +142,9 @@ func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.Client
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithBlock())
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", s.brokerAddr, s.brokerPort), opts...)
+	conn, err := grpc.Dial(s.brokerAddr, opts...)
 	if err != nil {
-		s.logger.Fatalf("fail to dial: %v", err)
+		s.logger.Fatalf("fail to dial to broker addr %s: %v", s.brokerAddr, err)
 	}
 	client := pb.NewBrokerServiceClient(conn)
 
@@ -555,18 +553,24 @@ func (c *SEARCHChannel) startSenderRoutines() {
 }
 
 // StartServer starts gRPC middleware server
-func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicHost string, publicPort int, privateHost string, privatePort int, tls bool, certFile string, keyFile string) {
-	s.PublicURL = fmt.Sprintf("%s:%d", publicHost, publicPort)
+func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicAddr string, privateAddr string, tls bool, certFile string, keyFile string, notifyListening chan string) {
+	lisPub, err := net.Listen("tcp", publicAddr)
+	if err != nil {
+		s.logger.Fatalf("failed to listen on public interface: %v", err)
+	}
+	// TODO: add publicURL parameter to this function so that we can have a DNS name for the public interface. This is what gets sent to the broker!
+	s.PublicURL = fmt.Sprintf("dns:%s", lisPub.Addr().String())
 	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
-	lisPub, err := net.Listen("tcp", s.PublicURL)
+
+	lisPriv, err := net.Listen("tcp", privateAddr)
 	if err != nil {
-		s.logger.Fatalf("failed to listen: %v", err)
+		s.logger.Fatalf("failed to listen on private interface: %v", err)
 	}
-	s.PrivateURL = fmt.Sprintf("%s:%d", privateHost, privatePort)
-	lisPriv, err := net.Listen("tcp", s.PrivateURL)
-	if err != nil {
-		s.logger.Fatalf("failed to listen: %v", err)
+	s.PrivateURL = lisPriv.Addr().String()
+	if notifyListening != nil {
+		notifyListening <- s.PrivateURL
 	}
+
 	var opts []grpc.ServerOption
 	if tls {
 		if certFile == "" {

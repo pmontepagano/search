@@ -637,14 +637,15 @@ func NewBrokerServer(databasePath string) *brokerServer {
 	return s
 }
 
-func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string) {
-	s.PublicURL = fmt.Sprintf("%s:%d", host, port)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
-
-	lis, err := net.Listen("tcp", s.PublicURL)
+// StartServer starts the broker server. If tls is true, certFile and keyFile must be provided. If notifyStartChan is not nil,
+// the broker will send its public URL to the channel when it's already listening on the port.
+func (s *brokerServer) StartServer(address string, tls bool, certFile string, keyFile string, notifyStartChan chan string) {
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)
 	}
+	s.PublicURL = lis.Addr().String()
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	var opts []grpc.ServerOption
 	if tls {
 		if certFile == "" {
@@ -663,6 +664,11 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 	s.server = grpcServer
 	pb.RegisterBrokerServiceServer(grpcServer, s)
 	s.logger.Printf("Broker server starting...")
+	if notifyStartChan != nil {
+		s.logger.Print("Sending broker public URL to notifyStartChan...")
+		notifyStartChan <- s.PublicURL
+		s.logger.Print("Sent broker public URL to notifyStartChan...")
+	}
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
