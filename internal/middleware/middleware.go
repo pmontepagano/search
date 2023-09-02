@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/google/uuid"
@@ -14,6 +15,8 @@ import (
 
 	"github.com/pmontepagano/search/contract"
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
+	"github.com/pmontepagano/search/internal/searcherrors"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/codes"
@@ -26,7 +29,7 @@ import (
 )
 
 var (
-	bufferSize = 100
+	bufferSize = 100 // number of messages that can be buffered in each channel.
 )
 
 type MiddlewareServer struct {
@@ -40,18 +43,13 @@ type MiddlewareServer struct {
 
 	// channels already brokered. key: ChannelID
 	brokeredChannels map[string]*SEARCHChannel
-
 	// channels registered by local apps that have not yet been brokered. key: LocalID
 	unBrokeredChannels map[string]*SEARCHChannel
-
 	// channels being brokered. key: LocalID
 	brokeringChannels map[string]*SEARCHChannel
-
-	// channles for which brokering failed. key: LocalID
-	brokeringFailedChannels map[string]*SEARCHChannel
-
-	// mapping of channels' LocalID <--> ID (global)
-	// This only makes sense for already brokered channels.
+	// channles for which brokering failed. key: LocalID, value: list of participants for which the broker was unable to find matches.
+	brokeringFailedChannels map[string][]string
+	// mapping of channels' LocalID <--> ID (global). This only makes sense for already brokered channels.
 	localChannels *bimap.BiMap
 	channelLock   *sync.RWMutex // protects all previous maps/bimaps for channels
 
@@ -72,13 +70,13 @@ func NewMiddlewareServer(brokerAddr string) *MiddlewareServer {
 	var s MiddlewareServer
 	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
-
-	s.brokeredChannels = make(map[string]*SEARCHChannel)        // channels already brokered (locally initiated or not)
-	s.unBrokeredChannels = make(map[string]*SEARCHChannel)      // channels locally registered but not yet brokered
-	s.brokeringChannels = make(map[string]*SEARCHChannel)       // channels being brokered
-	s.brokeringFailedChannels = make(map[string]*SEARCHChannel) // channels for which brokering failed
-	s.channelLock = new(sync.RWMutex)
 	s.providersLock = new(sync.Mutex)
+
+	s.brokeredChannels = make(map[string]*SEARCHChannel)   // channels already brokered (locally initiated or not)
+	s.unBrokeredChannels = make(map[string]*SEARCHChannel) // channels locally registered but not yet brokered
+	s.brokeringChannels = make(map[string]*SEARCHChannel)  // channels being brokered
+	s.brokeringFailedChannels = make(map[string][]string)  // channels for which brokering failed
+	s.channelLock = new(sync.RWMutex)
 
 	s.brokerAddr = brokerAddr
 	s.logger = log.New(os.Stderr, "[MIDDLEWARE] - ", log.LstdFlags|log.Lmsgprefix)
@@ -115,6 +113,10 @@ type SEARCHChannel struct {
 
 	sendersPool           *pool.ContextPool  // pool of workers for sending outbound messages.
 	sendersPoolCancelFunc context.CancelFunc // cancel function for the pool of workers that send outbound messages.
+
+	brokerageWg         pool.ErrorPool     // wait group for the brokerage process.
+	brokerageCancelFunc context.CancelFunc // cancel function for the brokerage process.
+	brokerageSucceeded  bool               // flag to indicate if the brokerage process has finished. zero value is false.
 
 	// pointer to middleware
 	mw *MiddlewareServer
@@ -157,12 +159,10 @@ func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.Client
 }
 
 // connect to the broker, send contract, wait for result and save data in the channel
-func (r *SEARCHChannel) broker() {
+func (r *SEARCHChannel) broker(ctx context.Context) error {
 	r.mw.logger.Printf("Requesting brokerage of contract: '%v'", r.Contract)
 	client, conn := r.mw.connectBroker()
 	defer conn.Close()
-	ctx, cancel := context.WithCancel(context.TODO()) // TODO: add deadline/timeout or inherit from request context.
-	defer cancel()
 	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
 		Contract: r.ContractPB,
 		PresetParticipants: map[string]*pb.RemoteParticipant{
@@ -176,9 +176,18 @@ func (r *SEARCHChannel) broker() {
 	defer r.mw.channelLock.Unlock()
 	if err != nil {
 		r.mw.logger.Printf("brokering failed for channel with LocalID %s. broker err: %v", r.LocalID.String(), err)
-		r.mw.brokeringFailedChannels[r.LocalID.String()] = r
+		st, ok := status.FromError(err)
+		if !ok {
+			// Error was not a status error. TODO: how to handle this?
+			r.mw.brokeringFailedChannels[r.LocalID.String()] = []string{}
+			return fmt.Errorf("brokerage failed: %w", err)
+		}
+
+		details := st.Details()
+		detail := details[0].(*errdetails.ErrorInfo)
+		r.mw.brokeringFailedChannels[r.LocalID.String()] = strings.Split(detail.GetMetadata()["failed_participants"], ",")
 		delete(r.mw.brokeringChannels, r.LocalID.String())
-		return
+		return st.Err()
 	}
 
 	r.addresses = brokerresult.GetParticipants()
@@ -191,6 +200,8 @@ func (r *SEARCHChannel) broker() {
 	delete(r.mw.brokeringChannels, r.LocalID.String())
 
 	r.startSenderRoutines()
+	r.brokerageSucceeded = true
+	return nil
 }
 
 // RegisterApp is invoked by Service Providers on the private interface in order to register their service with
@@ -338,33 +349,73 @@ func (r *SEARCHChannel) sender(ctx context.Context, participant string) error {
 
 // if the SEARCHChannel is not yet brokered, we launch goroutine to do that
 // and also update middleware's internal structures to reflect that change
-func (s *MiddlewareServer) getChannelForUsage(localID string) *SEARCHChannel {
+func (s *MiddlewareServer) getChannelForUsage(localID string, blockUntilBrokered bool) (*SEARCHChannel, error) {
 	s.channelLock.Lock()
-	defer s.channelLock.Unlock()
+	failedParticipants, ok := s.brokeringFailedChannels[localID]
+	if ok {
+		defer s.channelLock.Unlock()
+		return nil, searcherrors.BrokerageFailedError(failedParticipants)
+	}
 	c, ok := s.unBrokeredChannels[localID]
 	if ok {
-		// channel has not been brokered
+		// channel has not been brokered, so we launch brokering process.
 		s.brokeringChannels[localID] = c
 		delete(s.unBrokeredChannels, localID)
-		go c.broker()
+		if blockUntilBrokered {
+			s.channelLock.Unlock()
+			// TODO: we should receive a context from the caller to pass on to the broker function.
+			ctx := context.TODO()
+			err := c.broker(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return c, nil
+		} else {
+			defer s.channelLock.Unlock()
+			ctx, cancelBrokerage := context.WithCancel(context.Background())
+			c.brokerageCancelFunc = cancelBrokerage
+			c.brokerageWg.Go(func() error { return c.broker(ctx) })
+			// TODO: where do we await for this function to finish?
+		}
 	} else {
 		// check if channel is being brokered
 		c, ok = s.brokeringChannels[localID]
 		if !ok {
 			// channel must already be brokered
+			defer s.channelLock.Unlock()
 			channelID, ok := s.localChannels.Get(localID)
 			if !ok {
-				s.logger.Fatalf("getChannelForUsage invoked on channel ID %s: there's no localChannel with that ID.", localID)
+				s.logger.Printf("getChannelForUsage invoked on channel ID %s: there's no localChannel with that ID.", localID)
+				return nil, searcherrors.ErrChannelNotFound
 			}
 			c = s.brokeredChannels[channelID.(string)]
+		} else {
+			// channel is being brokered. We wait for it if blockUntilBrokered is true
+			if blockUntilBrokered {
+				// wait until brokerage finishes...
+				s.channelLock.Unlock() // we need to unlock before waiting because the mutex is used in the broker() func.
+				s.logger.Printf("waiting for brokerage to finish for channel %s\n", localID)
+				c.brokerageWg.Wait()
+				if !c.brokerageSucceeded {
+					// TODO: remove channel from s.brokeringFailedChannels?
+					// TODO: we need the list of failed participants
+					return nil, searcherrors.BrokerageFailedError(nil)
+				}
+			} else {
+				defer s.channelLock.Unlock()
+			}
 		}
 	}
-	return c
+	return c, nil
 }
 
 // simple (g)rpc the local app uses when sending a message to a remote participant on an already registered channel
 func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.AppSendRequest) (*pb.AppSendResponse, error) {
-	c := s.getChannelForUsage(req.ChannelId)
+	c, err := s.getChannelForUsage(req.ChannelId, false)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: catch panic if buffer is closed?
 	c.Outgoing[req.Recipient] <- req.GetMessage() // enqueue message in outgoing buffer. This will block if the buffer is full.
 	s.logger.Printf("Enqueued message of type %s in outgoing buffer for channel %s, participant %s\n", req.Message.GetType(), req.ChannelId, req.Recipient)
 	// TODO: reply with error code in case there is an error. eg buffer full.
@@ -372,7 +423,10 @@ func (s *MiddlewareServer) AppSend(ctx context.Context, req *pb.AppSendRequest) 
 }
 
 func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) (*pb.AppRecvResponse, error) {
-	c := s.getChannelForUsage(req.ChannelId)
+	c, err := s.getChannelForUsage(req.ChannelId, true)
+	if err != nil {
+		return nil, err
+	}
 	msg := <-c.Incoming[req.Participant]
 
 	return &pb.AppRecvResponse{
@@ -382,6 +436,18 @@ func (s *MiddlewareServer) AppRecv(ctx context.Context, req *pb.AppRecvRequest) 
 	}, nil
 }
 
+// A Service Client invokes this when it wants to close a channel. There are multiple scenarios in which this action can fail:
+// 1. There are still messages in the buffers that the Service Client should receive (by running AppRecv).
+// 2. The channelID is not registered in the middleware.
+// 3. The channel is being brokered and there is at least one message in the outbound buffers. In this case, we block until the
+// brokerage finishes. Before blocking, we need to mark the channel somehow to prevent any other AppSend/AppRecv/CloseChannel calls.
+// We should also prevent inbound messages from other participants from being enqueued in the channel's inbound buffers.
+// 4. The context is cancelled/times out.
+// There are also other situations in which we need to clean up before closing the channel but should not cause an error:
+// 1. If the channel is being brokered and there are no messages in the outbound buffers (there cannot be any in the inbound buffers),
+// we need to cancel the brokerage process.
+// 2. If the channel has not been brokered yet and is also not being brokered. This would only happen if the Service Client registered
+// the channel and then closed it without doing any AppSend nor AppRecv.
 func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChannelRequest) (*pb.CloseChannelResponse, error) {
 	// We have to check if the channel has messages in the buffers.
 	s.logger.Printf("CloseChannel. ChannelID: %s", req.ChannelId)
@@ -392,10 +458,9 @@ func (s *MiddlewareServer) CloseChannel(ctx context.Context, req *pb.CloseChanne
 		s.channelLock.RUnlock()
 		s.channelLock.Lock()
 		defer s.channelLock.Unlock()
-		if c, ok = s.brokeringFailedChannels[req.ChannelId]; ok {
-			// TODO: send names of participants that failed to broker.
+		if failedParticipants, ok := s.brokeringFailedChannels[req.ChannelId]; ok {
 			delete(s.brokeringFailedChannels, req.ChannelId)
-			return nil, fmt.Errorf("CloseChannel invoked on a channel that failed to broker: %s", req.ChannelId)
+			return nil, searcherrors.BrokerageFailedError(failedParticipants)
 		}
 		return nil, fmt.Errorf("CloseChannel invoked on an inexistent or unbrokered channel ID %s", req.ChannelId)
 	}

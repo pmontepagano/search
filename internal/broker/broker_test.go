@@ -20,60 +20,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func TestDefer(t *testing.T) {
-	tmpDir := t.TempDir()
-	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
-	t.Cleanup(b.Stop)
-	go b.StartServer("localhost:3333", false, "", "", nil)
-
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	opts = append(opts, grpc.WithBlock())
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", "localhost", 3333), opts...)
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
-	defer conn.Close()
-	client := pb.NewBrokerServiceClient(conn)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	res, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
-		Contract: &pb.GlobalContract{
-			Contract: []byte(`--
-			.outputs Ping
-			.state graph
-			0 1 ! ping 4
-			2 1 ! bye 5
-			2 1 ! finished 1
-			3 1 ! *<1 0
-			3 1 ! >*1 2
-			4 1 ? pong 3
-			5 1 ? bye 1
-			.marking 0
-			.end
-
-			.outputs Pong
-			.state graph
-			0 0 ? ping 4
-			2 0 ? bye 5
-			2 0 ? finished 1
-			3 0 ? *<1 0
-			3 0 ? >*1 2
-			4 0 ! pong 3
-			5 0 ! bye 1
-			.marking 0
-			.end
-			`),
-			Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
-			InitiatorName: "Ping",
-		},
-	})
-	t.Logf("res: %s, err: %s", res, err)
-
-}
-
 func TestBrokerRegisterProviderRequest(t *testing.T) {
 	tmpDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
@@ -305,7 +251,7 @@ func TestGetBestCandidate_UnregisteredRequirementContract(t *testing.T) {
 	// Assert
 	assert.Nil(t, result)
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "ent: registered_contract not found")
+	assert.Equal(t, err.Error(), "error getting registered contract for participant test_participant_name")
 }
 
 func TestGetBestCandidate_NoCompatibilityResults(t *testing.T) {
