@@ -19,12 +19,8 @@ message BrokerChannelRequest {
 
 
 message BrokerChannelResponse {
-    enum Result {
-        RESULT_UNSPECIFIED = 0;
-        RESULT_ACK = 1;
-        RESULT_ERR = 2;
-    }
-    Result result = 1;
+    string channel_id = 2;  // uuidv4
+    map<string, RemoteParticipant> participants = 3;  // preset + brokered participants
 }
 
 message RegisterProviderRequest {

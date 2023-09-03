@@ -18,7 +18,7 @@
 
 ### To get a report of code coverage
 
-    go test ./... -coverprofile=coverage.txt -covermode atomic -race -timeout 4s
+    go test ./... -coverprofile=coverage.txt -covermode atomic -coverpkg=./cfsm/...,./internal/...,./contract -timeout 30s
     go tool cover -html=coverage.txt
 
 ### Para correr los tests

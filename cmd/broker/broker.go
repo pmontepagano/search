@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/pmontepagano/search/internal/broker"
 )
@@ -18,5 +19,6 @@ var (
 func main() {
 	flag.Parse()
 	b := broker.NewBrokerServer(*databaseFile)
-	b.StartServer(*host, *port, *tls, *certFile, *keyFile)
+	address := fmt.Sprintf("%s:%d", *host, *port)
+	b.StartServer(address, *tls, *certFile, *keyFile, nil)
 }

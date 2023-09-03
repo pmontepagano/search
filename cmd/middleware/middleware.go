@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"sync"
 
 	"github.com/pmontepagano/search/internal/middleware"
@@ -16,14 +17,15 @@ var (
 	publicPort  = flag.Int("public_port", 10000, "The port for public facing middleware")
 	privateHost = flag.String("private_host", "localhost", "Host IP on which private service listens")
 	privatePort = flag.Int("private_port", 11000, "The port for private services")
-	brokerAddr  = flag.String("broker_addr", "localhost", "The server address in the format of host:port")
-	brokerPort  = flag.Int("broker_port", 10000, "The port in which the broker is listening")
+	brokerAddr  = flag.String("broker_addr", "localhost:", "The server address in the format of host:port")
 )
 
 func main() {
 	flag.Parse()
-	mw := middleware.NewMiddlewareServer(*brokerAddr, *brokerPort)
+	mw := middleware.NewMiddlewareServer(*brokerAddr)
 	var wg sync.WaitGroup
-	mw.StartMiddlewareServer(&wg, *publicHost, *publicPort, *privateHost, *privatePort, *tls, *certFile, *keyFile)
+	publicAddr := fmt.Sprintf("%s:%d", *publicHost, *publicPort)
+	privateAddr := fmt.Sprintf("%s:%d", *privateHost, *privatePort)
+	mw.StartMiddlewareServer(&wg, publicAddr, privateAddr, *tls, *certFile, *keyFile, nil)
 	wg.Wait()
 }

@@ -14,7 +14,9 @@ import (
 	"github.com/pmontepagano/search/contract"
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
 	"github.com/pmontepagano/search/internal/broker"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 )
@@ -22,9 +24,9 @@ import (
 // Start Middleware that listens on localhost and then send to it a
 // dummy RegisterChannel RPC with a dummy GlobalContract
 func TestRegisterChannel(t *testing.T) {
-	mw := NewMiddlewareServer("broker", 7777)
+	mw := NewMiddlewareServer("broker:7777")
 	var wg sync.WaitGroup
-	mw.StartMiddlewareServer(&wg, "localhost", 4444, "localhost", 5555, false, "", "")
+	mw.StartMiddlewareServer(&wg, "localhost:4444", "localhost:5555", false, "", "", nil)
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -81,26 +83,181 @@ func TestRegisterChannel(t *testing.T) {
 	wg.Wait()
 }
 
+// Test scenarios where the Broker cannot find any provider that satisfies the requirements.
+func TestNoCompatibleProviders(t *testing.T) {
+	type testcase struct {
+		name          string
+		req           []byte // requirement contract
+		initiatorName string
+		action        func(*testing.T, pb.PrivateMiddlewareServiceClient, context.Context, string) // action to trigger search for providers
+	}
+	tests := []testcase{
+		{
+			name:          "onlysendonce",
+			initiatorName: "0",
+			req: []byte(`--
+				.outputs
+				.state graph
+				q0 1 ! hello q0
+				.marking q0
+				.end
+
+				.outputs FooBar
+				.state graph
+				q0 0 ? hello q0
+				.marking q0
+				.end
+			`),
+			action: func(t *testing.T, client pb.PrivateMiddlewareServiceClient, ctx context.Context, channelID string) {
+				// Send a message to FooBar to trigger brokerage of channel. This send will succeed.
+				appSendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
+					ChannelId: channelID,
+					Recipient: "FooBar",
+					Message: &pb.AppMessage{
+						Type: "hello",
+						Body: []byte("hello")},
+				})
+				if err != nil {
+					t.Errorf("Received error when sending message to FooBar")
+				}
+				if appSendResponse.Result != pb.AppSendResponse_RESULT_OK {
+					t.Errorf("Received non-OK result when sending message to FooBar")
+				}
+
+				// Close the channel. This should fail because the brokerage failed.
+				closeResponse, err := client.CloseChannel(ctx, &pb.CloseChannelRequest{ChannelId: channelID})
+				if err == nil {
+					t.Errorf("Received no error when closing channel")
+				}
+				if closeResponse != nil && closeResponse.Result == pb.CloseChannelResponse_RESULT_CLOSED {
+					t.Errorf("Received proper close when no provider is compatible...")
+				}
+			},
+		},
+		{
+			name:          "failtorecv",
+			initiatorName: "Bar",
+			req: []byte(`--
+				.outputs Foo
+				.state graph
+				q0 1 ! hello q0
+				.marking q0
+				.end
+
+				.outputs Bar
+				.state graph
+				q0 0 ? hello q0
+				.marking q0
+				.end
+			`),
+			action: func(t *testing.T, client pb.PrivateMiddlewareServiceClient, ctx context.Context, channelID string) {
+				// Try to receive "hello" from Foo. This should fail because brokerage should fail.
+				_, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+					ChannelId:   channelID,
+					Participant: "Foo",
+				})
+				if err == nil {
+					t.Error("AppRecv was expected to fail because there are no compatible providers.")
+				} else {
+					st := status.Convert(err)
+					if st.Code() != codes.NotFound {
+						t.Error("AppRecv was expected to fail with gRPC Unknown error code.")
+					}
+					details := st.Details()
+					if len(details) != 1 {
+						t.Error("AppRecv was expected to fail with one error detail.")
+					}
+					detail := details[0].(*errdetails.ErrorInfo)
+					if detail.GetReason() != "CHANNEL_BROKERAGE_FAILED" {
+						t.Errorf("AppRecv was expected to fail with CHANNEL_BROKERAGE_FAILED, but got %s", detail.GetReason())
+					}
+					if detail.Metadata["failed_participants"] != "Foo" {
+						t.Errorf("Unexpected list of failed participants.")
+					}
+
+				}
+
+				// Close the channel. This should fail because the brokerage failed.
+				closeResponse, err := client.CloseChannel(ctx, &pb.CloseChannelRequest{ChannelId: channelID})
+				if err == nil {
+					t.Errorf("Received no error when closing channel")
+				}
+				if closeResponse != nil && closeResponse.Result == pb.CloseChannelResponse_RESULT_CLOSED {
+					t.Errorf("Received proper close when no provider is compatible...")
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			bs := broker.NewBrokerServer(fmt.Sprintf("%s/testnocompatibleproviders-%s-%s.db", tmpDir, tt.name, time.Now().Format("2006-01-02T15:04:05")))
+			t.Cleanup(bs.Stop)
+			brokerStartedURL := make(chan string, 1)
+			go bs.StartServer("localhost:", false, "", "", brokerStartedURL)
+
+			var wgServiceClient sync.WaitGroup
+			// start middleware for Service Client
+			t.Log("waiting for broker...")
+			brokerURL := <-brokerStartedURL // wait until the Broker has selected a free TCP port and started listening on it.
+			serviceClientMw := NewMiddlewareServer(brokerURL)
+			serviceClientMw.StartMiddlewareServer(&wgServiceClient, "localhost:", "localhost:", false, "", "", nil)
+			t.Cleanup(serviceClientMw.Stop)
+
+			// Connect to Service Client's middleware.
+			var opts []grpc.DialOption
+			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			opts = append(opts, grpc.WithBlock())
+			conn, err := grpc.Dial(serviceClientMw.PrivateURL, opts...)
+			if err != nil {
+				t.Error("Could not contact local private middleware server.")
+			}
+			defer conn.Close()
+			client := pb.NewPrivateMiddlewareServiceClient(conn)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			req := pb.RegisterChannelRequest{
+				RequirementsContract: &pb.GlobalContract{
+					Contract:      tt.req,
+					InitiatorName: tt.initiatorName,
+					Format:        pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA,
+				},
+			}
+			regResult, err := client.RegisterChannel(ctx, &req)
+			if err != nil {
+				t.Errorf("Received error from RegisterChannel: %v", err)
+			}
+			t.Logf("Received ChannelID: %s", regResult.ChannelId)
+
+			tt.action(t, client, ctx, regResult.ChannelId)
+		})
+	}
+
+}
+
 func TestCircle(t *testing.T) {
-	brokerPort, p1Port, p2Port, p3Port, initiatorPort := 20000, 20001, 20003, 20005, 20007
+	p1Port, p2Port, p3Port, initiatorPort := 20001, 20003, 20005, 20007
 
 	tmpDir := t.TempDir()
 	bs := broker.NewBrokerServer(fmt.Sprintf("%s/testcircle-%s.db", tmpDir, time.Now().Format("2006-01-02T15:04:05")))
 	t.Cleanup(bs.Stop)
 	bs.SetCompatFunc(circleContractCompatChecker)
-	go bs.StartServer("localhost", brokerPort, false, "", "")
+	brokerStartedURL := make(chan string, 1)
+	go bs.StartServer("localhost:", false, "", "", brokerStartedURL)
+	brokerURL := <-brokerStartedURL // wait until the Broker has selected a free TCP port and started listening on it.
 
 	var wgProviders sync.WaitGroup
 	var wgInitiator sync.WaitGroup
 	// start middlewares
-	p1Mw := NewMiddlewareServer("localhost", brokerPort)
-	p1Mw.StartMiddlewareServer(&wgProviders, "localhost", p1Port, "localhost", p1Port+1, false, "", "")
-	p2Mw := NewMiddlewareServer("localhost", brokerPort)
-	p2Mw.StartMiddlewareServer(&wgProviders, "localhost", p2Port, "localhost", p2Port+1, false, "", "")
-	p3Mw := NewMiddlewareServer("localhost", brokerPort)
-	p3Mw.StartMiddlewareServer(&wgProviders, "localhost", p3Port, "localhost", p3Port+1, false, "", "")
-	initiatorMw := NewMiddlewareServer("localhost", brokerPort)
-	initiatorMw.StartMiddlewareServer(&wgInitiator, "localhost", initiatorPort, "localhost", initiatorPort+1, false, "", "")
+	p1Mw := NewMiddlewareServer(brokerURL)
+	p1Mw.StartMiddlewareServer(&wgProviders, fmt.Sprintf("localhost:%d", p1Port), fmt.Sprintf("localhost:%d", p1Port+1), false, "", "", nil)
+	p2Mw := NewMiddlewareServer(brokerURL)
+	p2Mw.StartMiddlewareServer(&wgProviders, fmt.Sprintf("localhost:%d", p2Port), fmt.Sprintf("localhost:%d", p2Port+1), false, "", "", nil)
+	p3Mw := NewMiddlewareServer(brokerURL)
+	p3Mw.StartMiddlewareServer(&wgProviders, fmt.Sprintf("localhost:%d", p3Port), fmt.Sprintf("localhost:%d", p3Port+1), false, "", "", nil)
+	initiatorMw := NewMiddlewareServer(brokerURL)
+	initiatorMw.StartMiddlewareServer(&wgInitiator, fmt.Sprintf("localhost:%d", initiatorPort), fmt.Sprintf("localhost:%d", initiatorPort+1), false, "", "", nil)
 	defer initiatorMw.Stop()
 
 	// common grpc.DialOption
@@ -328,16 +485,16 @@ func TestPingPongFullExample(t *testing.T) {
 	bs := broker.NewBrokerServer(fmt.Sprintf("%s/testpingpongfullexample.db", tmpDir))
 	t.Cleanup(bs.Stop)
 	bs.SetCompatFunc(pingPongContractCompatChecker)
-	go bs.StartServer("localhost", brokerPort, false, "", "")
+	go bs.StartServer(fmt.Sprintf("localhost:%d", brokerPort), false, "", "", nil)
 	defer bs.Stop()
 
 	var wg sync.WaitGroup
 	// start middlewares
-	pingMiddleware := NewMiddlewareServer("localhost", brokerPort)
-	pingMiddleware.StartMiddlewareServer(&wg, "localhost", pingPubPort, "localhost", pingPrivPort, false, "", "")
+	pingMiddleware := NewMiddlewareServer(fmt.Sprintf("localhost:%d", brokerPort))
+	pingMiddleware.StartMiddlewareServer(&wg, fmt.Sprintf("localhost:%d", pingPubPort), fmt.Sprintf("localhost:%d", pingPrivPort), false, "", "", nil)
 
-	pongMiddleware := NewMiddlewareServer("localhost", brokerPort)
-	pongMiddleware.StartMiddlewareServer(&wg, "localhost", pongPubPort, "localhost", pongPrivPort, false, "", "")
+	pongMiddleware := NewMiddlewareServer(fmt.Sprintf("localhost:%d", brokerPort))
+	pongMiddleware.StartMiddlewareServer(&wg, fmt.Sprintf("localhost:%d", pongPubPort), fmt.Sprintf("localhost:%d", pongPrivPort), false, "", "", nil)
 
 	defer pingMiddleware.Stop()
 	defer pongMiddleware.Stop()
