@@ -395,11 +395,11 @@ func (s *MiddlewareServer) getChannelForUsage(localID string, blockUntilBrokered
 				// wait until brokerage finishes...
 				s.channelLock.Unlock() // we need to unlock before waiting because the mutex is used in the broker() func.
 				s.logger.Printf("waiting for brokerage to finish for channel %s\n", localID)
-				c.brokerageWg.Wait()
-				if !c.brokerageSucceeded {
+				err := c.brokerageWg.Wait()
+				if err != nil || !c.brokerageSucceeded {
 					// TODO: remove channel from s.brokeringFailedChannels?
-					// TODO: we need the list of failed participants
-					return nil, searcherrors.BrokerageFailedError(nil)
+					failedParticipants := c.mw.brokeringFailedChannels[localID]
+					return nil, searcherrors.BrokerageFailedError(failedParticipants)
 				}
 			} else {
 				defer s.channelLock.Unlock()
