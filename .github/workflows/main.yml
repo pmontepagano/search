@@ -36,7 +36,7 @@ jobs:
       with:
         go-version: 'stable'
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v3.4.0
+      uses: golangci/golangci-lint-action@v3
     - name: Run go vet
       run: go vet ./...
     - name: Run gofmt
