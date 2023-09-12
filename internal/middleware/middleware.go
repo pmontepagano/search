@@ -583,11 +583,7 @@ func (s *MiddlewareServer) InitChannel(ctx context.Context, icr *pb.InitChannelR
 			return nil, err
 		}
 		r.AppID = uuid.MustParse(icr.GetAppId())
-
 		r.LocalID = uuid.MustParse(icr.GetChannelId()) // in non locally initiated channels, LocalID == ID
-
-		// notify local provider app
-		*regapp.NotifyChan <- initChannelNotification{ChannelID: icr.GetChannelId()}
 	} else {
 		// TODO: improve error message, return proper gRPC error.
 		return nil, fmt.Errorf("Received InitChannel for invalid AppID %s", icr.GetAppId())
@@ -611,9 +607,20 @@ func (s *MiddlewareServer) StartChannel(ctx context.Context, req *pb.StartChanne
 	c, ok := s.brokeredChannels[req.ChannelId]
 	s.channelLock.RUnlock()
 	if !ok {
-		// TODO: change this and return error.
-		s.logger.Panicf("Received StartChannel on non brokered ChannelID: %s", req.ChannelId)
+		s.logger.Printf("ERROR: Received StartChannel on non brokered ChannelID: %s", req.ChannelId)
+		return nil, status.Error(codes.InvalidArgument, "invalid ChannelID")
 	}
+
+	// notify local provider app
+	s.providersLock.Lock()
+	regapp, ok := s.registeredApps[req.AppId]
+	if !ok {
+		s.providersLock.Unlock()
+		return nil, status.Error(codes.InvalidArgument, "invalid AppID")
+	}
+	s.providersLock.Unlock()
+	*regapp.NotifyChan <- initChannelNotification{ChannelID: req.ChannelId}
+
 	c.startSenderRoutines()
 
 	return &pb.StartChannelResponse{Result: pb.StartChannelResponse_RESULT_ACK}, nil
