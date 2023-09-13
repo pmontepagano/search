@@ -31,7 +31,7 @@ Y con el [race detector](https://go.dev/doc/articles/race_detector):
 
 ### Para compilar los binarios de broker y middleware
 
-    go build ./cmd/broker ./cmd/middleware
+    go build -o . ./...
 
 ### Comandos útiles de Entgo (ORM)
 

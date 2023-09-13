@@ -147,7 +147,7 @@ func (mw *MiddlewareServer) newSEARCHChannel(c contract.Contract, pbContract *pb
 
 func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.ClientConn) {
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials())) // TODO: use tls
 	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(s.brokerAddr, opts...)
 	if err != nil {
@@ -520,20 +520,20 @@ func (s *MiddlewareServer) MessageExchange(stream pb.PublicMiddlewareService_Mes
 		s.logger.Printf("Error in MessageExchange when attempting to recv from stream: %s", err)
 		return err // TODO: what should we do here?
 	}
-	s.logger.Print("Attempting to obtain channelLock...")
+	s.logger.Print("[DEBUG] Attempting to obtain channelLock...")
 	s.channelLock.RLock()
-	s.logger.Print("Obtained the channelLock...")
+	s.logger.Print("[DEBUG] Obtained the channelLock...")
 	c, ok := s.brokeredChannels[in.GetChannelId()]
 	if !ok {
 		// TODO: attempt to get the channel from s.brokeringChannels (this can happen when some provider starts sending messages to the Service Client
 		// before we have finished processing the BrokerChannelResponse)
 		s.logger.Printf("Received MessageExchange with ChannelID %s but it is not a brokered Channel in this middleware.", in.GetChannelId())
 		s.channelLock.RUnlock()
-		s.logger.Print("Released channelLock...")
+		s.logger.Print("[DEBUG] Released channelLock...")
 		return fmt.Errorf("Received MessageExchange with ChannelID %s but it is not a brokered Channel in this middleware.", in.GetChannelId())
 	}
 	s.channelLock.RUnlock()
-	s.logger.Print("Released channelLock...")
+	s.logger.Print("[DEBUG] Released channelLock...")
 	// TODO: must check in.RecipientId... we could be hosting two different apps from same channel
 	participantName := c.participants[in.SenderId]
 

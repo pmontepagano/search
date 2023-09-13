@@ -466,17 +466,11 @@ func circleContractCompatChecker(ctx context.Context, req contract.LocalContract
 }
 
 func TestPingPongFullExample(t *testing.T) {
-
-	// TODO: I don't think we can accept GC format in the middleware. Because if the conversion
-	// to FSA introduces new messages that are not present in the GC, then the programmer needs
-	// to explicitly send those messages to the middleware!
-
-	// In this section we'll create several entities that will interact in this example:
+	// In this test we'll create several entities that will interact in this example:
 	// 1. Middleware for Ping (initiator). Runs private and public middleware servers in gorotines.
-	// 2. goroutine for Ping.
-	// 3. Middleware for Pong (provider). Runs private and public middleware servers in gorotines.
-	// 4. goroutine for Pong.
-	// 5. Broker. Runs in gorotine.
+	// 2. Middleware for Pong (provider). Runs private and public middleware servers in gorotines.
+	// 3. goroutine for Pong.
+	// 4. Broker. Runs in gorotine.
 
 	brokerPort, pingPrivPort, pingPubPort, pongPrivPort, pongPubPort := 30000, 30001, 30002, 30003, 30004
 
@@ -488,14 +482,12 @@ func TestPingPongFullExample(t *testing.T) {
 	go bs.StartServer(fmt.Sprintf("localhost:%d", brokerPort), false, "", "", nil)
 	defer bs.Stop()
 
-	var wg sync.WaitGroup
 	// start middlewares
+	var wg sync.WaitGroup
 	pingMiddleware := NewMiddlewareServer(fmt.Sprintf("localhost:%d", brokerPort))
 	pingMiddleware.StartMiddlewareServer(&wg, fmt.Sprintf("localhost:%d", pingPubPort), fmt.Sprintf("localhost:%d", pingPrivPort), false, "", "", nil)
-
 	pongMiddleware := NewMiddlewareServer(fmt.Sprintf("localhost:%d", brokerPort))
 	pongMiddleware.StartMiddlewareServer(&wg, fmt.Sprintf("localhost:%d", pongPubPort), fmt.Sprintf("localhost:%d", pongPrivPort), false, "", "", nil)
-
 	defer pingMiddleware.Stop()
 	defer pongMiddleware.Stop()
 
@@ -506,13 +498,6 @@ func TestPingPongFullExample(t *testing.T) {
 
 	// Signal pongProgram to exit.
 	exitPong <- true
-
-	// Signal both middlewares to exit.
-	pingMiddleware.Stop()
-	pongMiddleware.Stop()
-
-	// Signal broker to exit.
-	bs.Stop()
 }
 
 const pongContractFSA = `
@@ -601,6 +586,8 @@ func pongProgram(t *testing.T, middlewareURL string, registeredNotify chan bool,
 	go func(t *testing.T, stream pb.PrivateMiddlewareService_RegisterAppClient, recvChan chan NewSessionNotification) {
 		// We make a goroutine to have a channel interface instead of a blocking Recv()
 		// https://github.com/grpc/grpc-go/issues/465#issuecomment-179414474
+		// This goroutine simply waits for any new RegisterAppResponse in the stream and sends it
+		// to the recvChan.
 		for {
 			newResponse, err := stream.Recv()
 			recvChan <- NewSessionNotification{
