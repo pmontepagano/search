@@ -50,7 +50,7 @@ type MiddlewareServer struct {
 	// channles for which brokering failed. key: LocalID, value: list of participants for which the broker was unable to find matches.
 	brokeringFailedChannels map[string][]string
 	// mapping of channels' LocalID <--> ID (global). This only makes sense for already brokered channels.
-	localChannels *bimap.BiMap
+	localChannels *bimap.BiMap[string, string]
 	channelLock   *sync.RWMutex // protects all previous maps/bimaps for channels
 
 	brokerAddr string // maybe replace with net.url.URL type?
@@ -68,7 +68,7 @@ type MiddlewareServer struct {
 // NewMiddlewareServer is MiddlewareServer's constructor
 func NewMiddlewareServer(brokerAddr string) *MiddlewareServer {
 	var s MiddlewareServer
-	s.localChannels = bimap.NewBiMap() // mapping between local channelID and global channelID. When initiator not local, they are equal
+	s.localChannels = bimap.NewBiMap[string, string]() // mapping between local channelID and global channelID. When initiator not local, they are equal
 	s.registeredApps = make(map[string]registeredApp)
 	s.providersLock = new(sync.Mutex)
 
@@ -388,7 +388,7 @@ func (s *MiddlewareServer) getChannelForUsage(localID string, blockUntilBrokered
 				s.logger.Printf("getChannelForUsage invoked on channel ID %s: there's no localChannel with that ID.", localID)
 				return nil, searcherrors.ErrChannelNotFound
 			}
-			c = s.brokeredChannels[channelID.(string)]
+			c = s.brokeredChannels[channelID]
 		} else {
 			// channel is being brokered. We wait for it if blockUntilBrokered is true
 			if blockUntilBrokered {
