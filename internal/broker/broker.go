@@ -22,7 +22,6 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
-	"google.golang.org/grpc/testdata"
 
 	"github.com/pmontepagano/search/contract"
 	"github.com/pmontepagano/search/ent"
@@ -660,12 +659,6 @@ func (s *brokerServer) StartServer(address string, tls bool, certFile string, ke
 	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	var opts []grpc.ServerOption
 	if tls {
-		if certFile == "" {
-			certFile = testdata.Path("server1.pem")
-		}
-		if keyFile == "" {
-			keyFile = testdata.Path("server1.key")
-		}
 		creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 		if err != nil {
 			s.logger.Fatalf("Failed to generate credentials %v", err)
