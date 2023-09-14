@@ -145,11 +145,11 @@ func (mw *MiddlewareServer) newSEARCHChannel(c contract.Contract, pbContract *pb
 	return &r, nil
 }
 
-func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.ClientConn) {
+func (s *MiddlewareServer) connectBroker(ctx context.Context) (pb.BrokerServiceClient, *grpc.ClientConn) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials())) // TODO: use tls
 	opts = append(opts, grpc.WithBlock())
-	conn, err := grpc.Dial(s.brokerAddr, opts...)
+	conn, err := grpc.DialContext(ctx, s.brokerAddr, opts...)
 	if err != nil {
 		s.logger.Fatalf("fail to dial to broker addr %s: %v", s.brokerAddr, err)
 	}
@@ -161,7 +161,7 @@ func (s *MiddlewareServer) connectBroker() (pb.BrokerServiceClient, *grpc.Client
 // connect to the broker, send contract, wait for result and save data in the channel
 func (r *SEARCHChannel) broker(ctx context.Context) error {
 	r.mw.logger.Printf("Requesting brokerage of contract: '%v'", r.Contract)
-	client, conn := r.mw.connectBroker()
+	client, conn := r.mw.connectBroker(ctx)
 	defer conn.Close()
 	brokerresult, err := client.BrokerChannel(ctx, &pb.BrokerChannelRequest{
 		Contract: r.ContractPB,
@@ -209,7 +209,7 @@ func (r *SEARCHChannel) broker(ctx context.Context) error {
 // to notify it of new channels being initiated for it.
 func (s *MiddlewareServer) RegisterApp(req *pb.RegisterAppRequest, stream pb.PrivateMiddlewareService_RegisterAppServer) error {
 	// Connect to broker.
-	client, conn := s.connectBroker()
+	client, conn := s.connectBroker(context.TODO())
 	defer conn.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
