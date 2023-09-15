@@ -12,6 +12,7 @@ import (
 	"github.com/pmontepagano/search/ent"
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
 	"github.com/pmontepagano/search/mocks"
+	"go.uber.org/goleak"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -21,10 +22,12 @@ import (
 )
 
 func TestBrokerRegisterProviderRequest(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	tmpDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
 	t.Cleanup(b.Stop)
 	go b.StartServer("localhost:3333", false, "", "", nil)
+	defer b.Stop()
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -169,6 +172,7 @@ func TestGetParticipantMapping(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			defer goleak.VerifyNone(t)
 			if tt.setup != nil {
 				tt.req = mocks.NewGlobalContract(t)
 				tt.reqProjection = mocks.NewLocalContract(t)
@@ -178,7 +182,8 @@ func TestGetParticipantMapping(t *testing.T) {
 
 			testDir := t.TempDir()
 			b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
-			t.Cleanup(b.Stop)
+			// t.Cleanup(b.Stop)
+			defer b.Stop()
 
 			if tt.req != nil {
 				// Project requirement from Global Contract.

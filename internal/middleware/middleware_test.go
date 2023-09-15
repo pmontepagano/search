@@ -14,6 +14,7 @@ import (
 	"github.com/pmontepagano/search/contract"
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
 	"github.com/pmontepagano/search/internal/broker"
+	"go.uber.org/goleak"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -24,6 +25,7 @@ import (
 // Start Middleware that listens on localhost and then send to it a
 // dummy RegisterChannel RPC with a dummy GlobalContract
 func TestRegisterChannel(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	mw := NewMiddlewareServer("broker:7777")
 	var wg sync.WaitGroup
 	mw.StartMiddlewareServer(&wg, "localhost:4444", "localhost:5555", false, "", "", nil)
@@ -190,6 +192,7 @@ func TestNoCompatibleProviders(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			defer goleak.VerifyNone(t)
 			tmpDir := t.TempDir()
 			bs := broker.NewBrokerServer(fmt.Sprintf("%s/testnocompatibleproviders-%s-%s.db", tmpDir, tt.name, time.Now().Format("2006-01-02T15:04:05")))
 			t.Cleanup(bs.Stop)

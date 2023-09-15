@@ -25,6 +25,11 @@ type LocalContract interface {
 	// TODO: add GetNextState()
 }
 
+type LocalContractMonitor interface {
+	Init(LocalContract) LocalContractMonitor
+	TransitionToNextState(participant string, send bool, msgtype string) error
+}
+
 // GlobalContract is an interface that represents the global view of a communication channel.
 // It is used to specify behaviour for Service Clients in SEARch.
 // You can project a GlobalContract into one LocalContract for each participant in the GlobalContract.
