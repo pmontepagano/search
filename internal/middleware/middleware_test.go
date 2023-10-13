@@ -195,7 +195,7 @@ func TestNoCompatibleProviders(t *testing.T) {
 			defer goleak.VerifyNone(t)
 			tmpDir := t.TempDir()
 			bs := broker.NewBrokerServer(fmt.Sprintf("%s/testnocompatibleproviders-%s-%s.db", tmpDir, tt.name, time.Now().Format("2006-01-02T15:04:05")))
-			t.Cleanup(bs.Stop)
+			defer bs.Stop()
 			brokerStartedURL := make(chan string, 1)
 			go bs.StartServer("localhost:", false, "", "", brokerStartedURL)
 
@@ -205,7 +205,7 @@ func TestNoCompatibleProviders(t *testing.T) {
 			brokerURL := <-brokerStartedURL // wait until the Broker has selected a free TCP port and started listening on it.
 			serviceClientMw := NewMiddlewareServer(brokerURL)
 			serviceClientMw.StartMiddlewareServer(&wgServiceClient, "localhost:", "localhost:", false, "", "", nil)
-			t.Cleanup(serviceClientMw.Stop)
+			defer serviceClientMw.Stop()
 
 			// Connect to Service Client's middleware.
 			var opts []grpc.DialOption

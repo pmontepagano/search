@@ -704,6 +704,18 @@ func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicAddr 
 
 func (s *MiddlewareServer) Stop() {
 	// TODO: flush all buffers before stopping!
+	s.channelLock.Lock()
+	defer s.channelLock.Unlock()
+	// for _, c := range s.brokeringChannels {
+	// 	if c.brokerageCancelFunc != nil {
+	// 		c.brokerageCancelFunc()
+	// 	}
+	// }
+	for _, c := range s.brokeredChannels {
+		if c.sendersPoolCancelFunc != nil {
+			c.sendersPoolCancelFunc()
+		}
+	}
 	if s.publicServer != nil {
 		s.publicServer.Stop()
 	}
