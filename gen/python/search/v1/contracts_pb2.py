@@ -19,9 +19,8 @@ _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'search.v1.contracts_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z(github.com/pmontepagano/search/gen/go/v1'
+  _globals['DESCRIPTOR']._options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z(github.com/pmontepagano/search/gen/go/v1'
   _globals['_GLOBALCONTRACTFORMAT']._serialized_start=284
   _globals['_GLOBALCONTRACTFORMAT']._serialized_end=409
   _globals['_LOCALCONTRACTFORMAT']._serialized_start=411

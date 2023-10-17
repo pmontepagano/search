@@ -19,9 +19,8 @@ _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'search.v1.app_message_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z(github.com/pmontepagano/search/gen/go/v1'
+  _globals['DESCRIPTOR']._options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z(github.com/pmontepagano/search/gen/go/v1'
   _globals['_MESSAGEEXCHANGEREQUEST']._serialized_start=43
   _globals['_MESSAGEEXCHANGEREQUEST']._serialized_end=211
   _globals['_APPSENDREQUEST']._serialized_start=213

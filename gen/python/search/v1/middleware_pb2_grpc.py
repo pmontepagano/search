@@ -244,7 +244,7 @@ class PublicMiddlewareServiceServicer(object):
     """
 
     def InitChannel(self, request, context):
-        """The Broker, when a new channel is registered, signals all participants with this
+        """The Broker, when a new channel is registered, signals all providers with this
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')

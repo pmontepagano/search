@@ -22,13 +22,12 @@ _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'search.v1.middleware_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z(github.com/pmontepagano/search/gen/go/v1'
-  _REGISTERCHANNELREQUEST_PRESETPARTICIPANTSENTRY._options = None
-  _REGISTERCHANNELREQUEST_PRESETPARTICIPANTSENTRY._serialized_options = b'8\001'
-  _INITCHANNELREQUEST_PARTICIPANTSENTRY._options = None
-  _INITCHANNELREQUEST_PARTICIPANTSENTRY._serialized_options = b'8\001'
+  _globals['DESCRIPTOR']._options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z(github.com/pmontepagano/search/gen/go/v1'
+  _globals['_REGISTERCHANNELREQUEST_PRESETPARTICIPANTSENTRY']._options = None
+  _globals['_REGISTERCHANNELREQUEST_PRESETPARTICIPANTSENTRY']._serialized_options = b'8\001'
+  _globals['_INITCHANNELREQUEST_PARTICIPANTSENTRY']._options = None
+  _globals['_INITCHANNELREQUEST_PARTICIPANTSENTRY']._serialized_options = b'8\001'
   _globals['_APPSENDRESPONSE']._serialized_start=122
   _globals['_APPSENDRESPONSE']._serialized_end=263
   _globals['_APPSENDRESPONSE_RESULT']._serialized_start=200
