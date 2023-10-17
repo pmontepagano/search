@@ -1,4 +1,4 @@
-package search.v1;
+package ar.com.montepagano.search.middleware.v1;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
@@ -19,29 +19,29 @@ public final class PrivateMiddlewareServiceGrpc {
   public static final java.lang.String SERVICE_NAME = "search.v1.PrivateMiddlewareService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<search.v1.Middleware.RegisterChannelRequest,
-      search.v1.Middleware.RegisterChannelResponse> getRegisterChannelMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse> getRegisterChannelMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "RegisterChannel",
-      requestType = search.v1.Middleware.RegisterChannelRequest.class,
-      responseType = search.v1.Middleware.RegisterChannelResponse.class,
+      requestType = ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest.class,
+      responseType = ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<search.v1.Middleware.RegisterChannelRequest,
-      search.v1.Middleware.RegisterChannelResponse> getRegisterChannelMethod() {
-    io.grpc.MethodDescriptor<search.v1.Middleware.RegisterChannelRequest, search.v1.Middleware.RegisterChannelResponse> getRegisterChannelMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse> getRegisterChannelMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse> getRegisterChannelMethod;
     if ((getRegisterChannelMethod = PrivateMiddlewareServiceGrpc.getRegisterChannelMethod) == null) {
       synchronized (PrivateMiddlewareServiceGrpc.class) {
         if ((getRegisterChannelMethod = PrivateMiddlewareServiceGrpc.getRegisterChannelMethod) == null) {
           PrivateMiddlewareServiceGrpc.getRegisterChannelMethod = getRegisterChannelMethod =
-              io.grpc.MethodDescriptor.<search.v1.Middleware.RegisterChannelRequest, search.v1.Middleware.RegisterChannelResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RegisterChannel"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.RegisterChannelRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.RegisterChannelResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PrivateMiddlewareServiceMethodDescriptorSupplier("RegisterChannel"))
               .build();
         }
@@ -50,29 +50,29 @@ public final class PrivateMiddlewareServiceGrpc {
     return getRegisterChannelMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<search.v1.Middleware.RegisterAppRequest,
-      search.v1.Middleware.RegisterAppResponse> getRegisterAppMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse> getRegisterAppMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "RegisterApp",
-      requestType = search.v1.Middleware.RegisterAppRequest.class,
-      responseType = search.v1.Middleware.RegisterAppResponse.class,
+      requestType = ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest.class,
+      responseType = ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
-  public static io.grpc.MethodDescriptor<search.v1.Middleware.RegisterAppRequest,
-      search.v1.Middleware.RegisterAppResponse> getRegisterAppMethod() {
-    io.grpc.MethodDescriptor<search.v1.Middleware.RegisterAppRequest, search.v1.Middleware.RegisterAppResponse> getRegisterAppMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse> getRegisterAppMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest, ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse> getRegisterAppMethod;
     if ((getRegisterAppMethod = PrivateMiddlewareServiceGrpc.getRegisterAppMethod) == null) {
       synchronized (PrivateMiddlewareServiceGrpc.class) {
         if ((getRegisterAppMethod = PrivateMiddlewareServiceGrpc.getRegisterAppMethod) == null) {
           PrivateMiddlewareServiceGrpc.getRegisterAppMethod = getRegisterAppMethod =
-              io.grpc.MethodDescriptor.<search.v1.Middleware.RegisterAppRequest, search.v1.Middleware.RegisterAppResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest, ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RegisterApp"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.RegisterAppRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.RegisterAppResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PrivateMiddlewareServiceMethodDescriptorSupplier("RegisterApp"))
               .build();
         }
@@ -81,29 +81,29 @@ public final class PrivateMiddlewareServiceGrpc {
     return getRegisterAppMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<search.v1.Middleware.CloseChannelRequest,
-      search.v1.Middleware.CloseChannelResponse> getCloseChannelMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse> getCloseChannelMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "CloseChannel",
-      requestType = search.v1.Middleware.CloseChannelRequest.class,
-      responseType = search.v1.Middleware.CloseChannelResponse.class,
+      requestType = ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest.class,
+      responseType = ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<search.v1.Middleware.CloseChannelRequest,
-      search.v1.Middleware.CloseChannelResponse> getCloseChannelMethod() {
-    io.grpc.MethodDescriptor<search.v1.Middleware.CloseChannelRequest, search.v1.Middleware.CloseChannelResponse> getCloseChannelMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse> getCloseChannelMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse> getCloseChannelMethod;
     if ((getCloseChannelMethod = PrivateMiddlewareServiceGrpc.getCloseChannelMethod) == null) {
       synchronized (PrivateMiddlewareServiceGrpc.class) {
         if ((getCloseChannelMethod = PrivateMiddlewareServiceGrpc.getCloseChannelMethod) == null) {
           PrivateMiddlewareServiceGrpc.getCloseChannelMethod = getCloseChannelMethod =
-              io.grpc.MethodDescriptor.<search.v1.Middleware.CloseChannelRequest, search.v1.Middleware.CloseChannelResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CloseChannel"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.CloseChannelRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.CloseChannelResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PrivateMiddlewareServiceMethodDescriptorSupplier("CloseChannel"))
               .build();
         }
@@ -112,29 +112,29 @@ public final class PrivateMiddlewareServiceGrpc {
     return getCloseChannelMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<search.v1.AppMessageOuterClass.AppSendRequest,
-      search.v1.Middleware.AppSendResponse> getAppSendMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse> getAppSendMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "AppSend",
-      requestType = search.v1.AppMessageOuterClass.AppSendRequest.class,
-      responseType = search.v1.Middleware.AppSendResponse.class,
+      requestType = ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.class,
+      responseType = ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<search.v1.AppMessageOuterClass.AppSendRequest,
-      search.v1.Middleware.AppSendResponse> getAppSendMethod() {
-    io.grpc.MethodDescriptor<search.v1.AppMessageOuterClass.AppSendRequest, search.v1.Middleware.AppSendResponse> getAppSendMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse> getAppSendMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest, ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse> getAppSendMethod;
     if ((getAppSendMethod = PrivateMiddlewareServiceGrpc.getAppSendMethod) == null) {
       synchronized (PrivateMiddlewareServiceGrpc.class) {
         if ((getAppSendMethod = PrivateMiddlewareServiceGrpc.getAppSendMethod) == null) {
           PrivateMiddlewareServiceGrpc.getAppSendMethod = getAppSendMethod =
-              io.grpc.MethodDescriptor.<search.v1.AppMessageOuterClass.AppSendRequest, search.v1.Middleware.AppSendResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest, ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AppSend"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.AppMessageOuterClass.AppSendRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.AppSendResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PrivateMiddlewareServiceMethodDescriptorSupplier("AppSend"))
               .build();
         }
@@ -143,29 +143,29 @@ public final class PrivateMiddlewareServiceGrpc {
     return getAppSendMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<search.v1.Middleware.AppRecvRequest,
-      search.v1.AppMessageOuterClass.AppRecvResponse> getAppRecvMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest,
+      ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse> getAppRecvMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "AppRecv",
-      requestType = search.v1.Middleware.AppRecvRequest.class,
-      responseType = search.v1.AppMessageOuterClass.AppRecvResponse.class,
+      requestType = ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest.class,
+      responseType = ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<search.v1.Middleware.AppRecvRequest,
-      search.v1.AppMessageOuterClass.AppRecvResponse> getAppRecvMethod() {
-    io.grpc.MethodDescriptor<search.v1.Middleware.AppRecvRequest, search.v1.AppMessageOuterClass.AppRecvResponse> getAppRecvMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest,
+      ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse> getAppRecvMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse> getAppRecvMethod;
     if ((getAppRecvMethod = PrivateMiddlewareServiceGrpc.getAppRecvMethod) == null) {
       synchronized (PrivateMiddlewareServiceGrpc.class) {
         if ((getAppRecvMethod = PrivateMiddlewareServiceGrpc.getAppRecvMethod) == null) {
           PrivateMiddlewareServiceGrpc.getAppRecvMethod = getAppRecvMethod =
-              io.grpc.MethodDescriptor.<search.v1.Middleware.AppRecvRequest, search.v1.AppMessageOuterClass.AppRecvResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AppRecv"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.AppRecvRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.AppMessageOuterClass.AppRecvResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PrivateMiddlewareServiceMethodDescriptorSupplier("AppRecv"))
               .build();
         }
@@ -231,8 +231,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by a requires point to start a new channel with a requirement contract.
      * </pre>
      */
-    default void registerChannel(search.v1.Middleware.RegisterChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.RegisterChannelResponse> responseObserver) {
+    default void registerChannel(ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterChannelMethod(), responseObserver);
     }
 
@@ -241,8 +241,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by provider services to register their provision contract with the Registry/Broker.
      * </pre>
      */
-    default void registerApp(search.v1.Middleware.RegisterAppRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.RegisterAppResponse> responseObserver) {
+    default void registerApp(ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterAppMethod(), responseObserver);
     }
 
@@ -251,8 +251,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by local app (be it a Service Client or a Service Provider) to close a channel.
      * </pre>
      */
-    default void closeChannel(search.v1.Middleware.CloseChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.CloseChannelResponse> responseObserver) {
+    default void closeChannel(ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCloseChannelMethod(), responseObserver);
     }
 
@@ -262,15 +262,15 @@ public final class PrivateMiddlewareServiceGrpc {
      * initiated or registered channel
      * </pre>
      */
-    default void appSend(search.v1.AppMessageOuterClass.AppSendRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.AppSendResponse> responseObserver) {
+    default void appSend(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAppSendMethod(), responseObserver);
     }
 
     /**
      */
-    default void appRecv(search.v1.Middleware.AppRecvRequest request,
-        io.grpc.stub.StreamObserver<search.v1.AppMessageOuterClass.AppRecvResponse> responseObserver) {
+    default void appRecv(ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAppRecvMethod(), responseObserver);
     }
   }
@@ -315,8 +315,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by a requires point to start a new channel with a requirement contract.
      * </pre>
      */
-    public void registerChannel(search.v1.Middleware.RegisterChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.RegisterChannelResponse> responseObserver) {
+    public void registerChannel(ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getRegisterChannelMethod(), getCallOptions()), request, responseObserver);
     }
@@ -326,8 +326,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by provider services to register their provision contract with the Registry/Broker.
      * </pre>
      */
-    public void registerApp(search.v1.Middleware.RegisterAppRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.RegisterAppResponse> responseObserver) {
+    public void registerApp(ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncServerStreamingCall(
           getChannel().newCall(getRegisterAppMethod(), getCallOptions()), request, responseObserver);
     }
@@ -337,8 +337,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by local app (be it a Service Client or a Service Provider) to close a channel.
      * </pre>
      */
-    public void closeChannel(search.v1.Middleware.CloseChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.CloseChannelResponse> responseObserver) {
+    public void closeChannel(ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getCloseChannelMethod(), getCallOptions()), request, responseObserver);
     }
@@ -349,16 +349,16 @@ public final class PrivateMiddlewareServiceGrpc {
      * initiated or registered channel
      * </pre>
      */
-    public void appSend(search.v1.AppMessageOuterClass.AppSendRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.AppSendResponse> responseObserver) {
+    public void appSend(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getAppSendMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
      */
-    public void appRecv(search.v1.Middleware.AppRecvRequest request,
-        io.grpc.stub.StreamObserver<search.v1.AppMessageOuterClass.AppRecvResponse> responseObserver) {
+    public void appRecv(ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getAppRecvMethod(), getCallOptions()), request, responseObserver);
     }
@@ -389,7 +389,7 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by a requires point to start a new channel with a requirement contract.
      * </pre>
      */
-    public search.v1.Middleware.RegisterChannelResponse registerChannel(search.v1.Middleware.RegisterChannelRequest request) {
+    public ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse registerChannel(ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getRegisterChannelMethod(), getCallOptions(), request);
     }
@@ -399,8 +399,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by provider services to register their provision contract with the Registry/Broker.
      * </pre>
      */
-    public java.util.Iterator<search.v1.Middleware.RegisterAppResponse> registerApp(
-        search.v1.Middleware.RegisterAppRequest request) {
+    public java.util.Iterator<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse> registerApp(
+        ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest request) {
       return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
           getChannel(), getRegisterAppMethod(), getCallOptions(), request);
     }
@@ -410,7 +410,7 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by local app (be it a Service Client or a Service Provider) to close a channel.
      * </pre>
      */
-    public search.v1.Middleware.CloseChannelResponse closeChannel(search.v1.Middleware.CloseChannelRequest request) {
+    public ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse closeChannel(ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getCloseChannelMethod(), getCallOptions(), request);
     }
@@ -421,14 +421,14 @@ public final class PrivateMiddlewareServiceGrpc {
      * initiated or registered channel
      * </pre>
      */
-    public search.v1.Middleware.AppSendResponse appSend(search.v1.AppMessageOuterClass.AppSendRequest request) {
+    public ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse appSend(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getAppSendMethod(), getCallOptions(), request);
     }
 
     /**
      */
-    public search.v1.AppMessageOuterClass.AppRecvResponse appRecv(search.v1.Middleware.AppRecvRequest request) {
+    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse appRecv(ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getAppRecvMethod(), getCallOptions(), request);
     }
@@ -459,8 +459,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by a requires point to start a new channel with a requirement contract.
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<search.v1.Middleware.RegisterChannelResponse> registerChannel(
-        search.v1.Middleware.RegisterChannelRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse> registerChannel(
+        ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getRegisterChannelMethod(), getCallOptions()), request);
     }
@@ -470,8 +470,8 @@ public final class PrivateMiddlewareServiceGrpc {
      * This is used by local app (be it a Service Client or a Service Provider) to close a channel.
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<search.v1.Middleware.CloseChannelResponse> closeChannel(
-        search.v1.Middleware.CloseChannelRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse> closeChannel(
+        ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getCloseChannelMethod(), getCallOptions()), request);
     }
@@ -482,16 +482,16 @@ public final class PrivateMiddlewareServiceGrpc {
      * initiated or registered channel
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<search.v1.Middleware.AppSendResponse> appSend(
-        search.v1.AppMessageOuterClass.AppSendRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse> appSend(
+        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getAppSendMethod(), getCallOptions()), request);
     }
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<search.v1.AppMessageOuterClass.AppRecvResponse> appRecv(
-        search.v1.Middleware.AppRecvRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse> appRecv(
+        ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getAppRecvMethod(), getCallOptions()), request);
     }
@@ -521,24 +521,24 @@ public final class PrivateMiddlewareServiceGrpc {
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_REGISTER_CHANNEL:
-          serviceImpl.registerChannel((search.v1.Middleware.RegisterChannelRequest) request,
-              (io.grpc.stub.StreamObserver<search.v1.Middleware.RegisterChannelResponse>) responseObserver);
+          serviceImpl.registerChannel((ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest) request,
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse>) responseObserver);
           break;
         case METHODID_REGISTER_APP:
-          serviceImpl.registerApp((search.v1.Middleware.RegisterAppRequest) request,
-              (io.grpc.stub.StreamObserver<search.v1.Middleware.RegisterAppResponse>) responseObserver);
+          serviceImpl.registerApp((ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest) request,
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse>) responseObserver);
           break;
         case METHODID_CLOSE_CHANNEL:
-          serviceImpl.closeChannel((search.v1.Middleware.CloseChannelRequest) request,
-              (io.grpc.stub.StreamObserver<search.v1.Middleware.CloseChannelResponse>) responseObserver);
+          serviceImpl.closeChannel((ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest) request,
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse>) responseObserver);
           break;
         case METHODID_APP_SEND:
-          serviceImpl.appSend((search.v1.AppMessageOuterClass.AppSendRequest) request,
-              (io.grpc.stub.StreamObserver<search.v1.Middleware.AppSendResponse>) responseObserver);
+          serviceImpl.appSend((ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest) request,
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse>) responseObserver);
           break;
         case METHODID_APP_RECV:
-          serviceImpl.appRecv((search.v1.Middleware.AppRecvRequest) request,
-              (io.grpc.stub.StreamObserver<search.v1.AppMessageOuterClass.AppRecvResponse>) responseObserver);
+          serviceImpl.appRecv((ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest) request,
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -562,36 +562,36 @@ public final class PrivateMiddlewareServiceGrpc {
           getRegisterChannelMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              search.v1.Middleware.RegisterChannelRequest,
-              search.v1.Middleware.RegisterChannelResponse>(
+              ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest,
+              ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse>(
                 service, METHODID_REGISTER_CHANNEL)))
         .addMethod(
           getRegisterAppMethod(),
           io.grpc.stub.ServerCalls.asyncServerStreamingCall(
             new MethodHandlers<
-              search.v1.Middleware.RegisterAppRequest,
-              search.v1.Middleware.RegisterAppResponse>(
+              ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppRequest,
+              ar.com.montepagano.search.middleware.v1.Middleware.RegisterAppResponse>(
                 service, METHODID_REGISTER_APP)))
         .addMethod(
           getCloseChannelMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              search.v1.Middleware.CloseChannelRequest,
-              search.v1.Middleware.CloseChannelResponse>(
+              ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelRequest,
+              ar.com.montepagano.search.middleware.v1.Middleware.CloseChannelResponse>(
                 service, METHODID_CLOSE_CHANNEL)))
         .addMethod(
           getAppSendMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              search.v1.AppMessageOuterClass.AppSendRequest,
-              search.v1.Middleware.AppSendResponse>(
+              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest,
+              ar.com.montepagano.search.middleware.v1.Middleware.AppSendResponse>(
                 service, METHODID_APP_SEND)))
         .addMethod(
           getAppRecvMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              search.v1.Middleware.AppRecvRequest,
-              search.v1.AppMessageOuterClass.AppRecvResponse>(
+              ar.com.montepagano.search.middleware.v1.Middleware.AppRecvRequest,
+              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse>(
                 service, METHODID_APP_RECV)))
         .build();
   }
@@ -602,7 +602,7 @@ public final class PrivateMiddlewareServiceGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-      return search.v1.Middleware.getDescriptor();
+      return ar.com.montepagano.search.middleware.v1.Middleware.getDescriptor();
     }
 
     @java.lang.Override

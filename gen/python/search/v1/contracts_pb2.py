@@ -13,14 +13,14 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19search/v1/contracts.proto\x12\tsearch.v1\"\x8c\x01\n\x0eGlobalContract\x12\x1a\n\x08\x63ontract\x18\x01 \x01(\x0cR\x08\x63ontract\x12\x37\n\x06\x66ormat\x18\x02 \x01(\x0e\x32\x1f.search.v1.GlobalContractFormatR\x06\x66ormat\x12%\n\x0einitiator_name\x18\x03 \x01(\tR\rinitiatorName\"c\n\rLocalContract\x12\x1a\n\x08\x63ontract\x18\x01 \x01(\x0cR\x08\x63ontract\x12\x36\n\x06\x66ormat\x18\x02 \x01(\x0e\x32\x1e.search.v1.LocalContractFormatR\x06\x66ormat*}\n\x14GlobalContractFormat\x12&\n\"GLOBAL_CONTRACT_FORMAT_UNSPECIFIED\x10\x00\x12\x1e\n\x1aGLOBAL_CONTRACT_FORMAT_FSA\x10\x01\x12\x1d\n\x19GLOBAL_CONTRACT_FORMAT_GC\x10\x02*[\n\x13LocalContractFormat\x12%\n!LOCAL_CONTRACT_FORMAT_UNSPECIFIED\x10\x00\x12\x1d\n\x19LOCAL_CONTRACT_FORMAT_FSA\x10\x01\x42*Z(github.com/pmontepagano/search/gen/go/v1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19search/v1/contracts.proto\x12\tsearch.v1\"\x8c\x01\n\x0eGlobalContract\x12\x1a\n\x08\x63ontract\x18\x01 \x01(\x0cR\x08\x63ontract\x12\x37\n\x06\x66ormat\x18\x02 \x01(\x0e\x32\x1f.search.v1.GlobalContractFormatR\x06\x66ormat\x12%\n\x0einitiator_name\x18\x03 \x01(\tR\rinitiatorName\"c\n\rLocalContract\x12\x1a\n\x08\x63ontract\x18\x01 \x01(\x0cR\x08\x63ontract\x12\x36\n\x06\x66ormat\x18\x02 \x01(\x0e\x32\x1e.search.v1.LocalContractFormatR\x06\x66ormat*}\n\x14GlobalContractFormat\x12&\n\"GLOBAL_CONTRACT_FORMAT_UNSPECIFIED\x10\x00\x12\x1e\n\x1aGLOBAL_CONTRACT_FORMAT_FSA\x10\x01\x12\x1d\n\x19GLOBAL_CONTRACT_FORMAT_GC\x10\x02*[\n\x13LocalContractFormat\x12%\n!LOCAL_CONTRACT_FORMAT_UNSPECIFIED\x10\x00\x12\x1d\n\x19LOCAL_CONTRACT_FORMAT_FSA\x10\x01\x42R\n&ar.com.montepagano.search.contracts.v1Z(github.com/pmontepagano/search/gen/go/v1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'search.v1.contracts_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['DESCRIPTOR']._options = None
-  _globals['DESCRIPTOR']._serialized_options = b'Z(github.com/pmontepagano/search/gen/go/v1'
+  _globals['DESCRIPTOR']._serialized_options = b'\n&ar.com.montepagano.search.contracts.v1Z(github.com/pmontepagano/search/gen/go/v1'
   _globals['_GLOBALCONTRACTFORMAT']._serialized_start=284
   _globals['_GLOBALCONTRACTFORMAT']._serialized_end=409
   _globals['_LOCALCONTRACTFORMAT']._serialized_start=411

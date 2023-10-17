@@ -1,4 +1,4 @@
-package search.v1;
+package ar.com.montepagano.search.middleware.v1;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
@@ -18,29 +18,29 @@ public final class PublicMiddlewareServiceGrpc {
   public static final java.lang.String SERVICE_NAME = "search.v1.PublicMiddlewareService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<search.v1.Middleware.InitChannelRequest,
-      search.v1.Middleware.InitChannelResponse> getInitChannelMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse> getInitChannelMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "InitChannel",
-      requestType = search.v1.Middleware.InitChannelRequest.class,
-      responseType = search.v1.Middleware.InitChannelResponse.class,
+      requestType = ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest.class,
+      responseType = ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<search.v1.Middleware.InitChannelRequest,
-      search.v1.Middleware.InitChannelResponse> getInitChannelMethod() {
-    io.grpc.MethodDescriptor<search.v1.Middleware.InitChannelRequest, search.v1.Middleware.InitChannelResponse> getInitChannelMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse> getInitChannelMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse> getInitChannelMethod;
     if ((getInitChannelMethod = PublicMiddlewareServiceGrpc.getInitChannelMethod) == null) {
       synchronized (PublicMiddlewareServiceGrpc.class) {
         if ((getInitChannelMethod = PublicMiddlewareServiceGrpc.getInitChannelMethod) == null) {
           PublicMiddlewareServiceGrpc.getInitChannelMethod = getInitChannelMethod =
-              io.grpc.MethodDescriptor.<search.v1.Middleware.InitChannelRequest, search.v1.Middleware.InitChannelResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "InitChannel"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.InitChannelRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.InitChannelResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PublicMiddlewareServiceMethodDescriptorSupplier("InitChannel"))
               .build();
         }
@@ -49,29 +49,29 @@ public final class PublicMiddlewareServiceGrpc {
     return getInitChannelMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<search.v1.Middleware.StartChannelRequest,
-      search.v1.Middleware.StartChannelResponse> getStartChannelMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse> getStartChannelMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "StartChannel",
-      requestType = search.v1.Middleware.StartChannelRequest.class,
-      responseType = search.v1.Middleware.StartChannelResponse.class,
+      requestType = ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest.class,
+      responseType = ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<search.v1.Middleware.StartChannelRequest,
-      search.v1.Middleware.StartChannelResponse> getStartChannelMethod() {
-    io.grpc.MethodDescriptor<search.v1.Middleware.StartChannelRequest, search.v1.Middleware.StartChannelResponse> getStartChannelMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse> getStartChannelMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse> getStartChannelMethod;
     if ((getStartChannelMethod = PublicMiddlewareServiceGrpc.getStartChannelMethod) == null) {
       synchronized (PublicMiddlewareServiceGrpc.class) {
         if ((getStartChannelMethod = PublicMiddlewareServiceGrpc.getStartChannelMethod) == null) {
           PublicMiddlewareServiceGrpc.getStartChannelMethod = getStartChannelMethod =
-              io.grpc.MethodDescriptor.<search.v1.Middleware.StartChannelRequest, search.v1.Middleware.StartChannelResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest, ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "StartChannel"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.StartChannelRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.StartChannelResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PublicMiddlewareServiceMethodDescriptorSupplier("StartChannel"))
               .build();
         }
@@ -80,29 +80,29 @@ public final class PublicMiddlewareServiceGrpc {
     return getStartChannelMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<search.v1.AppMessageOuterClass.MessageExchangeRequest,
-      search.v1.Middleware.MessageExchangeResponse> getMessageExchangeMethod;
+  private static volatile io.grpc.MethodDescriptor<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse> getMessageExchangeMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "MessageExchange",
-      requestType = search.v1.AppMessageOuterClass.MessageExchangeRequest.class,
-      responseType = search.v1.Middleware.MessageExchangeResponse.class,
+      requestType = ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.class,
+      responseType = ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
-  public static io.grpc.MethodDescriptor<search.v1.AppMessageOuterClass.MessageExchangeRequest,
-      search.v1.Middleware.MessageExchangeResponse> getMessageExchangeMethod() {
-    io.grpc.MethodDescriptor<search.v1.AppMessageOuterClass.MessageExchangeRequest, search.v1.Middleware.MessageExchangeResponse> getMessageExchangeMethod;
+  public static io.grpc.MethodDescriptor<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest,
+      ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse> getMessageExchangeMethod() {
+    io.grpc.MethodDescriptor<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest, ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse> getMessageExchangeMethod;
     if ((getMessageExchangeMethod = PublicMiddlewareServiceGrpc.getMessageExchangeMethod) == null) {
       synchronized (PublicMiddlewareServiceGrpc.class) {
         if ((getMessageExchangeMethod = PublicMiddlewareServiceGrpc.getMessageExchangeMethod) == null) {
           PublicMiddlewareServiceGrpc.getMessageExchangeMethod = getMessageExchangeMethod =
-              io.grpc.MethodDescriptor.<search.v1.AppMessageOuterClass.MessageExchangeRequest, search.v1.Middleware.MessageExchangeResponse>newBuilder()
+              io.grpc.MethodDescriptor.<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest, ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "MessageExchange"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.AppMessageOuterClass.MessageExchangeRequest.getDefaultInstance()))
+                  ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  search.v1.Middleware.MessageExchangeResponse.getDefaultInstance()))
+                  ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse.getDefaultInstance()))
               .setSchemaDescriptor(new PublicMiddlewareServiceMethodDescriptorSupplier("MessageExchange"))
               .build();
         }
@@ -167,22 +167,22 @@ public final class PublicMiddlewareServiceGrpc {
      * The Broker, when a new channel is registered, signals all providers with this
      * </pre>
      */
-    default void initChannel(search.v1.Middleware.InitChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.InitChannelResponse> responseObserver) {
+    default void initChannel(ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInitChannelMethod(), responseObserver);
     }
 
     /**
      */
-    default void startChannel(search.v1.Middleware.StartChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.StartChannelResponse> responseObserver) {
+    default void startChannel(ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getStartChannelMethod(), responseObserver);
     }
 
     /**
      */
-    default io.grpc.stub.StreamObserver<search.v1.AppMessageOuterClass.MessageExchangeRequest> messageExchange(
-        io.grpc.stub.StreamObserver<search.v1.Middleware.MessageExchangeResponse> responseObserver) {
+    default io.grpc.stub.StreamObserver<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest> messageExchange(
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse> responseObserver) {
       return io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall(getMessageExchangeMethod(), responseObserver);
     }
   }
@@ -225,24 +225,24 @@ public final class PublicMiddlewareServiceGrpc {
      * The Broker, when a new channel is registered, signals all providers with this
      * </pre>
      */
-    public void initChannel(search.v1.Middleware.InitChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.InitChannelResponse> responseObserver) {
+    public void initChannel(ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getInitChannelMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
      */
-    public void startChannel(search.v1.Middleware.StartChannelRequest request,
-        io.grpc.stub.StreamObserver<search.v1.Middleware.StartChannelResponse> responseObserver) {
+    public void startChannel(ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest request,
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getStartChannelMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
      */
-    public io.grpc.stub.StreamObserver<search.v1.AppMessageOuterClass.MessageExchangeRequest> messageExchange(
-        io.grpc.stub.StreamObserver<search.v1.Middleware.MessageExchangeResponse> responseObserver) {
+    public io.grpc.stub.StreamObserver<ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest> messageExchange(
+        io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse> responseObserver) {
       return io.grpc.stub.ClientCalls.asyncClientStreamingCall(
           getChannel().newCall(getMessageExchangeMethod(), getCallOptions()), responseObserver);
     }
@@ -272,14 +272,14 @@ public final class PublicMiddlewareServiceGrpc {
      * The Broker, when a new channel is registered, signals all providers with this
      * </pre>
      */
-    public search.v1.Middleware.InitChannelResponse initChannel(search.v1.Middleware.InitChannelRequest request) {
+    public ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse initChannel(ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getInitChannelMethod(), getCallOptions(), request);
     }
 
     /**
      */
-    public search.v1.Middleware.StartChannelResponse startChannel(search.v1.Middleware.StartChannelRequest request) {
+    public ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse startChannel(ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getStartChannelMethod(), getCallOptions(), request);
     }
@@ -309,16 +309,16 @@ public final class PublicMiddlewareServiceGrpc {
      * The Broker, when a new channel is registered, signals all providers with this
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<search.v1.Middleware.InitChannelResponse> initChannel(
-        search.v1.Middleware.InitChannelRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse> initChannel(
+        ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getInitChannelMethod(), getCallOptions()), request);
     }
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<search.v1.Middleware.StartChannelResponse> startChannel(
-        search.v1.Middleware.StartChannelRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse> startChannel(
+        ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getStartChannelMethod(), getCallOptions()), request);
     }
@@ -346,12 +346,12 @@ public final class PublicMiddlewareServiceGrpc {
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_INIT_CHANNEL:
-          serviceImpl.initChannel((search.v1.Middleware.InitChannelRequest) request,
-              (io.grpc.stub.StreamObserver<search.v1.Middleware.InitChannelResponse>) responseObserver);
+          serviceImpl.initChannel((ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest) request,
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse>) responseObserver);
           break;
         case METHODID_START_CHANNEL:
-          serviceImpl.startChannel((search.v1.Middleware.StartChannelRequest) request,
-              (io.grpc.stub.StreamObserver<search.v1.Middleware.StartChannelResponse>) responseObserver);
+          serviceImpl.startChannel((ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest) request,
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -365,7 +365,7 @@ public final class PublicMiddlewareServiceGrpc {
       switch (methodId) {
         case METHODID_MESSAGE_EXCHANGE:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.messageExchange(
-              (io.grpc.stub.StreamObserver<search.v1.Middleware.MessageExchangeResponse>) responseObserver);
+              (io.grpc.stub.StreamObserver<ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -378,22 +378,22 @@ public final class PublicMiddlewareServiceGrpc {
           getInitChannelMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              search.v1.Middleware.InitChannelRequest,
-              search.v1.Middleware.InitChannelResponse>(
+              ar.com.montepagano.search.middleware.v1.Middleware.InitChannelRequest,
+              ar.com.montepagano.search.middleware.v1.Middleware.InitChannelResponse>(
                 service, METHODID_INIT_CHANNEL)))
         .addMethod(
           getStartChannelMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              search.v1.Middleware.StartChannelRequest,
-              search.v1.Middleware.StartChannelResponse>(
+              ar.com.montepagano.search.middleware.v1.Middleware.StartChannelRequest,
+              ar.com.montepagano.search.middleware.v1.Middleware.StartChannelResponse>(
                 service, METHODID_START_CHANNEL)))
         .addMethod(
           getMessageExchangeMethod(),
           io.grpc.stub.ServerCalls.asyncClientStreamingCall(
             new MethodHandlers<
-              search.v1.AppMessageOuterClass.MessageExchangeRequest,
-              search.v1.Middleware.MessageExchangeResponse>(
+              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest,
+              ar.com.montepagano.search.middleware.v1.Middleware.MessageExchangeResponse>(
                 service, METHODID_MESSAGE_EXCHANGE)))
         .build();
   }
@@ -404,7 +404,7 @@ public final class PublicMiddlewareServiceGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-      return search.v1.Middleware.getDescriptor();
+      return ar.com.montepagano.search.middleware.v1.Middleware.getDescriptor();
     }
 
     @java.lang.Override

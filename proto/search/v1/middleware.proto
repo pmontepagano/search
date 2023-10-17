@@ -1,6 +1,7 @@
 syntax = "proto3";
 package search.v1;
 option go_package = "github.com/pmontepagano/search/gen/go/v1";
+option java_package = "ar.com.montepagano.search.middleware.v1";
 
 import "search/v1/app_message.proto";
 import "search/v1/contracts.proto";
