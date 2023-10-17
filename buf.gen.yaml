@@ -1,8 +1,29 @@
+# https://buf.build/blog/remote-plugin-execution
+
 version: v1
 plugins:
+  # Go
   - plugin: buf.build/protocolbuffers/go
     out: gen/go
     opt: paths=source_relative
   - plugin: buf.build/grpc/go
     out: gen/go
     opt: paths=source_relative
+
+  # Python
+  - plugin: buf.build/protocolbuffers/python
+    out: gen/python
+  - plugin: buf.build/grpc/python
+    out: gen/python
+  # - plugin: buf.build/community/danielgtaylor-betterproto:2.0.0b6
+  #   out: gen/python
+
+  # Java
+  - plugin: buf.build/grpc/java:v1.58.0
+    out: gen/java
+  - plugin: buf.build/protocolbuffers/java
+    out: gen/java
+
+  # Typescript
+  - plugin: buf.build/bufbuild/es:v1.3.3
+    out: gen/ts
