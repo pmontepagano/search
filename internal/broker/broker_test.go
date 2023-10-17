@@ -24,7 +24,7 @@ func TestBrokerRegisterProviderRequest(t *testing.T) {
 	tmpDir := t.TempDir()
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", tmpDir))
 	t.Cleanup(b.Stop)
-	go b.StartServer("localhost", 3333, false, "", "")
+	go b.StartServer("localhost:3333", false, "", "", nil)
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -251,7 +251,7 @@ func TestGetBestCandidate_UnregisteredRequirementContract(t *testing.T) {
 	// Assert
 	assert.Nil(t, result)
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "ent: registered_contract not found")
+	assert.Equal(t, err.Error(), "error getting registered contract for participant test_participant_name")
 }
 
 func TestGetBestCandidate_NoCompatibilityResults(t *testing.T) {

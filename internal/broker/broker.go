@@ -22,13 +22,13 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
-	"google.golang.org/grpc/testdata"
 
 	"github.com/pmontepagano/search/contract"
 	"github.com/pmontepagano/search/ent"
 	"github.com/pmontepagano/search/ent/compatibilityresult"
 	"github.com/pmontepagano/search/ent/registeredcontract"
 	"github.com/pmontepagano/search/ent/registeredprovider"
+	"github.com/pmontepagano/search/internal/searcherrors"
 
 	_ "github.com/mattn/go-sqlite3"
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
@@ -78,17 +78,26 @@ func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []str
 	return result
 }
 
+type candidateErr struct {
+	participantName string
+	err             error
+}
+
+func (e candidateErr) Error() string {
+	return e.err.Error()
+}
+
 func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.GlobalContract, p string) (*ent.RegisteredProvider, error) {
 	// Get from the database the projection of the requirement contract (it should have been saved when handling BrokerChannelRequest).
 	// rc *ent.RegisteredContract
 	projection, err := req.GetProjection(p)
 	if err != nil {
-		return nil, err
+		return nil, candidateErr{p, fmt.Errorf("error getting projection for participant %s: %w", p, err)}
 	}
 	s.logger.Printf("running getBestCandidate for participant %s, requirement projection ID %s", p, projection.GetContractID())
 	rc, err := s.dbClient.RegisteredContract.Get(ctx, projection.GetContractID())
 	if err != nil {
-		return nil, err
+		return nil, candidateErr{p, fmt.Errorf("error getting registered contract for participant %s", p)}
 	}
 	// Search in database if there are any compatible providers.
 	cachedResults, err := s.dbClient.CompatibilityResult.
@@ -100,7 +109,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 		)).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, candidateErr{p, fmt.Errorf("error querying compatibility results for participant %s: %w", p, err)}
 	}
 	if len(cachedResults) > 0 {
 		// If there is at least one, return the best ranked one.
@@ -112,7 +121,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 		// TODO: sort by ranking (first we need to add ranking to the schema).
 		result, err := cachedResults[0].Edges.ProviderContract.QueryProviders().First(ctx)
 		if err != nil {
-			return nil, err
+			return nil, candidateErr{p, fmt.Errorf("error getting provider for participant %s: %w", p, err)}
 		}
 		s.logger.Printf("found cached result for participant %s, returning provider with contract ID %s", p, result.ContractID)
 		// TODO: enqueue jobs to calculate compatibility with all providers for which we have no data
@@ -140,14 +149,14 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	// 	Where(
 	// 		registeredprovider.Not(registeredprovider.HasContractWith(registeredcontract)
 	if err != nil {
-		return nil, err
+		return nil, candidateErr{p, fmt.Errorf("error querying registered contracts for participant %s: %w", p, err)}
 	}
 	// allRegisteredProviders, err := s.dbClient.Debug().RegisteredProvider.Query().WithContract().All(ctx)
 	// for _, rp := range allRegisteredProviders {
 	// 	fmt.Printf("registered provider with participant name %s and contract ID: %s\n", rp.ParticipantName, rp.Edges.Contract.ID)
 	// }
 	if len(contractsToCalculate) == 0 {
-		return nil, errors.New("no compatible provider found and no potential candidates to calculate compatibility")
+		return nil, candidateErr{p, errors.New("no compatible provider found and no potential candidates to calculate compatibility")}
 	}
 	firstResult := make(chan *ent.RegisteredProvider, 1)
 	workersFinished := make(chan struct{}, 1)
@@ -200,7 +209,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 	case r := <-firstResult:
 		return r, nil
 	case <-workersFinished:
-		return nil, fmt.Errorf("no compatible provider found for participant %s", p)
+		return nil, candidateErr{p, fmt.Errorf("no compatible provider found for participant %s", p)}
 	}
 
 }
@@ -208,7 +217,7 @@ func (s *brokerServer) getBestCandidate(ctx context.Context, req contract.Global
 // given a contract and a list of participants, get best possible candidates for those candidates
 // from all the candidates present in the registry
 func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.GlobalContract, participants []string,
-	blacklistedProviders map[*pb.RemoteParticipant]struct{}) (map[string]*ent.RegisteredProvider, error) {
+	denylistedProviders map[*pb.RemoteParticipant]struct{}) (map[string]*ent.RegisteredProvider, error) {
 	// sanity check: check that all elements of param `participants` are present as participants in param `contract`
 	contractParticipants := contract.GetParticipants()
 	sort.Strings(contractParticipants)
@@ -224,13 +233,16 @@ func (s *brokerServer) getBestCandidates(ctx context.Context, contract contract.
 
 	response := make(map[string]*ent.RegisteredProvider)
 
-	// TODO: use blacklistedProviders
+	// TODO: use denylistedProviders
 	providers, err := iter.MapErr(participants, func(p *string) (*ent.RegisteredProvider, error) {
 		return s.getBestCandidate(ctx, contract, *p)
 	})
 	if err != nil {
-		// TODO: better error handling.
-		return nil, err
+		failedParticipants := make([]string, 0)
+		for _, e := range err.(interface{ Unwrap() []error }).Unwrap() {
+			failedParticipants = append(failedParticipants, e.(candidateErr).participantName)
+		}
+		return nil, searcherrors.BrokerageFailedError(failedParticipants)
 	}
 	for idx, p := range participants {
 		response[p] = providers[idx]
@@ -276,13 +288,39 @@ func (s *brokerServer) getParticipantMapping(req contract.GlobalContract, initia
 	return res, nil
 }
 
-// this routine will find compatible candidates and notify them
-func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, presetParticipants map[string]*pb.RemoteParticipant,
-	initiatorName string, blacklistedProviders map[*pb.RemoteParticipant]struct{}) {
+func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
+	if request.Contract == nil {
+		return nil, status.New(codes.InvalidArgument, "contract is required").Err()
+	}
+	s.logger.Printf("Received broker request for contract: '%s'", request.Contract.Contract)
+	reqContract, err := contract.ConvertPBGlobalContract(request.GetContract())
+	if err != nil {
+		return nil, status.New(codes.InvalidArgument, "failed to parse requirement contract").Err()
+	}
+	presetParticipants := request.GetPresetParticipants()
+	initiatorName := request.Contract.GetInitiatorName()
+
+	for _, pName := range reqContract.GetRemoteParticipantNames() {
+		if _, ok := presetParticipants[pName]; !ok {
+			participantContract, err := reqContract.GetProjection(pName)
+			if err != nil {
+				return nil, status.New(codes.FailedPrecondition, err.Error()).Err()
+			}
+			_, err = s.getOrSaveContract(ctx, participantContract)
+			if err != nil {
+				return nil, status.New(codes.Unavailable, err.Error()).Err()
+			}
+			s.logger.Printf("Saved requirement projection for participant %s with ID %s", pName, participantContract.GetContractID())
+		}
+	}
+
 	// TODO: split this function up in two functions: broker and initializeChannel
 	// func (s *brokerServer) broker(ctx context.Context, reqContract contract.Contract, initiatorName string, presetParticipants map[string]struct{},
-	//		blacklistedProviders map[*ent.RegisteredProvider]struct{}) (map[string]*ent.RegisteredProviders, error)
+	//		denylistedProviders map[*ent.RegisteredProvider]struct{}) (map[string]*ent.RegisteredProviders, error)
 	// func (s *brokerServer) initializeChannel(ctx context.Context, )... not sure yet what else needs
+
+	// TODO: implement functionality to denylist providers.
+	denylistedProviders := make(map[*pb.RemoteParticipant]struct{})
 
 	// Broker participants.
 	s.logger.Printf("brokerAndInitialize presetParticipants: %v", presetParticipants)
@@ -290,13 +328,14 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 	s.logger.Printf("brokerAndInitialize contract.GetParticipants(): %v", reqContract.GetParticipants())
 	participantsToMatch := filterParticipants(reqContract.GetParticipants(), presetParticipants)
 	s.logger.Printf("brokerAndInitialize participantsToMatch: %v", participantsToMatch)
-	candidates, err := s.getBestCandidates(context.TODO(), reqContract, participantsToMatch, blacklistedProviders)
+	candidates, err := s.getBestCandidates(ctx, reqContract, participantsToMatch, denylistedProviders)
 	if err != nil {
-		// TODO: if there is no result from getBestCandidates, we should notify error to initiator somehow
-		s.logger.Fatalf("Could not get any provider candidates. Error: %s", err)
+		s.logger.Printf("Could not get any provider candidates. Error: %s", err)
+		return nil, err
 	}
 
-	// Initialize channel.
+	// allParticipants will contain the RemoteParticipant object for all participants, including Service Client, preset providers and provider candidates
+	// that the broker has selected. The key is the name of the participant according to the Service Client's requirement contract.
 	allParticipants := make(map[string]*pb.RemoteParticipant)
 	for pname, p := range candidates {
 		allParticipants[pname] = getRemoteParticipant(p)
@@ -304,61 +343,105 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 	for pname, p := range presetParticipants {
 		allParticipants[pname] = p
 	}
-
 	s.logger.Printf("allParticipants: %v", allParticipants)
 
+	// TODO: why not simply accept the UUID generated by the Service Client? We should maybe change them and make them have a prefix
+	// that is specific to the Service Client's ID (and authenticate this connection...?). This simplifies tracing, since we can use the
+	// same channel ID everywhere and makes it very explicit who is the owner of the channel.
 	channelID := uuid.New()
 
+	initChannelCtx, cancelInitChannel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancelInitChannel()
+	initChannelPool := pool.NewWithResults[struct {
+		pname  string
+		client pb.PublicMiddlewareServiceClient
+		conn   *grpc.ClientConn
+	}]().WithErrors().WithFirstError().WithContext(initChannelCtx).WithCancelOnError()
+
+	// This channel is used to signal providers to which are failing so that we can exclude them and ask for new candidates.
+	unresponsiveParticipants := make(chan string, len(allParticipants))
+
 	// first round: InitChannel to all candidates and presetParticipants and wait for response
-	// if any one of them did not respond, recurse into this func excluding unresponsive participants
-	unresponsiveParticipants := make(map[string]bool)
-	s.logger.Printf("Brokering: first round...")
+	// if any one of them does not respond, send its name through unresponsiveParticipants
 	for pname, p := range allParticipants {
-		s.logger.Printf("Sending InitChannel to: %s", p.AppId)
-		conn, err := grpc.Dial(
-			p.Url,
-			grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO: use tls
-			grpc.WithBlock(),
-			grpc.FailOnNonTempDialError(true),
-		)
-		if err != nil {
-			// TODO: discard this participant if it's not in presetParticipants by recursing into this func excluding this participant
-			unresponsiveParticipants[pname] = true
-			s.logger.Printf("Couldn't contact participant")
-			return
-			// TODO: here we should increment sequence number for InitChannel and restart
-		}
-		defer conn.Close()
-		client := pb.NewPublicMiddlewareServiceClient(conn)
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-		var participantsMapping map[string]*pb.RemoteParticipant
 		if pname == initiatorName {
-			participantsMapping = allParticipants
-		} else {
+			continue
+		}
+		pname, p := pname, p // https://github.com/golang/go/wiki/CommonMistakes#using-reference-to-loop-iterator-variable
+		initChannelPool.Go(func(ctx context.Context) (struct {
+			pname  string
+			client pb.PublicMiddlewareServiceClient
+			conn   *grpc.ClientConn
+		}, error) {
+			result := struct {
+				pname  string
+				client pb.PublicMiddlewareServiceClient
+				conn   *grpc.ClientConn
+			}{pname, nil, nil}
+			s.logger.Printf("Connecting to participant %s during brokerage. Provider AppId: %s", pname, p.AppId)
+
+			// Connect to the provider's middleware.
+			conn, err := grpc.DialContext(
+				ctx,
+				p.Url,
+				grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO: use tls
+				grpc.WithBlock(),
+				grpc.FailOnNonTempDialError(true),
+			)
+			result.conn = conn
+			if err != nil {
+				unresponsiveParticipants <- pname
+				return result, fmt.Errorf("failed to dial %s: %w", p.Url, err)
+			}
+			client := pb.NewPublicMiddlewareServiceClient(conn)
+			result.client = client
+			var participantsMapping map[string]*pb.RemoteParticipant
 			participantsMapping, err = s.getParticipantMapping(reqContract, allParticipants, pname, candidates[pname])
 			if err != nil {
-				// TODO: proper error handling
-				s.logger.Panicf(err.Error())
+				s.logger.Printf(err.Error())
+				unresponsiveParticipants <- pname
+				return result, fmt.Errorf("internal error calculating participant mapping: %w", err)
 			}
+			req := pb.InitChannelRequest{
+				ChannelId:    channelID.String(),
+				AppId:        p.AppId,
+				Participants: participantsMapping,
+			}
+			res, err := client.InitChannel(ctx, &req)
+			if err != nil {
+				unresponsiveParticipants <- pname
+				s.logger.Printf("Error doing InitChannel")
+				return result, fmt.Errorf("unresponsive provider during InitChannel: %w", err)
+			}
+			if res.Result != pb.InitChannelResponse_RESULT_ACK {
+				unresponsiveParticipants <- pname
+				s.logger.Printf("Received non-ACK response to InitChannel")
+				return result, fmt.Errorf("non-ACK received during InitChannel")
+			}
+			return result, nil
+		})
+	}
+
+	providerMwClientsSlice, err := initChannelPool.Wait()
+	if err != nil {
+		s.logger.Printf("Failed to InitChannel at least one participant")
+		close(unresponsiveParticipants)
+		for pname := range unresponsiveParticipants {
+			// TODO: what do we do if an unresponsive provider is one of the presetParticipants? Send error to Service Client.
+			denylistedProviders[allParticipants[pname]] = struct{}{}
 		}
-		req := pb.InitChannelRequest{
-			ChannelId:    channelID.String(),
-			AppId:        p.AppId,
-			Participants: participantsMapping,
-		}
-		res, err := client.InitChannel(ctx, &req)
-		if err != nil {
-			// TODO: discard this participant if it's not in presetParticipants
-			unresponsiveParticipants[pname] = true
-			s.logger.Printf("Error doing InitChannel")
-			return
-		}
-		if res.Result != pb.InitChannelResponse_RESULT_ACK {
-			// TODO: ??
-			s.logger.Printf("Received non-ACK response to InitChannel")
-			return
-		}
+		s.logger.Fatalf("TODO: failed to InitChannel at least one participant. Denylist providers and ask for new candidates.")
+	}
+	providerMwClients := make(map[string]struct {
+		client pb.PublicMiddlewareServiceClient
+		conn   *grpc.ClientConn
+	})
+	for _, p := range providerMwClientsSlice {
+		pname, client, conn := p.pname, p.client, p.conn
+		providerMwClients[pname] = struct {
+			client pb.PublicMiddlewareServiceClient
+			conn   *grpc.ClientConn
+		}{client: client, conn: conn}
 	}
 
 	// Second round: when all responded ACK, signal them all to start choreography with StartChannelRequest.
@@ -368,69 +451,51 @@ func (s *brokerServer) brokerAndInitialize(reqContract contract.GlobalContract, 
 	// TODO: We could maybe improve this by only notifying the participants that can send a message from their start state.
 	//   This would require that Middlewares also start the sender routines when they receive a message from the channel.
 	s.logger.Printf("Brokering: second round...")
-	// TODO: Do this concurrently.
+
+	startChannelCtx, startChannelCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	startChannelPool := pool.New().WithContext(startChannelCtx)
+
 	for pname, p := range allParticipants {
-		s.logger.Printf("Sending StartChannel to: %s", p.AppId)
-		// TODO: refactor this repeated code
-		conn, err := grpc.Dial(
-			p.Url,
-			grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO: use tls
-			grpc.WithBlock(),
-			grpc.FailOnNonTempDialError(true),
-		)
-		if err != nil {
-			s.logger.Printf("Couldn't contact participant %s", pname) // TODO: panic?
-			return
+		if pname == initiatorName {
+			continue
 		}
-		defer conn.Close()
-		client := pb.NewPublicMiddlewareServiceClient(conn)
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // TODO: remove hardcoded timeout
-		defer cancel()
-		req := pb.StartChannelRequest{
-			ChannelId: channelID.String(),
-			AppId:     p.AppId,
-		}
-		res, err := client.StartChannel(ctx, &req)
-		if err != nil {
-			// TODO: panic?
-			s.logger.Printf("Error doing StartChannel")
-			return
-		}
-		if res.Result != pb.StartChannelResponse_RESULT_ACK {
-			// TODO: ??
-			s.logger.Printf("Received non-ACK response to StartChannel")
-			return
-		}
-	}
+		pname, p := pname, p // https://github.com/golang/go/wiki/CommonMistakes#using-reference-to-loop-iterator-variable
+		startChannelPool.Go(func(ctx context.Context) error {
+			s.logger.Printf("Sending StartChannel to: %s", p.AppId)
+			client := providerMwClients[pname].client
+			defer providerMwClients[pname].conn.Close()
 
-}
-
-func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChannelRequest) (*pb.BrokerChannelResponse, error) {
-	s.logger.Printf("Received broker request for contract: '%s'", request.Contract.Contract)
-	reqContract, err := contract.ConvertPBGlobalContract(request.GetContract())
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse contract")
-	}
-	presetParticipants := request.GetPresetParticipants()
-	initiatorName := request.Contract.GetInitiatorName()
-
-	for _, pName := range reqContract.GetRemoteParticipantNames() {
-		if _, ok := presetParticipants[pName]; !ok {
-			participantContract, err := reqContract.GetProjection(pName)
-			if err != nil {
-				return nil, status.New(codes.Internal, err.Error()).Err()
+			req := pb.StartChannelRequest{
+				ChannelId: channelID.String(),
+				AppId:     p.AppId,
 			}
-			_, err = s.getOrSaveContract(ctx, participantContract)
+			res, err := client.StartChannel(ctx, &req)
 			if err != nil {
-				return nil, status.New(codes.Internal, err.Error()).Err()
+				s.logger.Printf("Error sending StartChannel to participant %s, with URL %s", pname, p.Url)
+				return fmt.Errorf("Error sending StartChannel to participant %s, with URL %s. Error caused by %w", pname, p.Url, err)
 			}
-			s.logger.Printf("Saved requirement projection for participant %s with ID %s", pName, participantContract.GetContractID())
-		}
+			if res.Result != pb.StartChannelResponse_RESULT_ACK {
+				msg := fmt.Sprintf("Non-ACK response while sending StartChannel to participant %s, with URL %s", pname, p.Url)
+				s.logger.Print(msg)
+				return fmt.Errorf(msg)
+			}
+			return nil
+		})
 	}
+	go func() {
+		defer startChannelCancel()
+		err := startChannelPool.Wait()
+		if err != nil {
+			// TODO: at this point, we can no longer recover. In the future we can implement a mechanism to notify the Service Client
+			//   that this channel should be teared down.
+			s.logger.Printf("Error sending StartChannel to at least one participant")
+		}
+	}()
 
-	go s.brokerAndInitialize(reqContract, presetParticipants, initiatorName, make(map[*pb.RemoteParticipant]struct{}))
-
-	return &pb.BrokerChannelResponse{Result: pb.BrokerChannelResponse_RESULT_ACK}, nil
+	return &pb.BrokerChannelResponse{
+		ChannelId:    channelID.String(),
+		Participants: allParticipants,
+	}, nil
 }
 
 func (s *brokerServer) getOrSaveContract(ctx context.Context, c contract.LocalContract) (*ent.RegisteredContract, error) {
@@ -583,22 +648,17 @@ func NewBrokerServer(databasePath string) *brokerServer {
 	return s
 }
 
-func (s *brokerServer) StartServer(host string, port int, tls bool, certFile string, keyFile string) {
-	s.PublicURL = fmt.Sprintf("%s:%d", host, port)
-	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
-
-	lis, err := net.Listen("tcp", s.PublicURL)
+// StartServer starts the broker server. If tls is true, certFile and keyFile must be provided. If notifyStartChan is not nil,
+// the broker will send its public URL to the channel when it's already listening on the port.
+func (s *brokerServer) StartServer(address string, tls bool, certFile string, keyFile string, notifyStartChan chan string) {
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		s.logger.Fatalf("failed to listen: %v", err)
 	}
+	s.PublicURL = lis.Addr().String()
+	s.logger = log.New(os.Stderr, fmt.Sprintf("[BROKER] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	var opts []grpc.ServerOption
 	if tls {
-		if certFile == "" {
-			certFile = testdata.Path("server1.pem")
-		}
-		if keyFile == "" {
-			keyFile = testdata.Path("server1.key")
-		}
 		creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 		if err != nil {
 			s.logger.Fatalf("Failed to generate credentials %v", err)
@@ -609,6 +669,11 @@ func (s *brokerServer) StartServer(host string, port int, tls bool, certFile str
 	s.server = grpcServer
 	pb.RegisterBrokerServiceServer(grpcServer, s)
 	s.logger.Printf("Broker server starting...")
+	if notifyStartChan != nil {
+		s.logger.Print("Sending broker public URL to notifyStartChan...")
+		notifyStartChan <- s.PublicURL
+		s.logger.Print("Sent broker public URL to notifyStartChan...")
+	}
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

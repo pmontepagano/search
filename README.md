@@ -1,12 +1,5 @@
 # Implementación de SEArch
 
-## Componentes
-
-Por ahora habrá estos componentes en la arquitectura:
-
-- broker + repository
-- middleware
-
 ## Código generado (go protobufs y go-grpc)
 
 ### Buf para protobufs y gRPC
@@ -25,7 +18,7 @@ Por ahora habrá estos componentes en la arquitectura:
 
 ### To get a report of code coverage
 
-    go test ./... -coverprofile=coverage.txt -covermode atomic -race -timeout 4s
+    go test ./... -coverprofile=coverage.txt -covermode atomic -coverpkg=./cfsm/...,./internal/...,./contract -timeout 30s
     go tool cover -html=coverage.txt
 
 ### Para correr los tests
@@ -38,7 +31,7 @@ Y con el [race detector](https://go.dev/doc/articles/race_detector):
 
 ### Para compilar los binarios de broker y middleware
 
-    go build ./cmd/broker ./cmd/middleware
+    go build -o . ./...
 
 ### Comandos útiles de Entgo (ORM)
 
@@ -53,4 +46,11 @@ Y con el [race detector](https://go.dev/doc/articles/race_detector):
 #### Generate Entity Relation diagram locally
 
     go run -mod=mod github.com/a8m/enter ./ent/schema
+
+
+## Run ChorGram's gc2fsa
+
+After `--` you send the parameters. In this example, we simply pass the input file name.
+
+    wasmtime --dir=. gc2fsa.wasm -- pingpong.gc
 

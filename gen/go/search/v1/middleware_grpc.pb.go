@@ -305,7 +305,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PublicMiddlewareServiceClient interface {
-	// The Broker, when a new channel is registered, signals all participants with this
+	// The Broker, when a new channel is registered, signals all providers with this
 	InitChannel(ctx context.Context, in *InitChannelRequest, opts ...grpc.CallOption) (*InitChannelResponse, error)
 	StartChannel(ctx context.Context, in *StartChannelRequest, opts ...grpc.CallOption) (*StartChannelResponse, error)
 	MessageExchange(ctx context.Context, opts ...grpc.CallOption) (PublicMiddlewareService_MessageExchangeClient, error)
@@ -375,7 +375,7 @@ func (x *publicMiddlewareServiceMessageExchangeClient) CloseAndRecv() (*MessageE
 // All implementations must embed UnimplementedPublicMiddlewareServiceServer
 // for forward compatibility
 type PublicMiddlewareServiceServer interface {
-	// The Broker, when a new channel is registered, signals all participants with this
+	// The Broker, when a new channel is registered, signals all providers with this
 	InitChannel(context.Context, *InitChannelRequest) (*InitChannelResponse, error)
 	StartChannel(context.Context, *StartChannelRequest) (*StartChannelResponse, error)
 	MessageExchange(PublicMiddlewareService_MessageExchangeServer) error
