@@ -20,7 +20,6 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	PrivateMiddlewareService_RegisterChannel_FullMethodName = "/search.v1.PrivateMiddlewareService/RegisterChannel"
-	PrivateMiddlewareService_RegisterApp_FullMethodName     = "/search.v1.PrivateMiddlewareService/RegisterApp"
 	PrivateMiddlewareService_CloseChannel_FullMethodName    = "/search.v1.PrivateMiddlewareService/CloseChannel"
 	PrivateMiddlewareService_AppSend_FullMethodName         = "/search.v1.PrivateMiddlewareService/AppSend"
 	PrivateMiddlewareService_AppRecv_FullMethodName         = "/search.v1.PrivateMiddlewareService/AppRecv"
@@ -32,8 +31,6 @@ const (
 type PrivateMiddlewareServiceClient interface {
 	// This is used by a requires point to start a new channel with a requirement contract.
 	RegisterChannel(ctx context.Context, in *RegisterChannelRequest, opts ...grpc.CallOption) (*RegisterChannelResponse, error)
-	// This is used by provider services to register their provision contract with the Registry/Broker.
-	RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (PrivateMiddlewareService_RegisterAppClient, error)
 	// This is used by local app (be it a Service Client or a Service Provider) to close a channel.
 	CloseChannel(ctx context.Context, in *CloseChannelRequest, opts ...grpc.CallOption) (*CloseChannelResponse, error)
 	// This is used by the local app to communicate with other participants in an already
@@ -57,38 +54,6 @@ func (c *privateMiddlewareServiceClient) RegisterChannel(ctx context.Context, in
 		return nil, err
 	}
 	return out, nil
-}
-
-func (c *privateMiddlewareServiceClient) RegisterApp(ctx context.Context, in *RegisterAppRequest, opts ...grpc.CallOption) (PrivateMiddlewareService_RegisterAppClient, error) {
-	stream, err := c.cc.NewStream(ctx, &PrivateMiddlewareService_ServiceDesc.Streams[0], PrivateMiddlewareService_RegisterApp_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &privateMiddlewareServiceRegisterAppClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type PrivateMiddlewareService_RegisterAppClient interface {
-	Recv() (*RegisterAppResponse, error)
-	grpc.ClientStream
-}
-
-type privateMiddlewareServiceRegisterAppClient struct {
-	grpc.ClientStream
-}
-
-func (x *privateMiddlewareServiceRegisterAppClient) Recv() (*RegisterAppResponse, error) {
-	m := new(RegisterAppResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 func (c *privateMiddlewareServiceClient) CloseChannel(ctx context.Context, in *CloseChannelRequest, opts ...grpc.CallOption) (*CloseChannelResponse, error) {
@@ -124,8 +89,6 @@ func (c *privateMiddlewareServiceClient) AppRecv(ctx context.Context, in *AppRec
 type PrivateMiddlewareServiceServer interface {
 	// This is used by a requires point to start a new channel with a requirement contract.
 	RegisterChannel(context.Context, *RegisterChannelRequest) (*RegisterChannelResponse, error)
-	// This is used by provider services to register their provision contract with the Registry/Broker.
-	RegisterApp(*RegisterAppRequest, PrivateMiddlewareService_RegisterAppServer) error
 	// This is used by local app (be it a Service Client or a Service Provider) to close a channel.
 	CloseChannel(context.Context, *CloseChannelRequest) (*CloseChannelResponse, error)
 	// This is used by the local app to communicate with other participants in an already
@@ -141,9 +104,6 @@ type UnimplementedPrivateMiddlewareServiceServer struct {
 
 func (UnimplementedPrivateMiddlewareServiceServer) RegisterChannel(context.Context, *RegisterChannelRequest) (*RegisterChannelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterChannel not implemented")
-}
-func (UnimplementedPrivateMiddlewareServiceServer) RegisterApp(*RegisterAppRequest, PrivateMiddlewareService_RegisterAppServer) error {
-	return status.Errorf(codes.Unimplemented, "method RegisterApp not implemented")
 }
 func (UnimplementedPrivateMiddlewareServiceServer) CloseChannel(context.Context, *CloseChannelRequest) (*CloseChannelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CloseChannel not implemented")
@@ -184,27 +144,6 @@ func _PrivateMiddlewareService_RegisterChannel_Handler(srv interface{}, ctx cont
 		return srv.(PrivateMiddlewareServiceServer).RegisterChannel(ctx, req.(*RegisterChannelRequest))
 	}
 	return interceptor(ctx, in, info, handler)
-}
-
-func _PrivateMiddlewareService_RegisterApp_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(RegisterAppRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(PrivateMiddlewareServiceServer).RegisterApp(m, &privateMiddlewareServiceRegisterAppServer{stream})
-}
-
-type PrivateMiddlewareService_RegisterAppServer interface {
-	Send(*RegisterAppResponse) error
-	grpc.ServerStream
-}
-
-type privateMiddlewareServiceRegisterAppServer struct {
-	grpc.ServerStream
-}
-
-func (x *privateMiddlewareServiceRegisterAppServer) Send(m *RegisterAppResponse) error {
-	return x.ServerStream.SendMsg(m)
 }
 
 func _PrivateMiddlewareService_CloseChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -285,13 +224,7 @@ var PrivateMiddlewareService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PrivateMiddlewareService_AppRecv_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "RegisterApp",
-			Handler:       _PrivateMiddlewareService_RegisterApp_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "search/v1/middleware.proto",
 }
 

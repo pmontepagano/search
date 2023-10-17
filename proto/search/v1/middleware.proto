@@ -15,9 +15,6 @@ service PrivateMiddlewareService {
     // This is used by a requires point to start a new channel with a requirement contract.
     rpc RegisterChannel(RegisterChannelRequest) returns(RegisterChannelResponse) {}
 
-    // This is used by provider services to register their provision contract with the Registry/Broker.
-    rpc RegisterApp(RegisterAppRequest) returns (stream RegisterAppResponse) {}
-
     // This is used by local app (be it a Service Client or a Service Provider) to close a channel.
     rpc CloseChannel(CloseChannelRequest) returns (CloseChannelResponse);
     
@@ -49,25 +46,6 @@ message RegisterChannelRequest {
 }
 
 message RegisterChannelResponse {
-    string channel_id = 1;
-}
-
-message RegisterAppRequest {
-    LocalContract provider_contract = 1;
-}
-
-// whenever a new channel that involves this app is started, the middleware needs to notify the local app
-message RegisterAppResponse {
-    oneof ack_or_new {
-        string app_id = 1;
-        InitChannelNotification notification = 2;
-    }
-    // TODO: error codes ?
-}
-
-// this is what a registered app receives whenever a new channel is initiated for that app
-// the app has to communicate with the middleware using UseChannel with this new channel_id
-message InitChannelNotification {
     string channel_id = 1;
 }
 

@@ -1,0 +1,21 @@
+syntax = "proto3";
+package search.v1;
+option go_package = "github.com/pmontepagano/search/gen/go/v1";
+
+
+/* 
+    This service is what a Service Provider needs to implement. This is to be accessed only by its own middleware.
+*/
+service ProviderService {
+    rpc NewChannelNotification(NewChannelNotificationRequest) returns (NewChannelNotificationResponse) {}
+}
+
+
+message NewChannelNotificationRequest {
+    string channel_id = 1;
+}
+
+message NewChannelNotificationResponse {
+    bool success = 1;
+    string error = 2;
+}
