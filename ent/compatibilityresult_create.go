@@ -92,7 +92,7 @@ func (crc *CompatibilityResultCreate) Mutation() *CompatibilityResultMutation {
 // Save creates the CompatibilityResult in the database.
 func (crc *CompatibilityResultCreate) Save(ctx context.Context) (*CompatibilityResult, error) {
 	crc.defaults()
-	return withHooks[*CompatibilityResult, CompatibilityResultMutation](ctx, crc.sqlSave, crc.mutation, crc.hooks)
+	return withHooks(ctx, crc.sqlSave, crc.mutation, crc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -244,11 +244,15 @@ func (crc *CompatibilityResultCreate) createSpec() (*CompatibilityResult, *sqlgr
 // CompatibilityResultCreateBulk is the builder for creating many CompatibilityResult entities in bulk.
 type CompatibilityResultCreateBulk struct {
 	config
+	err      error
 	builders []*CompatibilityResultCreate
 }
 
 // Save creates the CompatibilityResult entities in the database.
 func (crcb *CompatibilityResultCreateBulk) Save(ctx context.Context) ([]*CompatibilityResult, error) {
+	if crcb.err != nil {
+		return nil, crcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(crcb.builders))
 	nodes := make([]*CompatibilityResult, len(crcb.builders))
 	mutators := make([]Mutator, len(crcb.builders))

@@ -96,7 +96,7 @@ func (cru *CompatibilityResultUpdate) ClearProviderContract() *CompatibilityResu
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cru *CompatibilityResultUpdate) Save(ctx context.Context) (int, error) {
 	cru.defaults()
-	return withHooks[int, CompatibilityResultMutation](ctx, cru.sqlSave, cru.mutation, cru.hooks)
+	return withHooks(ctx, cru.sqlSave, cru.mutation, cru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -331,7 +331,7 @@ func (cruo *CompatibilityResultUpdateOne) Select(field string, fields ...string)
 // Save executes the query and returns the updated CompatibilityResult entity.
 func (cruo *CompatibilityResultUpdateOne) Save(ctx context.Context) (*CompatibilityResult, error) {
 	cruo.defaults()
-	return withHooks[*CompatibilityResult, CompatibilityResultMutation](ctx, cruo.sqlSave, cruo.mutation, cruo.hooks)
+	return withHooks(ctx, cruo.sqlSave, cruo.mutation, cruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -90,7 +90,7 @@ func (rpc *RegisteredProviderCreate) Mutation() *RegisteredProviderMutation {
 // Save creates the RegisteredProvider in the database.
 func (rpc *RegisteredProviderCreate) Save(ctx context.Context) (*RegisteredProvider, error) {
 	rpc.defaults()
-	return withHooks[*RegisteredProvider, RegisteredProviderMutation](ctx, rpc.sqlSave, rpc.mutation, rpc.hooks)
+	return withHooks(ctx, rpc.sqlSave, rpc.mutation, rpc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -223,11 +223,15 @@ func (rpc *RegisteredProviderCreate) createSpec() (*RegisteredProvider, *sqlgrap
 // RegisteredProviderCreateBulk is the builder for creating many RegisteredProvider entities in bulk.
 type RegisteredProviderCreateBulk struct {
 	config
+	err      error
 	builders []*RegisteredProviderCreate
 }
 
 // Save creates the RegisteredProvider entities in the database.
 func (rpcb *RegisteredProviderCreateBulk) Save(ctx context.Context) ([]*RegisteredProvider, error) {
+	if rpcb.err != nil {
+		return nil, rpcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(rpcb.builders))
 	nodes := make([]*RegisteredProvider, len(rpcb.builders))
 	mutators := make([]Mutator, len(rpcb.builders))

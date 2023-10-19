@@ -108,7 +108,7 @@ func (rcc *RegisteredContractCreate) Mutation() *RegisteredContractMutation {
 // Save creates the RegisteredContract in the database.
 func (rcc *RegisteredContractCreate) Save(ctx context.Context) (*RegisteredContract, error) {
 	rcc.defaults()
-	return withHooks[*RegisteredContract, RegisteredContractMutation](ctx, rcc.sqlSave, rcc.mutation, rcc.hooks)
+	return withHooks(ctx, rcc.sqlSave, rcc.mutation, rcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -263,11 +263,15 @@ func (rcc *RegisteredContractCreate) createSpec() (*RegisteredContract, *sqlgrap
 // RegisteredContractCreateBulk is the builder for creating many RegisteredContract entities in bulk.
 type RegisteredContractCreateBulk struct {
 	config
+	err      error
 	builders []*RegisteredContractCreate
 }
 
 // Save creates the RegisteredContract entities in the database.
 func (rccb *RegisteredContractCreateBulk) Save(ctx context.Context) ([]*RegisteredContract, error) {
+	if rccb.err != nil {
+		return nil, rccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(rccb.builders))
 	nodes := make([]*RegisteredContract, len(rccb.builders))
 	mutators := make([]Mutator, len(rccb.builders))

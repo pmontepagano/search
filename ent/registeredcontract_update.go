@@ -164,7 +164,7 @@ func (rcu *RegisteredContractUpdate) RemoveCompatibilityResultsAsProvider(c ...*
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (rcu *RegisteredContractUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RegisteredContractMutation](ctx, rcu.sqlSave, rcu.mutation, rcu.hooks)
+	return withHooks(ctx, rcu.sqlSave, rcu.mutation, rcu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -522,7 +522,7 @@ func (rcuo *RegisteredContractUpdateOne) Select(field string, fields ...string) 
 
 // Save executes the query and returns the updated RegisteredContract entity.
 func (rcuo *RegisteredContractUpdateOne) Save(ctx context.Context) (*RegisteredContract, error) {
-	return withHooks[*RegisteredContract, RegisteredContractMutation](ctx, rcuo.sqlSave, rcuo.mutation, rcuo.hooks)
+	return withHooks(ctx, rcuo.sqlSave, rcuo.mutation, rcuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

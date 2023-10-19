@@ -27,7 +27,7 @@ func (crd *CompatibilityResultDelete) Where(ps ...predicate.CompatibilityResult)
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (crd *CompatibilityResultDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, CompatibilityResultMutation](ctx, crd.sqlExec, crd.mutation, crd.hooks)
+	return withHooks(ctx, crd.sqlExec, crd.mutation, crd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

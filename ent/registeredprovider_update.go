@@ -67,7 +67,7 @@ func (rpu *RegisteredProviderUpdate) ClearContract() *RegisteredProviderUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (rpu *RegisteredProviderUpdate) Save(ctx context.Context) (int, error) {
 	rpu.defaults()
-	return withHooks[int, RegisteredProviderMutation](ctx, rpu.sqlSave, rpu.mutation, rpu.hooks)
+	return withHooks(ctx, rpu.sqlSave, rpu.mutation, rpu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -230,7 +230,7 @@ func (rpuo *RegisteredProviderUpdateOne) Select(field string, fields ...string) 
 // Save executes the query and returns the updated RegisteredProvider entity.
 func (rpuo *RegisteredProviderUpdateOne) Save(ctx context.Context) (*RegisteredProvider, error) {
 	rpuo.defaults()
-	return withHooks[*RegisteredProvider, RegisteredProviderMutation](ctx, rpuo.sqlSave, rpuo.mutation, rpuo.hooks)
+	return withHooks(ctx, rpuo.sqlSave, rpuo.mutation, rpuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

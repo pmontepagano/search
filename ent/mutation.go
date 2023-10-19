@@ -384,6 +384,7 @@ func (m *CompatibilityResultMutation) ResetUpdatedAt() {
 // ClearRequirementContract clears the "requirement_contract" edge to the RegisteredContract entity.
 func (m *CompatibilityResultMutation) ClearRequirementContract() {
 	m.clearedrequirement_contract = true
+	m.clearedFields[compatibilityresult.FieldRequirementContractID] = struct{}{}
 }
 
 // RequirementContractCleared reports if the "requirement_contract" edge to the RegisteredContract entity was cleared.
@@ -410,6 +411,7 @@ func (m *CompatibilityResultMutation) ResetRequirementContract() {
 // ClearProviderContract clears the "provider_contract" edge to the RegisteredContract entity.
 func (m *CompatibilityResultMutation) ClearProviderContract() {
 	m.clearedprovider_contract = true
+	m.clearedFields[compatibilityresult.FieldProviderContractID] = struct{}{}
 }
 
 // ProviderContractCleared reports if the "provider_contract" edge to the RegisteredContract entity was cleared.
@@ -1753,6 +1755,7 @@ func (m *RegisteredProviderMutation) ResetUpdatedAt() {
 // ClearContract clears the "contract" edge to the RegisteredContract entity.
 func (m *RegisteredProviderMutation) ClearContract() {
 	m.clearedcontract = true
+	m.clearedFields[registeredprovider.FieldContractID] = struct{}{}
 }
 
 // ContractCleared reports if the "contract" edge to the RegisteredContract entity was cleared.

@@ -27,7 +27,7 @@ func (rcd *RegisteredContractDelete) Where(ps ...predicate.RegisteredContract) *
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rcd *RegisteredContractDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, RegisteredContractMutation](ctx, rcd.sqlExec, rcd.mutation, rcd.hooks)
+	return withHooks(ctx, rcd.sqlExec, rcd.mutation, rcd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
