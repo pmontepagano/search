@@ -15,6 +15,7 @@ import ar.com.montepagano.search.middleware.v1.PrivateMiddlewareServiceGrpc;
 import ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest;
 import ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse;
 import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract;
+import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat;
 
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
@@ -71,7 +72,8 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        GlobalContract contract = GlobalContract.newBuilder().setContract(contractBytes).build();
+        GlobalContract contract = GlobalContract.newBuilder().setContract(contractBytes).setFormat(
+                GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_FSA).setInitiatorName("ClientApp").build();
 
         // Register channel with middleware
         ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:1234").usePlaintext().build();
