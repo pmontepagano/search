@@ -11,12 +11,15 @@ plugins:
     opt: paths=source_relative
 
   # Python
-  - plugin: buf.build/protocolbuffers/python
-    out: gen/python
-  - plugin: buf.build/grpc/python
-    out: gen/python
-  # - plugin: buf.build/community/danielgtaylor-betterproto:2.0.0b6
+  # - plugin: buf.build/protocolbuffers/python
   #   out: gen/python
+  # - plugin: buf.build/grpc/python
+  #   out: gen/python
+  
+  # We use local plugin for Python, since we're using an unreleased version.
+  # Install the protoc plugin by running pip install -r requirements.txt
+  - plugin: python_betterproto
+    out: gen/python
 
   # Java
   - plugin: buf.build/grpc/java:v1.58.0

@@ -3,22 +3,20 @@ package ar.com.montepagano.search.examples.creditcardpayments;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Scanner;
+
+import ar.com.montepagano.search.middleware.v1.Middleware;
+import org.json.JSONObject;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import java.util.Scanner;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.io.FileInputStream;
 import com.google.protobuf.ByteString;
 import ar.com.montepagano.search.middleware.v1.PrivateMiddlewareServiceGrpc;
 import ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest;
 import ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse;
+import ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest;
+import ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage;
 import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract;
 import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat;
 
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
 public class Main {
     public static void main(String[] args) {
         System.out.println( "Hello World!" );
@@ -65,7 +63,7 @@ public class Main {
         }
         System.out.println("Shipping Address: " + shippingAddress);
 
-        // Load file contract.fsa into a ByteString variable
+        // Load file contract.fsa into a GlobalContract
         ByteString contractBytes = null;
         try {
             contractBytes = ByteString.readFrom(new FileInputStream("./contract.fsa"));
@@ -75,11 +73,24 @@ public class Main {
         GlobalContract contract = GlobalContract.newBuilder().setContract(contractBytes).setFormat(
                 GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_FSA).setInitiatorName("ClientApp").build();
 
-        // Register channel with middleware
+        // Register channel with middleware using GlobalContract
         ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:1234").usePlaintext().build();
         PrivateMiddlewareServiceGrpc.PrivateMiddlewareServiceBlockingStub stub = PrivateMiddlewareServiceGrpc.newBlockingStub(channel);
         RegisterChannelRequest request = RegisterChannelRequest.newBuilder().setRequirementsContract(contract).build();
         RegisterChannelResponse response = stub.registerChannel(request);
+        var channelId = response.getChannelId();
+
+        // Send PurchaseRequest with each item quantities and the shipping address
+        var body = ByteString.copyFromUtf8("{}");
+        var msg = AppMessage.newBuilder().setType("PurchaseRequest").setBody(body).build();
+        var sendreq = AppSendRequest.newBuilder().setChannelId(channelId).setRecipient("Srv").setMessage(msg).build();
+        var sendresp = stub.appSend(sendreq);
+        if (sendresp.getResult() != Middleware.AppSendResponse.Result.RESULT_OK) {
+            System.out.println("Error sending PurchaseRequest. Exiting...");
+            System.exit(1);
+        }
+
+
         channel.shutdown();
     }
 }
