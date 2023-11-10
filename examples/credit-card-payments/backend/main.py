@@ -21,7 +21,7 @@ q6 ClientApp ! PurchaseFail q8
 
 
 async def main():
-    grpc_channel = Channel(host='127.0.0.1', port=50051)
+    grpc_channel = Channel(host='middleware-backend', port=11000)
     stub = search.PrivateMiddlewareServiceStub(grpc_channel)
     registered = False
     async for r in stub.register_app(search.RegisterAppRequest(

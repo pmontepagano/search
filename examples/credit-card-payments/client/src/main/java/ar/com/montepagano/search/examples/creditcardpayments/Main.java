@@ -16,10 +16,10 @@ import ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendReque
 import ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage;
 import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract;
 import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat;
+import ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println( "Hello World!" );
         Scanner scanner = new Scanner(System.in);
 
         // List of book titles
@@ -58,8 +58,8 @@ public class Main {
         // Print purchase information
         System.out.println("Purchase Information:");
         System.out.println("Selected Books:");
-        for (int i = 0; i < selectedBooks.length; i++) {
-            System.out.println("- " + bookTitles[selectedBooks[i] - 1]);
+        for (int selectedBook : selectedBooks) {
+            System.out.println("- " + bookTitles[selectedBook - 1]);
         }
         System.out.println("Shipping Address: " + shippingAddress);
 
@@ -73,10 +73,15 @@ public class Main {
         GlobalContract contract = GlobalContract.newBuilder().setContract(contractBytes).setFormat(
                 GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_FSA).setInitiatorName("ClientApp").build();
 
-        // Register channel with middleware using GlobalContract
-        ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:1234").usePlaintext().build();
+        // Get the stub to communicate with the middleware
+        ManagedChannel channel = ManagedChannelBuilder.forTarget("middleware-client:11000").usePlaintext().build();
         PrivateMiddlewareServiceGrpc.PrivateMiddlewareServiceBlockingStub stub = PrivateMiddlewareServiceGrpc.newBlockingStub(channel);
-        RegisterChannelRequest request = RegisterChannelRequest.newBuilder().setRequirementsContract(contract).build();
+
+        // Register channel with middleware using GlobalContract.
+        // Add preset participants to the RegisterChannelRequest. We do this because we don't have an algorithm for compatibility checking in the broker.
+        RemoteParticipant pps = RemoteParticipant.newBuilder().setUrl("middleware-payments:10000").setAppId("PPS").build();
+        RemoteParticipant srv = RemoteParticipant.newBuilder().setUrl("middleware-backend:10000").setAppId("Srv").build();
+        RegisterChannelRequest request = RegisterChannelRequest.newBuilder().setRequirementsContract(contract).putPresetParticipants("PPS", pps).putPresetParticipants("Srv", srv).build();
         RegisterChannelResponse response = stub.registerChannel(request);
         var channelId = response.getChannelId();
 

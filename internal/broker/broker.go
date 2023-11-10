@@ -63,7 +63,7 @@ func getContract(c *ent.RegisteredContract) (contract.LocalContract, error) {
 
 type ContractCompatibilityFunc func(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error)
 
-func computeCompatibility(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+func allContractsIncompatible(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
 	return false, nil, nil
 }
 
@@ -641,7 +641,7 @@ func NewBrokerServer(databasePath string) *brokerServer {
 	s := &brokerServer{}
 
 	s.dbClient = setUpDB(databasePath)
-	s.compatFunc = computeCompatibility
+	s.compatFunc = allContractsIncompatible
 	s.compatChecksWaitGroup = conc.NewWaitGroup()
 
 	s.logger = log.New(os.Stderr, "[BROKER] - ", log.LstdFlags|log.Lmsgprefix)

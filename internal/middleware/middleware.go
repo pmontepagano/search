@@ -640,13 +640,16 @@ func (c *SEARCHChannel) startSenderRoutines() {
 }
 
 // StartServer starts gRPC middleware server
-func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicAddr string, privateAddr string, tls bool, certFile string, keyFile string, notifyListening chan string) {
+func (s *MiddlewareServer) StartMiddlewareServer(wg *sync.WaitGroup, publicURL string, publicAddr string, privateAddr string, tls bool, certFile string, keyFile string, notifyListening chan string) {
 	lisPub, err := net.Listen("tcp", publicAddr)
 	if err != nil {
 		s.logger.Fatalf("failed to listen on public interface: %v", err)
 	}
-	// TODO: add publicURL parameter to this function so that we can have a DNS name for the public interface. This is what gets sent to the broker!
-	s.PublicURL = fmt.Sprintf("dns:%s", lisPub.Addr().String())
+	if publicURL == "" {
+		s.PublicURL = fmt.Sprintf("dns:%s", lisPub.Addr().String())
+	} else {
+		s.PublicURL = publicURL
+	}
 	s.logger = log.New(os.Stderr, fmt.Sprintf("[MIDDLEWARE] %s - ", s.PublicURL), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 
 	lisPriv, err := net.Listen("tcp", privateAddr)
