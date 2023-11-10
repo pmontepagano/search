@@ -66,7 +66,7 @@ public class Main {
         // Load file contract.fsa into a GlobalContract
         ByteString contractBytes = null;
         try {
-            contractBytes = ByteString.readFrom(new FileInputStream("./contract.fsa"));
+            contractBytes = ByteString.readFrom(new FileInputStream("contract.fsa"));
         } catch (IOException e) {
             e.printStackTrace();
         }

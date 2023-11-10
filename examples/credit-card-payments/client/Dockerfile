@@ -21,6 +21,7 @@ FROM eclipse-temurin:21-alpine
 # Set the working directory to /app
 WORKDIR /app
 
+COPY examples/credit-card-payments/contract.fsa .
 # Copy the compiled JAR file from the build container to the runtime container
 COPY --from=build /app/target/clientapp-1.0-SNAPSHOT-jar-with-dependencies.jar ./clientapp.jar
 

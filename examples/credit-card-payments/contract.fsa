@@ -1,0 +1,34 @@
+.outputs ClientApp
+.state graph
+q0 Srv ! PurchaseRequest q1
+q1 Srv ? TotalAmount q2
+q2 PPS ! CardDetailsWithTotalAmount q3
+q3 PPS ? PaymentNonce q4
+q4 Srv ! PurchaseWithPaymentNonce q5
+q5 Srv ? PurchaseOK q6
+q5 Srv ? PurchaseFail q7
+.marking q0
+.end
+
+.outputs Srv
+.state graph
+q0 ClientApp ? PurchaseRequest q1
+q1 ClientApp ! TotalAmount q2
+q2 ClientApp ? PurchaseWithPaymentNonce q3
+q3 PPS ! RequestChargeWithNonce q4
+q4 PPS ? ChargeOK q5
+q4 PPS ? ChargeFail q6
+q5 ClientApp ! PurchaseOK q7
+q6 ClientApp ! PurchaseFail q8
+.marking q0
+.end
+
+.outputs PPS
+.state graph
+q0 ClientApp ? CardDetailsWithTotalAmount q1
+q1 ClientApp ! PaymentNonce q2
+q2 Srv ? RequestChargeWithNonce q3
+q3 Srv ! ChargeOK q4
+q3 Srv ! ChargeFail q5
+.marking q0
+.end
