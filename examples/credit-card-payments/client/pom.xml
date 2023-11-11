@@ -41,10 +41,12 @@
             <version>6.0.53</version>
             <scope>provided</scope>
         </dependency>
+        <!--  Gson: Java to JSON conversion -->
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20231013</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>

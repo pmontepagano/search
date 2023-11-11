@@ -1,2 +1,3 @@
 grpclib[protobuf]==0.4.7rc1
 betterproto>=2.0.0b6
+simplejson

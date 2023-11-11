@@ -2,10 +2,12 @@ package ar.com.montepagano.search.examples.creditcardpayments;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import ar.com.montepagano.search.middleware.v1.Middleware;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import com.google.protobuf.ByteString;
@@ -103,7 +105,17 @@ public class Main {
         var channelId = response.getChannelId();
 
         // Send PurchaseRequest with each item quantities and the shipping address
-        var body = ByteString.copyFromUtf8("{}");
+        Map<String, Integer> items = new HashMap<>();
+        for (int selectedBook : selectedBooks) {
+            String bookTitle = bookTitles[selectedBook - 1];
+            if (items.containsKey(bookTitle)) {
+                items.put(bookTitle, items.get(bookTitle) + 1);
+            } else {
+                items.put(bookTitle, 1);
+            }
+        }
+        Gson gson = new Gson();
+        var body = ByteString.copyFromUtf8(String.format("{\"items\": %s, \"shippingAddress\": \"%s\"}", gson.toJson(items), shippingAddress));
         var msg = AppMessage.newBuilder().setType("PurchaseRequest").setBody(body).build();
         var sendreq = AppSendRequest.newBuilder().setChannelId(channelId).setRecipient("Srv").setMessage(msg).build();
         var sendresp = stub.appSend(sendreq);
@@ -112,6 +124,65 @@ public class Main {
             System.exit(1);
         }
 
+        // Receive TotalAmount from Srv
+        var recvreq = Middleware.AppRecvRequest.newBuilder().setChannelId(channelId).setParticipant("Srv").build();
+        var recvresp = stub.appRecv(recvreq);
+        if (!recvresp.getMessage().getType().equals("TotalAmount")) {
+            System.out.println("Error receiving TotalAmount. Exiting...");
+            System.exit(1);
+        }
+        var total_amount = gson.fromJson(recvresp.getMessage().getBody().toStringUtf8(), double.class);
+        System.out.println("Total amount: " + total_amount);
+
+        // Ask the user for the credit card details.
+        System.out.print("Enter the credit card number: ");
+        String cardNumber = scanner.nextLine();
+        System.out.print("Enter the credit card expiration date: ");
+        String cardExpirationDate = scanner.nextLine();
+        System.out.print("Enter the credit card security code: ");
+        String cardSecurityCode = scanner.nextLine();
+
+        // Send CardDetailsWithTotalAmount to PPS.
+        body = ByteString.copyFromUtf8(String.format("{\"card_number\": \"%s\", \"card_expirationDate\": \"%s\", \"card_cvv\": \"%s\", \"total_amount\": %s}", cardNumber, cardExpirationDate, cardSecurityCode, total_amount));
+        msg = AppMessage.newBuilder().setType("CardDetailsWithTotalAmount").setBody(body).build();
+        sendreq = AppSendRequest.newBuilder().setChannelId(channelId).setRecipient("PPS").setMessage(msg).build();
+        sendresp = stub.appSend(sendreq);
+        if (sendresp.getResult() != Middleware.AppSendResponse.Result.RESULT_OK) {
+            System.out.println("Error sending CardDetailsWithTotalAmount. Exiting...");
+            System.exit(1);
+        }
+
+        // Receive PaymentNonce from PPS.
+        recvreq = Middleware.AppRecvRequest.newBuilder().setChannelId(channelId).setParticipant("PPS").build();
+        recvresp = stub.appRecv(recvreq);
+        if (!recvresp.getMessage().getType().equals("PaymentNonce")) {
+            System.out.println("Error receiving PaymentNonce. Exiting...");
+            System.exit(1);
+        }
+        var payment_nonce = gson.fromJson(recvresp.getMessage().getBody().toStringUtf8(), String.class);
+        System.out.println("Payment nonce: " + payment_nonce);
+
+        // Send PurchaseWithPaymentNonce to Srv.
+        body = ByteString.copyFromUtf8(String.format("{\"items\": %s, \"shippingAddress\": \"%s\", \"nonce\": \"%s\"}", gson.toJson(items), shippingAddress, payment_nonce));
+        msg = AppMessage.newBuilder().setType("PurchaseWithPaymentNonce").setBody(body).build();
+        sendreq = AppSendRequest.newBuilder().setChannelId(channelId).setRecipient("Srv").setMessage(msg).build();
+        sendresp = stub.appSend(sendreq);
+        if (sendresp.getResult() != Middleware.AppSendResponse.Result.RESULT_OK) {
+            System.out.println("Error sending PurchaseWithPaymentNonce. Exiting...");
+            System.exit(1);
+        }
+
+        // Receive either PurchaseOK or PurchaseFail from Srv
+        recvreq = Middleware.AppRecvRequest.newBuilder().setChannelId(channelId).setParticipant("Srv").build();
+        recvresp = stub.appRecv(recvreq);
+        if (recvresp.getMessage().getType().equals("PurchaseOK")) {
+            System.out.println("Purchase successful!");
+        } else if (recvresp.getMessage().getType().equals("PurchaseFail")) {
+            System.out.println("Purchase failed!");
+        } else {
+            System.out.println("Error receiving PurchaseOK or PurchaseFail. Exiting...");
+            System.exit(1);
+        }
 
         channel.shutdown();
     }

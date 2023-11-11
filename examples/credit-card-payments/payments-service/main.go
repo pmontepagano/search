@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -107,53 +107,122 @@ func main() {
 			logger.Printf("Received Notification. ChannelID: %s", channelID)
 			go func(channelID string, client pb.PrivateMiddlewareServiceClient) {
 				// This is the actual program for PPS (the part that implements the contract).
-				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				ctx, cancel := context.WithCancel(context.Background())
 				defer cancel()
 
-				for loop := true; loop; {
-					// Receive ping, finished or bye request.
-					logger.Print("Waiting for ping/bye/finished...")
-					recvResponse, err := client.AppRecv(ctx, &pb.AppRecvRequest{
-						ChannelId:   channelID,
-						Participant: "Other",
+				// Receive CardDetailsWithTotalAmount from ClientApp.
+				logger.Print("Waiting for CardDetailsWithTotalAmount...")
+				recvResponse, err := client.AppRecv(ctx, &pb.AppRecvRequest{
+					ChannelId:   channelID,
+					Participant: "ClientApp",
+				})
+				if err != nil {
+					logger.Fatal("Failed to receive CardDetailsWithTotalAmount from ClientApp.")
+				}
+				if recvResponse.Message.Type != "CardDetailsWithTotalAmount" {
+					logger.Fatalf("Received invalid message of type %v", recvResponse.Message.Type)
+				}
+				// We don't validate the card details or the amount, this is just a demo.
+				type CardDetailsWithTotalAmount struct {
+					CardNumber         string  `json:"card_number"`
+					CardExpirationDate string  `json:"card_expirationdate"`
+					CardCVV            string  `json:"card_cvv"`
+					TotalAmount        float64 `json:"total_amount"`
+				}
+				var cardDetails CardDetailsWithTotalAmount
+				err = json.Unmarshal(recvResponse.Message.Body, &cardDetails)
+				if err != nil {
+					logger.Fatalf("Error unmarshalling CardDetailsWithTotalAmount: %v", err)
+				}
+				logger.Printf("Received CardDetailsWithTotalAmount: %v", cardDetails)
+
+				// Send PaymentNonce to ClientApp.
+				logger.Print("Sending PaymentNonce to ClientApp...")
+				sendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
+					ChannelId: channelID,
+					Recipient: "ClientApp",
+					Message: &pb.AppMessage{
+						Type: "PaymentNonce",
+						Body: []byte("1234567890"),
+					},
+				})
+				if err != nil {
+					logger.Fatal("Failed to send PaymentNonce to ClientApp.")
+				}
+				if sendResponse.Result != pb.AppSendResponse_RESULT_OK {
+					logger.Fatalf("Failed to send PaymentNonce to ClientApp. Result: %v", sendResponse.Result)
+				}
+
+				// Receive RequestChargeWithNonce from Srv.
+				logger.Print("Waiting for RequestChargeWithNonce...")
+				recvResponse, err = client.AppRecv(ctx, &pb.AppRecvRequest{
+					ChannelId:   channelID,
+					Participant: "Srv",
+				})
+				if err != nil {
+					logger.Fatal("Failed to receive RequestChargeWithNonce from Srv.")
+				}
+				if recvResponse.Message.Type != "RequestChargeWithNonce" {
+					logger.Fatalf("Received invalid message of type %v", recvResponse.Message.Type)
+				}
+				type RequestChargeWithNonce struct {
+					Nonce  string  `json:"nonce"`
+					Amount float64 `json:"amount"`
+				}
+				var requestCharge RequestChargeWithNonce
+				err = json.Unmarshal(recvResponse.Message.Body, &requestCharge)
+				if err != nil {
+					logger.Fatalf("Error unmarshalling RequestChargeWithNonce: %v", err)
+				}
+				logger.Printf("Received RequestChargeWithNonce: %v", requestCharge)
+				approvePurchase := true
+				reasonForRejection := ""
+				if requestCharge.Nonce != "1234567890" {
+					logger.Fatalf("Received invalid nonce: %v", requestCharge.Nonce)
+					approvePurchase = false
+					reasonForRejection = "Invalid nonce"
+				}
+				if requestCharge.Amount != cardDetails.TotalAmount {
+					logger.Fatalf("Received invalid amount: %v", requestCharge.Amount)
+					approvePurchase = false
+					reasonForRejection = "Invalid amount"
+				}
+
+				// Send ChargeOK or ChargeFail to Srv.
+				if approvePurchase {
+					logger.Print("Sending ChargeOK to Srv...")
+					sendResponse, err = client.AppSend(ctx, &pb.AppSendRequest{
+						ChannelId: channelID,
+						Recipient: "Srv",
+						Message: &pb.AppMessage{
+							Type: "ChargeOK",
+							Body: []byte(""),
+						},
 					})
 					if err != nil {
-						logger.Fatal("Failed to receive ping/bye/finished from Other.")
+						logger.Fatal("Failed to send ChargeOK to Srv.")
 					}
-					switch recvResponse.Message.Type {
-					case "ping":
-						// Send back pong response.
-						sendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
-							ChannelId: channelID,
-							Recipient: "Other",
-							Message: &pb.AppMessage{
-								Body: recvResponse.Message.Body,
-								Type: "pong",
-							},
-						})
-						if err != nil || sendResponse.Result != pb.AppSendResponse_RESULT_OK {
-							logger.Fatal("Failed to AppSend")
-						}
-					case "bye":
-						// Send back bye response and break out of the loop.
-						sendResponse, err := client.AppSend(ctx, &pb.AppSendRequest{
-							ChannelId: channelID,
-							Recipient: "Other",
-							Message: &pb.AppMessage{
-								Type: "bye",
-								Body: []byte("exiting..."),
-							},
-						})
-						if err != nil || sendResponse.Result != pb.AppSendResponse_RESULT_OK {
-							logger.Fatal("Failed to AppSend")
-						}
-						loop = false
-					case "finished":
-						loop = false
-					default:
-						logger.Fatalf("Received invalid message of type %v", recvResponse.Message.Type)
+					if sendResponse.Result != pb.AppSendResponse_RESULT_OK {
+						logger.Fatalf("Failed to send ChargeOK to Srv. Result: %v", sendResponse.Result)
+					}
+				} else {
+					logger.Print("Sending ChargeFail to Srv...")
+					sendResponse, err = client.AppSend(ctx, &pb.AppSendRequest{
+						ChannelId: channelID,
+						Recipient: "Srv",
+						Message: &pb.AppMessage{
+							Type: "ChargeFail",
+							Body: []byte(reasonForRejection),
+						},
+					})
+					if err != nil {
+						logger.Fatal("Failed to send ChargeFail to Srv.")
+					}
+					if sendResponse.Result != pb.AppSendResponse_RESULT_OK {
+						logger.Fatalf("Failed to send ChargeFail to Srv. Result: %v", sendResponse.Result)
 					}
 				}
+				logger.Printf("Finished PPS program for channel %s", channelID)
 
 			}(channelID, client)
 		}
