@@ -20,14 +20,16 @@ services:
     depends_on:
       - middleware-client
       - backend
-      # - payments-service
+      - payments-service
 
-  # payments-service:
-  #   build: ./payments-service
-  #   networks:
-  #     - payments_network
-  #   depends_on:
-  #     - middleware-payments
+  payments-service:
+    build:
+      context: ../../
+      dockerfile: ./examples/credit-card-payments/payments-service/Dockerfile
+    networks:
+      - payments_network
+    depends_on:
+      - middleware-payments
 
   broker:
     build: ../../

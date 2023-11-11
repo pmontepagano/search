@@ -1,6 +1,7 @@
 
 # Use Python 3.12 as base image
 FROM python:3.12
+ENV PYTHONUNBUFFERED=1
 
 # Set working directory to /app
 WORKDIR /app
