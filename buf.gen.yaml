@@ -28,5 +28,9 @@ plugins:
     out: gen/java
 
   # Typescript
-  - plugin: buf.build/bufbuild/es:v1.3.3
+  - plugin: buf.build/bufbuild/es:v1.4.2
+    opt: target=ts
+    out: gen/ts
+  - plugin: buf.build/connectrpc/es:v1.1.3
+    opt: target=ts
     out: gen/ts

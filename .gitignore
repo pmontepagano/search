@@ -15,3 +15,5 @@ __pycache__/
 # Binaries
 /broker
 /middleware
+
+node_modules
