@@ -2,7 +2,7 @@
 // source: search/v1/app_message.proto
 
 // Protobuf Java Version: 3.25.0
-package ar.com.montepagano.search.appmessage.v1;
+package ar.com.montepagano.search.v1;
 
 public final class AppMessageOuterClass {
   private AppMessageOuterClass() {}
@@ -90,11 +90,11 @@ public final class AppMessageOuterClass {
      * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
      * @return The content.
      */
-    ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getContent();
+    ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getContent();
     /**
      * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
      */
-    ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getContentOrBuilder();
+    ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getContentOrBuilder();
   }
   /**
    * <pre>
@@ -127,15 +127,15 @@ public final class AppMessageOuterClass {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_descriptor;
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_fieldAccessorTable
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.Builder.class);
+              ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest.class, ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest.Builder.class);
     }
 
     private int bitField0_;
@@ -283,7 +283,7 @@ public final class AppMessageOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 4;
-    private ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage content_;
+    private ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage content_;
     /**
      * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
      * @return Whether the content field is set.
@@ -297,15 +297,15 @@ public final class AppMessageOuterClass {
      * @return The content.
      */
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getContent() {
-      return content_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getContent() {
+      return content_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
     }
     /**
      * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
      */
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getContentOrBuilder() {
-      return content_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getContentOrBuilder() {
+      return content_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -366,10 +366,10 @@ public final class AppMessageOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest other = (ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest) obj;
+      ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest other = (ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest) obj;
 
       if (!getChannelId()
           .equals(other.getChannelId())) return false;
@@ -408,44 +408,44 @@ public final class AppMessageOuterClass {
       return hash;
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -453,26 +453,26 @@ public final class AppMessageOuterClass {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -485,7 +485,7 @@ public final class AppMessageOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -510,21 +510,21 @@ public final class AppMessageOuterClass {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.MessageExchangeRequest)
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequestOrBuilder {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_fieldAccessorTable
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.Builder.class);
+                ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest.class, ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -558,17 +558,17 @@ public final class AppMessageOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_MessageExchangeRequest_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest getDefaultInstanceForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.getDefaultInstance();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest build() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest result = buildPartial();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest build() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -576,14 +576,14 @@ public final class AppMessageOuterClass {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest buildPartial() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest result = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest(this);
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest buildPartial() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest result = new ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.channelId_ = channelId_;
@@ -638,16 +638,16 @@ public final class AppMessageOuterClass {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest) {
-          return mergeFrom((ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest)other);
+        if (other instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest) {
+          return mergeFrom((ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest other) {
-        if (other == ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest other) {
+        if (other == ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest.getDefaultInstance()) return this;
         if (!other.getChannelId().isEmpty()) {
           channelId_ = other.channelId_;
           bitField0_ |= 0x00000001;
@@ -1012,9 +1012,9 @@ public final class AppMessageOuterClass {
         return this;
       }
 
-      private ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage content_;
+      private ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage content_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder> contentBuilder_;
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder> contentBuilder_;
       /**
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        * @return Whether the content field is set.
@@ -1026,9 +1026,9 @@ public final class AppMessageOuterClass {
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        * @return The content.
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getContent() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getContent() {
         if (contentBuilder_ == null) {
-          return content_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
+          return content_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
         } else {
           return contentBuilder_.getMessage();
         }
@@ -1036,7 +1036,7 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        */
-      public Builder setContent(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage value) {
+      public Builder setContent(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage value) {
         if (contentBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1053,7 +1053,7 @@ public final class AppMessageOuterClass {
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        */
       public Builder setContent(
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder builderForValue) {
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder builderForValue) {
         if (contentBuilder_ == null) {
           content_ = builderForValue.build();
         } else {
@@ -1066,11 +1066,11 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        */
-      public Builder mergeContent(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage value) {
+      public Builder mergeContent(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage value) {
         if (contentBuilder_ == null) {
           if (((bitField0_ & 0x00000008) != 0) &&
             content_ != null &&
-            content_ != ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) {
+            content_ != ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) {
             getContentBuilder().mergeFrom(value);
           } else {
             content_ = value;
@@ -1100,7 +1100,7 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder getContentBuilder() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder getContentBuilder() {
         bitField0_ |= 0x00000008;
         onChanged();
         return getContentFieldBuilder().getBuilder();
@@ -1108,23 +1108,23 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getContentOrBuilder() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getContentOrBuilder() {
         if (contentBuilder_ != null) {
           return contentBuilder_.getMessageOrBuilder();
         } else {
           return content_ == null ?
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : content_;
         }
       }
       /**
        * <code>.search.v1.AppMessage content = 4 [json_name = "content"];</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder> 
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder> 
           getContentFieldBuilder() {
         if (contentBuilder_ == null) {
           contentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder>(
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder>(
                   getContent(),
                   getParentForChildren(),
                   isClean());
@@ -1149,12 +1149,12 @@ public final class AppMessageOuterClass {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.MessageExchangeRequest)
-    private static final ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest();
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1190,7 +1190,7 @@ public final class AppMessageOuterClass {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.MessageExchangeRequest getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.MessageExchangeRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1241,11 +1241,11 @@ public final class AppMessageOuterClass {
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      * @return The message.
      */
-    ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getMessage();
+    ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getMessage();
     /**
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      */
-    ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder();
+    ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder();
   }
   /**
    * <pre>
@@ -1277,15 +1277,15 @@ public final class AppMessageOuterClass {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_descriptor;
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_fieldAccessorTable
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.Builder.class);
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest.class, ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest.Builder.class);
     }
 
     private int bitField0_;
@@ -1376,7 +1376,7 @@ public final class AppMessageOuterClass {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 3;
-    private ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage message_;
+    private ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage message_;
     /**
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      * @return Whether the message field is set.
@@ -1390,15 +1390,15 @@ public final class AppMessageOuterClass {
      * @return The message.
      */
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getMessage() {
-      return message_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getMessage() {
+      return message_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
     }
     /**
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      */
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
-      return message_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
+      return message_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1453,10 +1453,10 @@ public final class AppMessageOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest other = (ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest) obj;
+      ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest other = (ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest) obj;
 
       if (!getChannelId()
           .equals(other.getChannelId())) return false;
@@ -1491,44 +1491,44 @@ public final class AppMessageOuterClass {
       return hash;
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1536,26 +1536,26 @@ public final class AppMessageOuterClass {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1568,7 +1568,7 @@ public final class AppMessageOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1593,21 +1593,21 @@ public final class AppMessageOuterClass {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.AppSendRequest)
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequestOrBuilder {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_fieldAccessorTable
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.Builder.class);
+                ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest.class, ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1640,17 +1640,17 @@ public final class AppMessageOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppSendRequest_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest getDefaultInstanceForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.getDefaultInstance();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest build() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest result = buildPartial();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest build() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1658,14 +1658,14 @@ public final class AppMessageOuterClass {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest buildPartial() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest result = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest(this);
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest buildPartial() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest result = new ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.channelId_ = channelId_;
@@ -1717,16 +1717,16 @@ public final class AppMessageOuterClass {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest) {
-          return mergeFrom((ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest)other);
+        if (other instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest) {
+          return mergeFrom((ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest other) {
-        if (other == ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest other) {
+        if (other == ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest.getDefaultInstance()) return this;
         if (!other.getChannelId().isEmpty()) {
           channelId_ = other.channelId_;
           bitField0_ |= 0x00000001;
@@ -1964,9 +1964,9 @@ public final class AppMessageOuterClass {
         return this;
       }
 
-      private ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage message_;
+      private ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage message_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder> messageBuilder_;
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder> messageBuilder_;
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        * @return Whether the message field is set.
@@ -1978,9 +1978,9 @@ public final class AppMessageOuterClass {
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        * @return The message.
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getMessage() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getMessage() {
         if (messageBuilder_ == null) {
-          return message_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+          return message_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
         } else {
           return messageBuilder_.getMessage();
         }
@@ -1988,7 +1988,7 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public Builder setMessage(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage value) {
+      public Builder setMessage(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage value) {
         if (messageBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2005,7 +2005,7 @@ public final class AppMessageOuterClass {
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
       public Builder setMessage(
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder builderForValue) {
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder builderForValue) {
         if (messageBuilder_ == null) {
           message_ = builderForValue.build();
         } else {
@@ -2018,11 +2018,11 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public Builder mergeMessage(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage value) {
+      public Builder mergeMessage(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage value) {
         if (messageBuilder_ == null) {
           if (((bitField0_ & 0x00000004) != 0) &&
             message_ != null &&
-            message_ != ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) {
+            message_ != ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) {
             getMessageBuilder().mergeFrom(value);
           } else {
             message_ = value;
@@ -2052,7 +2052,7 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder getMessageBuilder() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder getMessageBuilder() {
         bitField0_ |= 0x00000004;
         onChanged();
         return getMessageFieldBuilder().getBuilder();
@@ -2060,23 +2060,23 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
         if (messageBuilder_ != null) {
           return messageBuilder_.getMessageOrBuilder();
         } else {
           return message_ == null ?
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
         }
       }
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder> 
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder> 
           getMessageFieldBuilder() {
         if (messageBuilder_ == null) {
           messageBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder>(
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder>(
                   getMessage(),
                   getParentForChildren(),
                   isClean());
@@ -2101,12 +2101,12 @@ public final class AppMessageOuterClass {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.AppSendRequest)
-    private static final ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest();
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2142,7 +2142,7 @@ public final class AppMessageOuterClass {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2193,11 +2193,11 @@ public final class AppMessageOuterClass {
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      * @return The message.
      */
-    ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getMessage();
+    ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getMessage();
     /**
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      */
-    ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder();
+    ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder();
   }
   /**
    * <pre>
@@ -2229,15 +2229,15 @@ public final class AppMessageOuterClass {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_descriptor;
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_fieldAccessorTable
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.Builder.class);
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse.class, ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse.Builder.class);
     }
 
     private int bitField0_;
@@ -2328,7 +2328,7 @@ public final class AppMessageOuterClass {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 3;
-    private ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage message_;
+    private ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage message_;
     /**
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      * @return Whether the message field is set.
@@ -2342,15 +2342,15 @@ public final class AppMessageOuterClass {
      * @return The message.
      */
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getMessage() {
-      return message_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getMessage() {
+      return message_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
     }
     /**
      * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
      */
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
-      return message_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
+      return message_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2405,10 +2405,10 @@ public final class AppMessageOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse other = (ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse) obj;
+      ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse other = (ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse) obj;
 
       if (!getChannelId()
           .equals(other.getChannelId())) return false;
@@ -2443,44 +2443,44 @@ public final class AppMessageOuterClass {
       return hash;
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2488,26 +2488,26 @@ public final class AppMessageOuterClass {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2520,7 +2520,7 @@ public final class AppMessageOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -2545,21 +2545,21 @@ public final class AppMessageOuterClass {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.AppRecvResponse)
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponseOrBuilder {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_fieldAccessorTable
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.Builder.class);
+                ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse.class, ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -2592,17 +2592,17 @@ public final class AppMessageOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppRecvResponse_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse getDefaultInstanceForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.getDefaultInstance();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse build() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse result = buildPartial();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse build() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -2610,14 +2610,14 @@ public final class AppMessageOuterClass {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse buildPartial() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse result = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse(this);
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse buildPartial() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse result = new ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.channelId_ = channelId_;
@@ -2669,16 +2669,16 @@ public final class AppMessageOuterClass {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse) {
-          return mergeFrom((ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse)other);
+        if (other instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse) {
+          return mergeFrom((ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse other) {
-        if (other == ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse other) {
+        if (other == ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse.getDefaultInstance()) return this;
         if (!other.getChannelId().isEmpty()) {
           channelId_ = other.channelId_;
           bitField0_ |= 0x00000001;
@@ -2916,9 +2916,9 @@ public final class AppMessageOuterClass {
         return this;
       }
 
-      private ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage message_;
+      private ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage message_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder> messageBuilder_;
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder> messageBuilder_;
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        * @return Whether the message field is set.
@@ -2930,9 +2930,9 @@ public final class AppMessageOuterClass {
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        * @return The message.
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getMessage() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getMessage() {
         if (messageBuilder_ == null) {
-          return message_ == null ? ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+          return message_ == null ? ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
         } else {
           return messageBuilder_.getMessage();
         }
@@ -2940,7 +2940,7 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public Builder setMessage(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage value) {
+      public Builder setMessage(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage value) {
         if (messageBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2957,7 +2957,7 @@ public final class AppMessageOuterClass {
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
       public Builder setMessage(
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder builderForValue) {
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder builderForValue) {
         if (messageBuilder_ == null) {
           message_ = builderForValue.build();
         } else {
@@ -2970,11 +2970,11 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public Builder mergeMessage(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage value) {
+      public Builder mergeMessage(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage value) {
         if (messageBuilder_ == null) {
           if (((bitField0_ & 0x00000004) != 0) &&
             message_ != null &&
-            message_ != ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) {
+            message_ != ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) {
             getMessageBuilder().mergeFrom(value);
           } else {
             message_ = value;
@@ -3004,7 +3004,7 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder getMessageBuilder() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder getMessageBuilder() {
         bitField0_ |= 0x00000004;
         onChanged();
         return getMessageFieldBuilder().getBuilder();
@@ -3012,23 +3012,23 @@ public final class AppMessageOuterClass {
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder getMessageOrBuilder() {
         if (messageBuilder_ != null) {
           return messageBuilder_.getMessageOrBuilder();
         } else {
           return message_ == null ?
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance() : message_;
         }
       }
       /**
        * <code>.search.v1.AppMessage message = 3 [json_name = "message"];</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder> 
+          ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder> 
           getMessageFieldBuilder() {
         if (messageBuilder_ == null) {
           messageBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder>(
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder>(
                   getMessage(),
                   getParentForChildren(),
                   isClean());
@@ -3053,12 +3053,12 @@ public final class AppMessageOuterClass {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.AppRecvResponse)
-    private static final ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse();
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3094,7 +3094,7 @@ public final class AppMessageOuterClass {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppRecvResponse getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppRecvResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3154,15 +3154,15 @@ public final class AppMessageOuterClass {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_descriptor;
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_fieldAccessorTable
+      return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder.class);
+              ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.class, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder.class);
     }
 
     public static final int TYPE_FIELD_NUMBER = 1;
@@ -3261,10 +3261,10 @@ public final class AppMessageOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage other = (ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage) obj;
+      ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage other = (ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage) obj;
 
       if (!getType()
           .equals(other.getType())) return false;
@@ -3290,44 +3290,44 @@ public final class AppMessageOuterClass {
       return hash;
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3335,26 +3335,26 @@ public final class AppMessageOuterClass {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage parseFrom(
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3367,7 +3367,7 @@ public final class AppMessageOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -3394,21 +3394,21 @@ public final class AppMessageOuterClass {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.AppMessage)
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessageOrBuilder {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_fieldAccessorTable
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.class, ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.Builder.class);
+                ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.class, ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.newBuilder()
       private Builder() {
 
       }
@@ -3430,17 +3430,17 @@ public final class AppMessageOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_descriptor;
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.internal_static_search_v1_AppMessage_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getDefaultInstanceForType() {
-        return ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage build() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage result = buildPartial();
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage build() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3448,14 +3448,14 @@ public final class AppMessageOuterClass {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage buildPartial() {
-        ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage result = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage(this);
+      public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage buildPartial() {
+        ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage result = new ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.type_ = type_;
@@ -3499,16 +3499,16 @@ public final class AppMessageOuterClass {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage) {
-          return mergeFrom((ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage)other);
+        if (other instanceof ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage) {
+          return mergeFrom((ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage other) {
-        if (other == ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage other) {
+        if (other == ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage.getDefaultInstance()) return this;
         if (!other.getType().isEmpty()) {
           type_ = other.type_;
           bitField0_ |= 0x00000001;
@@ -3690,12 +3690,12 @@ public final class AppMessageOuterClass {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.AppMessage)
-    private static final ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage();
     }
 
-    public static ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3731,7 +3731,7 @@ public final class AppMessageOuterClass {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3778,10 +3778,9 @@ public final class AppMessageOuterClass {
       "\n\nchannel_id\030\001 \001(\tR\tchannelId\022\026\n\006sender\030" +
       "\002 \001(\tR\006sender\022/\n\007message\030\003 \001(\0132\025.search." +
       "v1.AppMessageR\007message\"4\n\nAppMessage\022\022\n\004" +
-      "type\030\001 \001(\tR\004type\022\022\n\004body\030\002 \001(\014R\004bodyBS\n\'" +
-      "ar.com.montepagano.search.appmessage.v1Z" +
-      "(github.com/pmontepagano/search/gen/go/v" +
-      "1b\006proto3"
+      "type\030\001 \001(\tR\004type\022\022\n\004body\030\002 \001(\014R\004bodyBH\n\034" +
+      "ar.com.montepagano.search.v1Z(github.com" +
+      "/pmontepagano/search/gen/go/v1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

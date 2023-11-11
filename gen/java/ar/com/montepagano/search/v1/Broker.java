@@ -2,7 +2,7 @@
 // source: search/v1/broker.proto
 
 // Protobuf Java Version: 3.25.0
-package ar.com.montepagano.search.broker.v1;
+package ar.com.montepagano.search.v1;
 
 public final class Broker {
   private Broker() {}
@@ -36,7 +36,7 @@ public final class Broker {
      * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
      * @return The contract.
      */
-    ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract getContract();
+    ar.com.montepagano.search.v1.Contracts.GlobalContract getContract();
     /**
      * <pre>
      * requirements contract
@@ -44,7 +44,7 @@ public final class Broker {
      *
      * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
      */
-    ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractOrBuilder getContractOrBuilder();
+    ar.com.montepagano.search.v1.Contracts.GlobalContractOrBuilder getContractOrBuilder();
 
     /**
      * <pre>
@@ -69,7 +69,7 @@ public final class Broker {
      * Use {@link #getPresetParticipantsMap()} instead.
      */
     @java.lang.Deprecated
-    java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+    java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
     getPresetParticipants();
     /**
      * <pre>
@@ -79,7 +79,7 @@ public final class Broker {
      *
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
      */
-    java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+    java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
     getPresetParticipantsMap();
     /**
      * <pre>
@@ -90,10 +90,10 @@ public final class Broker {
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
      */
     /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getPresetParticipantsOrDefault(
+ar.com.montepagano.search.v1.Broker.RemoteParticipant getPresetParticipantsOrDefault(
         java.lang.String key,
         /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
+ar.com.montepagano.search.v1.Broker.RemoteParticipant defaultValue);
     /**
      * <pre>
      * subset of contract's participants that are already decided. This should at least
@@ -102,7 +102,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      *
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
      */
-    ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getPresetParticipantsOrThrow(
+    ar.com.montepagano.search.v1.Broker.RemoteParticipant getPresetParticipantsOrThrow(
         java.lang.String key);
   }
   /**
@@ -129,7 +129,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelRequest_descriptor;
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelRequest_descriptor;
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -147,14 +147,14 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelRequest_fieldAccessorTable
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest.class, ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest.Builder.class);
+              ar.com.montepagano.search.v1.Broker.BrokerChannelRequest.class, ar.com.montepagano.search.v1.Broker.BrokerChannelRequest.Builder.class);
     }
 
     private int bitField0_;
     public static final int CONTRACT_FIELD_NUMBER = 1;
-    private ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract contract_;
+    private ar.com.montepagano.search.v1.Contracts.GlobalContract contract_;
     /**
      * <pre>
      * requirements contract
@@ -176,8 +176,8 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      * @return The contract.
      */
     @java.lang.Override
-    public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract getContract() {
-      return contract_ == null ? ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
+    public ar.com.montepagano.search.v1.Contracts.GlobalContract getContract() {
+      return contract_ == null ? ar.com.montepagano.search.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
     }
     /**
      * <pre>
@@ -187,26 +187,26 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
      */
     @java.lang.Override
-    public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractOrBuilder getContractOrBuilder() {
-      return contract_ == null ? ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
+    public ar.com.montepagano.search.v1.Contracts.GlobalContractOrBuilder getContractOrBuilder() {
+      return contract_ == null ? ar.com.montepagano.search.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
     }
 
     public static final int PRESET_PARTICIPANTS_FIELD_NUMBER = 2;
     private static final class PresetParticipantsDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
-          java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> defaultEntry =
+          java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> defaultEntry =
               com.google.protobuf.MapEntry
-              .<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>newDefaultInstance(
-                  ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelRequest_PresetParticipantsEntry_descriptor, 
+              .<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>newDefaultInstance(
+                  ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelRequest_PresetParticipantsEntry_descriptor, 
                   com.google.protobuf.WireFormat.FieldType.STRING,
                   "",
                   com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                  ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.getDefaultInstance());
+                  ar.com.montepagano.search.v1.Broker.RemoteParticipant.getDefaultInstance());
     }
     @SuppressWarnings("serial")
     private com.google.protobuf.MapField<
-        java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> presetParticipants_;
-    private com.google.protobuf.MapField<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+        java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> presetParticipants_;
+    private com.google.protobuf.MapField<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
     internalGetPresetParticipants() {
       if (presetParticipants_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
@@ -236,7 +236,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      */
     @java.lang.Override
     @java.lang.Deprecated
-    public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getPresetParticipants() {
+    public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getPresetParticipants() {
       return getPresetParticipantsMap();
     }
     /**
@@ -248,7 +248,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
      */
     @java.lang.Override
-    public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getPresetParticipantsMap() {
+    public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getPresetParticipantsMap() {
       return internalGetPresetParticipants().getMap();
     }
     /**
@@ -261,12 +261,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      */
     @java.lang.Override
     public /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getPresetParticipantsOrDefault(
+ar.com.montepagano.search.v1.Broker.RemoteParticipant getPresetParticipantsOrDefault(
         java.lang.String key,
         /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
+ar.com.montepagano.search.v1.Broker.RemoteParticipant defaultValue) {
       if (key == null) { throw new NullPointerException("map key"); }
-      java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> map =
+      java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> map =
           internalGetPresetParticipants().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
@@ -279,10 +279,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
      */
     @java.lang.Override
-    public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getPresetParticipantsOrThrow(
+    public ar.com.montepagano.search.v1.Broker.RemoteParticipant getPresetParticipantsOrThrow(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
-      java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> map =
+      java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> map =
           internalGetPresetParticipants().getMap();
       if (!map.containsKey(key)) {
         throw new java.lang.IllegalArgumentException();
@@ -326,9 +326,9 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getContract());
       }
-      for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> entry
+      for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> entry
            : internalGetPresetParticipants().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+        com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
         presetParticipants__ = PresetParticipantsDefaultEntryHolder.defaultEntry.newBuilderForType()
             .setKey(entry.getKey())
             .setValue(entry.getValue())
@@ -346,10 +346,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.Broker.BrokerChannelRequest)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest other = (ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest) obj;
+      ar.com.montepagano.search.v1.Broker.BrokerChannelRequest other = (ar.com.montepagano.search.v1.Broker.BrokerChannelRequest) obj;
 
       if (hasContract() != other.hasContract()) return false;
       if (hasContract()) {
@@ -382,44 +382,44 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       return hash;
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -427,26 +427,26 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -459,7 +459,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.Broker.BrokerChannelRequest prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -480,10 +480,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.BrokerChannelRequest)
-        ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequestOrBuilder {
+        ar.com.montepagano.search.v1.Broker.BrokerChannelRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelRequest_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelRequest_descriptor;
       }
 
       @SuppressWarnings({"rawtypes"})
@@ -511,12 +511,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelRequest_fieldAccessorTable
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest.class, ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest.Builder.class);
+                ar.com.montepagano.search.v1.Broker.BrokerChannelRequest.class, ar.com.montepagano.search.v1.Broker.BrokerChannelRequest.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.Broker.BrokerChannelRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -548,17 +548,17 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelRequest_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelRequest_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest getDefaultInstanceForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest.getDefaultInstance();
+      public ar.com.montepagano.search.v1.Broker.BrokerChannelRequest getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.Broker.BrokerChannelRequest.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest build() {
-        ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest result = buildPartial();
+      public ar.com.montepagano.search.v1.Broker.BrokerChannelRequest build() {
+        ar.com.montepagano.search.v1.Broker.BrokerChannelRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -566,14 +566,14 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest buildPartial() {
-        ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest result = new ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest(this);
+      public ar.com.montepagano.search.v1.Broker.BrokerChannelRequest buildPartial() {
+        ar.com.montepagano.search.v1.Broker.BrokerChannelRequest result = new ar.com.montepagano.search.v1.Broker.BrokerChannelRequest(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.Broker.BrokerChannelRequest result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -622,16 +622,16 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest) {
-          return mergeFrom((ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest)other);
+        if (other instanceof ar.com.montepagano.search.v1.Broker.BrokerChannelRequest) {
+          return mergeFrom((ar.com.montepagano.search.v1.Broker.BrokerChannelRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest other) {
-        if (other == ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.Broker.BrokerChannelRequest other) {
+        if (other == ar.com.montepagano.search.v1.Broker.BrokerChannelRequest.getDefaultInstance()) return this;
         if (other.hasContract()) {
           mergeContract(other.getContract());
         }
@@ -672,7 +672,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
                 break;
               } // case 10
               case 18: {
-                com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+                com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
                 presetParticipants__ = input.readMessage(
                     PresetParticipantsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
                 internalGetMutablePresetParticipants().ensureBuilderMap().put(
@@ -697,9 +697,9 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
       private int bitField0_;
 
-      private ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract contract_;
+      private ar.com.montepagano.search.v1.Contracts.GlobalContract contract_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.Builder, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractOrBuilder> contractBuilder_;
+          ar.com.montepagano.search.v1.Contracts.GlobalContract, ar.com.montepagano.search.v1.Contracts.GlobalContract.Builder, ar.com.montepagano.search.v1.Contracts.GlobalContractOrBuilder> contractBuilder_;
       /**
        * <pre>
        * requirements contract
@@ -719,9 +719,9 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
        * @return The contract.
        */
-      public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract getContract() {
+      public ar.com.montepagano.search.v1.Contracts.GlobalContract getContract() {
         if (contractBuilder_ == null) {
-          return contract_ == null ? ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
+          return contract_ == null ? ar.com.montepagano.search.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
         } else {
           return contractBuilder_.getMessage();
         }
@@ -733,7 +733,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        *
        * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
        */
-      public Builder setContract(ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract value) {
+      public Builder setContract(ar.com.montepagano.search.v1.Contracts.GlobalContract value) {
         if (contractBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -754,7 +754,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
        */
       public Builder setContract(
-          ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.Builder builderForValue) {
+          ar.com.montepagano.search.v1.Contracts.GlobalContract.Builder builderForValue) {
         if (contractBuilder_ == null) {
           contract_ = builderForValue.build();
         } else {
@@ -771,11 +771,11 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        *
        * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
        */
-      public Builder mergeContract(ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract value) {
+      public Builder mergeContract(ar.com.montepagano.search.v1.Contracts.GlobalContract value) {
         if (contractBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0) &&
             contract_ != null &&
-            contract_ != ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.getDefaultInstance()) {
+            contract_ != ar.com.montepagano.search.v1.Contracts.GlobalContract.getDefaultInstance()) {
             getContractBuilder().mergeFrom(value);
           } else {
             contract_ = value;
@@ -813,7 +813,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        *
        * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
        */
-      public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.Builder getContractBuilder() {
+      public ar.com.montepagano.search.v1.Contracts.GlobalContract.Builder getContractBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getContractFieldBuilder().getBuilder();
@@ -825,12 +825,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        *
        * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
        */
-      public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractOrBuilder getContractOrBuilder() {
+      public ar.com.montepagano.search.v1.Contracts.GlobalContractOrBuilder getContractOrBuilder() {
         if (contractBuilder_ != null) {
           return contractBuilder_.getMessageOrBuilder();
         } else {
           return contract_ == null ?
-              ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
+              ar.com.montepagano.search.v1.Contracts.GlobalContract.getDefaultInstance() : contract_;
         }
       }
       /**
@@ -841,11 +841,11 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>.search.v1.GlobalContract contract = 1 [json_name = "contract"];</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.Builder, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractOrBuilder> 
+          ar.com.montepagano.search.v1.Contracts.GlobalContract, ar.com.montepagano.search.v1.Contracts.GlobalContract.Builder, ar.com.montepagano.search.v1.Contracts.GlobalContractOrBuilder> 
           getContractFieldBuilder() {
         if (contractBuilder_ == null) {
           contractBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.Builder, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractOrBuilder>(
+              ar.com.montepagano.search.v1.Contracts.GlobalContract, ar.com.montepagano.search.v1.Contracts.GlobalContract.Builder, ar.com.montepagano.search.v1.Contracts.GlobalContractOrBuilder>(
                   getContract(),
                   getParentForChildren(),
                   isClean());
@@ -854,30 +854,30 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
         return contractBuilder_;
       }
 
-      private static final class PresetParticipantsConverter implements com.google.protobuf.MapFieldBuilder.Converter<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> {
+      private static final class PresetParticipantsConverter implements com.google.protobuf.MapFieldBuilder.Converter<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant> {
         @java.lang.Override
-        public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant build(ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder val) {
-          if (val instanceof ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) { return (ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) val; }
-          return ((ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder) val).build();
+        public ar.com.montepagano.search.v1.Broker.RemoteParticipant build(ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder val) {
+          if (val instanceof ar.com.montepagano.search.v1.Broker.RemoteParticipant) { return (ar.com.montepagano.search.v1.Broker.RemoteParticipant) val; }
+          return ((ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder) val).build();
         }
 
         @java.lang.Override
-        public com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> defaultEntry() {
+        public com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> defaultEntry() {
           return PresetParticipantsDefaultEntryHolder.defaultEntry;
         }
       };
       private static final PresetParticipantsConverter presetParticipantsConverter = new PresetParticipantsConverter();
 
       private com.google.protobuf.MapFieldBuilder<
-          java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder> presetParticipants_;
-      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder>
+          java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder> presetParticipants_;
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder>
           internalGetPresetParticipants() {
         if (presetParticipants_ == null) {
           return new com.google.protobuf.MapFieldBuilder<>(presetParticipantsConverter);
         }
         return presetParticipants_;
       }
-      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder>
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder>
           internalGetMutablePresetParticipants() {
         if (presetParticipants_ == null) {
           presetParticipants_ = new com.google.protobuf.MapFieldBuilder<>(presetParticipantsConverter);
@@ -908,7 +908,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        */
       @java.lang.Override
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getPresetParticipants() {
+      public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getPresetParticipants() {
         return getPresetParticipantsMap();
       }
       /**
@@ -920,7 +920,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
        */
       @java.lang.Override
-      public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getPresetParticipantsMap() {
+      public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getPresetParticipantsMap() {
         return internalGetPresetParticipants().getImmutableMap();
       }
       /**
@@ -933,12 +933,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        */
       @java.lang.Override
       public /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getPresetParticipantsOrDefault(
+ar.com.montepagano.search.v1.Broker.RemoteParticipant getPresetParticipantsOrDefault(
           java.lang.String key,
           /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
+ar.com.montepagano.search.v1.Broker.RemoteParticipant defaultValue) {
         if (key == null) { throw new NullPointerException("map key"); }
-        java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutablePresetParticipants().ensureBuilderMap();
+        java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutablePresetParticipants().ensureBuilderMap();
         return map.containsKey(key) ? presetParticipantsConverter.build(map.get(key)) : defaultValue;
       }
       /**
@@ -950,10 +950,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
        */
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getPresetParticipantsOrThrow(
+      public ar.com.montepagano.search.v1.Broker.RemoteParticipant getPresetParticipantsOrThrow(
           java.lang.String key) {
         if (key == null) { throw new NullPointerException("map key"); }
-        java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutablePresetParticipants().ensureBuilderMap();
+        java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutablePresetParticipants().ensureBuilderMap();
         if (!map.containsKey(key)) {
           throw new java.lang.IllegalArgumentException();
         }
@@ -983,7 +983,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * Use alternate mutation accessors instead.
        */
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+      public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
           getMutablePresetParticipants() {
         bitField0_ |= 0x00000002;
         return internalGetMutablePresetParticipants().ensureMessageMap();
@@ -998,7 +998,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        */
       public Builder putPresetParticipants(
           java.lang.String key,
-          ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant value) {
+          ar.com.montepagano.search.v1.Broker.RemoteParticipant value) {
         if (key == null) { throw new NullPointerException("map key"); }
         if (value == null) { throw new NullPointerException("map value"); }
         internalGetMutablePresetParticipants().ensureBuilderMap()
@@ -1015,8 +1015,8 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
        */
       public Builder putAllPresetParticipants(
-          java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> values) {
-        for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> e : values.entrySet()) {
+          java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> values) {
+        for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> e : values.entrySet()) {
           if (e.getKey() == null || e.getValue() == null) {
             throw new NullPointerException();
           }
@@ -1034,19 +1034,19 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        *
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; preset_participants = 2 [json_name = "presetParticipants"];</code>
        */
-      public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder putPresetParticipantsBuilderIfAbsent(
+      public ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder putPresetParticipantsBuilderIfAbsent(
           java.lang.String key) {
-        java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder> builderMap = internalGetMutablePresetParticipants().ensureBuilderMap();
-        ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder entry = builderMap.get(key);
+        java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder> builderMap = internalGetMutablePresetParticipants().ensureBuilderMap();
+        ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder entry = builderMap.get(key);
         if (entry == null) {
-          entry = ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.newBuilder();
+          entry = ar.com.montepagano.search.v1.Broker.RemoteParticipant.newBuilder();
           builderMap.put(key, entry);
         }
-        if (entry instanceof ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) {
-          entry = ((ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) entry).toBuilder();
+        if (entry instanceof ar.com.montepagano.search.v1.Broker.RemoteParticipant) {
+          entry = ((ar.com.montepagano.search.v1.Broker.RemoteParticipant) entry).toBuilder();
           builderMap.put(key, entry);
         }
-        return (ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder) entry;
+        return (ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder) entry;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -1065,12 +1065,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.BrokerChannelRequest)
-    private static final ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.Broker.BrokerChannelRequest DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.Broker.BrokerChannelRequest();
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelRequest getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1106,7 +1106,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelRequest getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.Broker.BrokerChannelRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1157,7 +1157,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
      * Use {@link #getParticipantsMap()} instead.
      */
     @java.lang.Deprecated
-    java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+    java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
     getParticipants();
     /**
      * <pre>
@@ -1166,7 +1166,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
      *
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
      */
-    java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+    java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
     getParticipantsMap();
     /**
      * <pre>
@@ -1176,10 +1176,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
      */
     /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getParticipantsOrDefault(
+ar.com.montepagano.search.v1.Broker.RemoteParticipant getParticipantsOrDefault(
         java.lang.String key,
         /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
+ar.com.montepagano.search.v1.Broker.RemoteParticipant defaultValue);
     /**
      * <pre>
      * preset + brokered participants
@@ -1187,7 +1187,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      *
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
      */
-    ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getParticipantsOrThrow(
+    ar.com.montepagano.search.v1.Broker.RemoteParticipant getParticipantsOrThrow(
         java.lang.String key);
   }
   /**
@@ -1215,7 +1215,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelResponse_descriptor;
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelResponse_descriptor;
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -1233,9 +1233,9 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelResponse_fieldAccessorTable
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse.class, ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse.Builder.class);
+              ar.com.montepagano.search.v1.Broker.BrokerChannelResponse.class, ar.com.montepagano.search.v1.Broker.BrokerChannelResponse.Builder.class);
     }
 
     public static final int CHANNEL_ID_FIELD_NUMBER = 2;
@@ -1288,19 +1288,19 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
     public static final int PARTICIPANTS_FIELD_NUMBER = 3;
     private static final class ParticipantsDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
-          java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> defaultEntry =
+          java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> defaultEntry =
               com.google.protobuf.MapEntry
-              .<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>newDefaultInstance(
-                  ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelResponse_ParticipantsEntry_descriptor, 
+              .<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>newDefaultInstance(
+                  ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelResponse_ParticipantsEntry_descriptor, 
                   com.google.protobuf.WireFormat.FieldType.STRING,
                   "",
                   com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                  ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.getDefaultInstance());
+                  ar.com.montepagano.search.v1.Broker.RemoteParticipant.getDefaultInstance());
     }
     @SuppressWarnings("serial")
     private com.google.protobuf.MapField<
-        java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> participants_;
-    private com.google.protobuf.MapField<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+        java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> participants_;
+    private com.google.protobuf.MapField<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
     internalGetParticipants() {
       if (participants_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
@@ -1329,7 +1329,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      */
     @java.lang.Override
     @java.lang.Deprecated
-    public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getParticipants() {
+    public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getParticipants() {
       return getParticipantsMap();
     }
     /**
@@ -1340,7 +1340,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
      */
     @java.lang.Override
-    public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getParticipantsMap() {
+    public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getParticipantsMap() {
       return internalGetParticipants().getMap();
     }
     /**
@@ -1352,12 +1352,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue);
      */
     @java.lang.Override
     public /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getParticipantsOrDefault(
+ar.com.montepagano.search.v1.Broker.RemoteParticipant getParticipantsOrDefault(
         java.lang.String key,
         /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
+ar.com.montepagano.search.v1.Broker.RemoteParticipant defaultValue) {
       if (key == null) { throw new NullPointerException("map key"); }
-      java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> map =
+      java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> map =
           internalGetParticipants().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
@@ -1369,10 +1369,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
      * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
      */
     @java.lang.Override
-    public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getParticipantsOrThrow(
+    public ar.com.montepagano.search.v1.Broker.RemoteParticipant getParticipantsOrThrow(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
-      java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> map =
+      java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> map =
           internalGetParticipants().getMap();
       if (!map.containsKey(key)) {
         throw new java.lang.IllegalArgumentException();
@@ -1415,9 +1415,9 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(channelId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, channelId_);
       }
-      for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> entry
+      for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> entry
            : internalGetParticipants().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+        com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
         participants__ = ParticipantsDefaultEntryHolder.defaultEntry.newBuilderForType()
             .setKey(entry.getKey())
             .setValue(entry.getValue())
@@ -1435,10 +1435,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.Broker.BrokerChannelResponse)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse other = (ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse) obj;
+      ar.com.montepagano.search.v1.Broker.BrokerChannelResponse other = (ar.com.montepagano.search.v1.Broker.BrokerChannelResponse) obj;
 
       if (!getChannelId()
           .equals(other.getChannelId())) return false;
@@ -1466,44 +1466,44 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       return hash;
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1511,26 +1511,26 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1543,7 +1543,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.Broker.BrokerChannelResponse prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1564,10 +1564,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.BrokerChannelResponse)
-        ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponseOrBuilder {
+        ar.com.montepagano.search.v1.Broker.BrokerChannelResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelResponse_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelResponse_descriptor;
       }
 
       @SuppressWarnings({"rawtypes"})
@@ -1595,12 +1595,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelResponse_fieldAccessorTable
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse.class, ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse.Builder.class);
+                ar.com.montepagano.search.v1.Broker.BrokerChannelResponse.class, ar.com.montepagano.search.v1.Broker.BrokerChannelResponse.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.Broker.BrokerChannelResponse.newBuilder()
       private Builder() {
 
       }
@@ -1622,17 +1622,17 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_BrokerChannelResponse_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_BrokerChannelResponse_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse getDefaultInstanceForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse.getDefaultInstance();
+      public ar.com.montepagano.search.v1.Broker.BrokerChannelResponse getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.Broker.BrokerChannelResponse.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse build() {
-        ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse result = buildPartial();
+      public ar.com.montepagano.search.v1.Broker.BrokerChannelResponse build() {
+        ar.com.montepagano.search.v1.Broker.BrokerChannelResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1640,14 +1640,14 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse buildPartial() {
-        ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse result = new ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse(this);
+      public ar.com.montepagano.search.v1.Broker.BrokerChannelResponse buildPartial() {
+        ar.com.montepagano.search.v1.Broker.BrokerChannelResponse result = new ar.com.montepagano.search.v1.Broker.BrokerChannelResponse(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.Broker.BrokerChannelResponse result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.channelId_ = channelId_;
@@ -1691,16 +1691,16 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse) {
-          return mergeFrom((ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse)other);
+        if (other instanceof ar.com.montepagano.search.v1.Broker.BrokerChannelResponse) {
+          return mergeFrom((ar.com.montepagano.search.v1.Broker.BrokerChannelResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse other) {
-        if (other == ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.Broker.BrokerChannelResponse other) {
+        if (other == ar.com.montepagano.search.v1.Broker.BrokerChannelResponse.getDefaultInstance()) return this;
         if (!other.getChannelId().isEmpty()) {
           channelId_ = other.channelId_;
           bitField0_ |= 0x00000001;
@@ -1741,7 +1741,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
                 break;
               } // case 18
               case 26: {
-                com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+                com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
                 participants__ = input.readMessage(
                     ParticipantsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
                 internalGetMutableParticipants().ensureBuilderMap().put(
@@ -1858,30 +1858,30 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
         return this;
       }
 
-      private static final class ParticipantsConverter implements com.google.protobuf.MapFieldBuilder.Converter<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> {
+      private static final class ParticipantsConverter implements com.google.protobuf.MapFieldBuilder.Converter<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant> {
         @java.lang.Override
-        public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant build(ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder val) {
-          if (val instanceof ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) { return (ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) val; }
-          return ((ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder) val).build();
+        public ar.com.montepagano.search.v1.Broker.RemoteParticipant build(ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder val) {
+          if (val instanceof ar.com.montepagano.search.v1.Broker.RemoteParticipant) { return (ar.com.montepagano.search.v1.Broker.RemoteParticipant) val; }
+          return ((ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder) val).build();
         }
 
         @java.lang.Override
-        public com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> defaultEntry() {
+        public com.google.protobuf.MapEntry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> defaultEntry() {
           return ParticipantsDefaultEntryHolder.defaultEntry;
         }
       };
       private static final ParticipantsConverter participantsConverter = new ParticipantsConverter();
 
       private com.google.protobuf.MapFieldBuilder<
-          java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder> participants_;
-      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder>
+          java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder> participants_;
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder>
           internalGetParticipants() {
         if (participants_ == null) {
           return new com.google.protobuf.MapFieldBuilder<>(participantsConverter);
         }
         return participants_;
       }
-      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder>
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder, ar.com.montepagano.search.v1.Broker.RemoteParticipant, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder>
           internalGetMutableParticipants() {
         if (participants_ == null) {
           participants_ = new com.google.protobuf.MapFieldBuilder<>(participantsConverter);
@@ -1911,7 +1911,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        */
       @java.lang.Override
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getParticipants() {
+      public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getParticipants() {
         return getParticipantsMap();
       }
       /**
@@ -1922,7 +1922,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
        */
       @java.lang.Override
-      public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> getParticipantsMap() {
+      public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> getParticipantsMap() {
         return internalGetParticipants().getImmutableMap();
       }
       /**
@@ -1934,12 +1934,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        */
       @java.lang.Override
       public /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getParticipantsOrDefault(
+ar.com.montepagano.search.v1.Broker.RemoteParticipant getParticipantsOrDefault(
           java.lang.String key,
           /* nullable */
-ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
+ar.com.montepagano.search.v1.Broker.RemoteParticipant defaultValue) {
         if (key == null) { throw new NullPointerException("map key"); }
-        java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutableParticipants().ensureBuilderMap();
+        java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutableParticipants().ensureBuilderMap();
         return map.containsKey(key) ? participantsConverter.build(map.get(key)) : defaultValue;
       }
       /**
@@ -1950,10 +1950,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
        */
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getParticipantsOrThrow(
+      public ar.com.montepagano.search.v1.Broker.RemoteParticipant getParticipantsOrThrow(
           java.lang.String key) {
         if (key == null) { throw new NullPointerException("map key"); }
-        java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutableParticipants().ensureBuilderMap();
+        java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder> map = internalGetMutableParticipants().ensureBuilderMap();
         if (!map.containsKey(key)) {
           throw new java.lang.IllegalArgumentException();
         }
@@ -1982,7 +1982,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * Use alternate mutation accessors instead.
        */
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant>
+      public java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant>
           getMutableParticipants() {
         bitField0_ |= 0x00000002;
         return internalGetMutableParticipants().ensureMessageMap();
@@ -1996,7 +1996,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        */
       public Builder putParticipants(
           java.lang.String key,
-          ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant value) {
+          ar.com.montepagano.search.v1.Broker.RemoteParticipant value) {
         if (key == null) { throw new NullPointerException("map key"); }
         if (value == null) { throw new NullPointerException("map value"); }
         internalGetMutableParticipants().ensureBuilderMap()
@@ -2012,8 +2012,8 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
        */
       public Builder putAllParticipants(
-          java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> values) {
-        for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant> e : values.entrySet()) {
+          java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> values) {
+        for (java.util.Map.Entry<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipant> e : values.entrySet()) {
           if (e.getKey() == null || e.getValue() == null) {
             throw new NullPointerException();
           }
@@ -2030,19 +2030,19 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        *
        * <code>map&lt;string, .search.v1.RemoteParticipant&gt; participants = 3 [json_name = "participants"];</code>
        */
-      public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder putParticipantsBuilderIfAbsent(
+      public ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder putParticipantsBuilderIfAbsent(
           java.lang.String key) {
-        java.util.Map<java.lang.String, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder> builderMap = internalGetMutableParticipants().ensureBuilderMap();
-        ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder entry = builderMap.get(key);
+        java.util.Map<java.lang.String, ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder> builderMap = internalGetMutableParticipants().ensureBuilderMap();
+        ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder entry = builderMap.get(key);
         if (entry == null) {
-          entry = ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.newBuilder();
+          entry = ar.com.montepagano.search.v1.Broker.RemoteParticipant.newBuilder();
           builderMap.put(key, entry);
         }
-        if (entry instanceof ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) {
-          entry = ((ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) entry).toBuilder();
+        if (entry instanceof ar.com.montepagano.search.v1.Broker.RemoteParticipant) {
+          entry = ((ar.com.montepagano.search.v1.Broker.RemoteParticipant) entry).toBuilder();
           builderMap.put(key, entry);
         }
-        return (ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder) entry;
+        return (ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder) entry;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -2061,12 +2061,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.BrokerChannelResponse)
-    private static final ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.Broker.BrokerChannelResponse DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.Broker.BrokerChannelResponse();
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.Broker.BrokerChannelResponse getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2102,7 +2102,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.broker.v1.Broker.BrokerChannelResponse getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.Broker.BrokerChannelResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2121,11 +2121,11 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
      * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
      * @return The contract.
      */
-    ar.com.montepagano.search.contracts.v1.Contracts.LocalContract getContract();
+    ar.com.montepagano.search.v1.Contracts.LocalContract getContract();
     /**
      * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
      */
-    ar.com.montepagano.search.contracts.v1.Contracts.LocalContractOrBuilder getContractOrBuilder();
+    ar.com.montepagano.search.v1.Contracts.LocalContractOrBuilder getContractOrBuilder();
 
     /**
      * <code>string url = 2 [json_name = "url"];</code>
@@ -2164,20 +2164,20 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderRequest_descriptor;
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderRequest_fieldAccessorTable
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest.class, ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest.Builder.class);
+              ar.com.montepagano.search.v1.Broker.RegisterProviderRequest.class, ar.com.montepagano.search.v1.Broker.RegisterProviderRequest.Builder.class);
     }
 
     private int bitField0_;
     public static final int CONTRACT_FIELD_NUMBER = 1;
-    private ar.com.montepagano.search.contracts.v1.Contracts.LocalContract contract_;
+    private ar.com.montepagano.search.v1.Contracts.LocalContract contract_;
     /**
      * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
      * @return Whether the contract field is set.
@@ -2191,15 +2191,15 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
      * @return The contract.
      */
     @java.lang.Override
-    public ar.com.montepagano.search.contracts.v1.Contracts.LocalContract getContract() {
-      return contract_ == null ? ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
+    public ar.com.montepagano.search.v1.Contracts.LocalContract getContract() {
+      return contract_ == null ? ar.com.montepagano.search.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
     }
     /**
      * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
      */
     @java.lang.Override
-    public ar.com.montepagano.search.contracts.v1.Contracts.LocalContractOrBuilder getContractOrBuilder() {
-      return contract_ == null ? ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
+    public ar.com.montepagano.search.v1.Contracts.LocalContractOrBuilder getContractOrBuilder() {
+      return contract_ == null ? ar.com.montepagano.search.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
     }
 
     public static final int URL_FIELD_NUMBER = 2;
@@ -2287,10 +2287,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.Broker.RegisterProviderRequest)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest other = (ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest) obj;
+      ar.com.montepagano.search.v1.Broker.RegisterProviderRequest other = (ar.com.montepagano.search.v1.Broker.RegisterProviderRequest) obj;
 
       if (hasContract() != other.hasContract()) return false;
       if (hasContract()) {
@@ -2321,44 +2321,44 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       return hash;
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2366,26 +2366,26 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2398,7 +2398,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.Broker.RegisterProviderRequest prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -2419,21 +2419,21 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.RegisterProviderRequest)
-        ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequestOrBuilder {
+        ar.com.montepagano.search.v1.Broker.RegisterProviderRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderRequest_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderRequest_fieldAccessorTable
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest.class, ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest.Builder.class);
+                ar.com.montepagano.search.v1.Broker.RegisterProviderRequest.class, ar.com.montepagano.search.v1.Broker.RegisterProviderRequest.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.Broker.RegisterProviderRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -2465,17 +2465,17 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderRequest_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderRequest_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest getDefaultInstanceForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest.getDefaultInstance();
+      public ar.com.montepagano.search.v1.Broker.RegisterProviderRequest getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.Broker.RegisterProviderRequest.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest build() {
-        ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest result = buildPartial();
+      public ar.com.montepagano.search.v1.Broker.RegisterProviderRequest build() {
+        ar.com.montepagano.search.v1.Broker.RegisterProviderRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -2483,14 +2483,14 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest buildPartial() {
-        ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest result = new ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest(this);
+      public ar.com.montepagano.search.v1.Broker.RegisterProviderRequest buildPartial() {
+        ar.com.montepagano.search.v1.Broker.RegisterProviderRequest result = new ar.com.montepagano.search.v1.Broker.RegisterProviderRequest(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.Broker.RegisterProviderRequest result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -2539,16 +2539,16 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest) {
-          return mergeFrom((ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest)other);
+        if (other instanceof ar.com.montepagano.search.v1.Broker.RegisterProviderRequest) {
+          return mergeFrom((ar.com.montepagano.search.v1.Broker.RegisterProviderRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest other) {
-        if (other == ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.Broker.RegisterProviderRequest other) {
+        if (other == ar.com.montepagano.search.v1.Broker.RegisterProviderRequest.getDefaultInstance()) return this;
         if (other.hasContract()) {
           mergeContract(other.getContract());
         }
@@ -2612,9 +2612,9 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
       private int bitField0_;
 
-      private ar.com.montepagano.search.contracts.v1.Contracts.LocalContract contract_;
+      private ar.com.montepagano.search.v1.Contracts.LocalContract contract_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.contracts.v1.Contracts.LocalContract, ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.Builder, ar.com.montepagano.search.contracts.v1.Contracts.LocalContractOrBuilder> contractBuilder_;
+          ar.com.montepagano.search.v1.Contracts.LocalContract, ar.com.montepagano.search.v1.Contracts.LocalContract.Builder, ar.com.montepagano.search.v1.Contracts.LocalContractOrBuilder> contractBuilder_;
       /**
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        * @return Whether the contract field is set.
@@ -2626,9 +2626,9 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        * @return The contract.
        */
-      public ar.com.montepagano.search.contracts.v1.Contracts.LocalContract getContract() {
+      public ar.com.montepagano.search.v1.Contracts.LocalContract getContract() {
         if (contractBuilder_ == null) {
-          return contract_ == null ? ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
+          return contract_ == null ? ar.com.montepagano.search.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
         } else {
           return contractBuilder_.getMessage();
         }
@@ -2636,7 +2636,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       /**
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        */
-      public Builder setContract(ar.com.montepagano.search.contracts.v1.Contracts.LocalContract value) {
+      public Builder setContract(ar.com.montepagano.search.v1.Contracts.LocalContract value) {
         if (contractBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2653,7 +2653,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        */
       public Builder setContract(
-          ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.Builder builderForValue) {
+          ar.com.montepagano.search.v1.Contracts.LocalContract.Builder builderForValue) {
         if (contractBuilder_ == null) {
           contract_ = builderForValue.build();
         } else {
@@ -2666,11 +2666,11 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       /**
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        */
-      public Builder mergeContract(ar.com.montepagano.search.contracts.v1.Contracts.LocalContract value) {
+      public Builder mergeContract(ar.com.montepagano.search.v1.Contracts.LocalContract value) {
         if (contractBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0) &&
             contract_ != null &&
-            contract_ != ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.getDefaultInstance()) {
+            contract_ != ar.com.montepagano.search.v1.Contracts.LocalContract.getDefaultInstance()) {
             getContractBuilder().mergeFrom(value);
           } else {
             contract_ = value;
@@ -2700,7 +2700,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       /**
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        */
-      public ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.Builder getContractBuilder() {
+      public ar.com.montepagano.search.v1.Contracts.LocalContract.Builder getContractBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getContractFieldBuilder().getBuilder();
@@ -2708,23 +2708,23 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       /**
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        */
-      public ar.com.montepagano.search.contracts.v1.Contracts.LocalContractOrBuilder getContractOrBuilder() {
+      public ar.com.montepagano.search.v1.Contracts.LocalContractOrBuilder getContractOrBuilder() {
         if (contractBuilder_ != null) {
           return contractBuilder_.getMessageOrBuilder();
         } else {
           return contract_ == null ?
-              ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
+              ar.com.montepagano.search.v1.Contracts.LocalContract.getDefaultInstance() : contract_;
         }
       }
       /**
        * <code>.search.v1.LocalContract contract = 1 [json_name = "contract"];</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ar.com.montepagano.search.contracts.v1.Contracts.LocalContract, ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.Builder, ar.com.montepagano.search.contracts.v1.Contracts.LocalContractOrBuilder> 
+          ar.com.montepagano.search.v1.Contracts.LocalContract, ar.com.montepagano.search.v1.Contracts.LocalContract.Builder, ar.com.montepagano.search.v1.Contracts.LocalContractOrBuilder> 
           getContractFieldBuilder() {
         if (contractBuilder_ == null) {
           contractBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ar.com.montepagano.search.contracts.v1.Contracts.LocalContract, ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.Builder, ar.com.montepagano.search.contracts.v1.Contracts.LocalContractOrBuilder>(
+              ar.com.montepagano.search.v1.Contracts.LocalContract, ar.com.montepagano.search.v1.Contracts.LocalContract.Builder, ar.com.montepagano.search.v1.Contracts.LocalContractOrBuilder>(
                   getContract(),
                   getParentForChildren(),
                   isClean());
@@ -2821,12 +2821,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.RegisterProviderRequest)
-    private static final ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.Broker.RegisterProviderRequest DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.Broker.RegisterProviderRequest();
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderRequest getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2862,7 +2862,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderRequest getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.Broker.RegisterProviderRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2913,15 +2913,15 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderResponse_descriptor;
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderResponse_fieldAccessorTable
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse.class, ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse.Builder.class);
+              ar.com.montepagano.search.v1.Broker.RegisterProviderResponse.class, ar.com.montepagano.search.v1.Broker.RegisterProviderResponse.Builder.class);
     }
 
     public static final int APP_ID_FIELD_NUMBER = 1;
@@ -3002,10 +3002,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.Broker.RegisterProviderResponse)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse other = (ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse) obj;
+      ar.com.montepagano.search.v1.Broker.RegisterProviderResponse other = (ar.com.montepagano.search.v1.Broker.RegisterProviderResponse) obj;
 
       if (!getAppId()
           .equals(other.getAppId())) return false;
@@ -3027,44 +3027,44 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       return hash;
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3072,26 +3072,26 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3104,7 +3104,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.Broker.RegisterProviderResponse prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -3129,21 +3129,21 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.RegisterProviderResponse)
-        ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponseOrBuilder {
+        ar.com.montepagano.search.v1.Broker.RegisterProviderResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderResponse_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderResponse_fieldAccessorTable
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse.class, ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse.Builder.class);
+                ar.com.montepagano.search.v1.Broker.RegisterProviderResponse.class, ar.com.montepagano.search.v1.Broker.RegisterProviderResponse.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.Broker.RegisterProviderResponse.newBuilder()
       private Builder() {
 
       }
@@ -3164,17 +3164,17 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RegisterProviderResponse_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RegisterProviderResponse_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse getDefaultInstanceForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse.getDefaultInstance();
+      public ar.com.montepagano.search.v1.Broker.RegisterProviderResponse getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.Broker.RegisterProviderResponse.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse build() {
-        ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse result = buildPartial();
+      public ar.com.montepagano.search.v1.Broker.RegisterProviderResponse build() {
+        ar.com.montepagano.search.v1.Broker.RegisterProviderResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3182,14 +3182,14 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse buildPartial() {
-        ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse result = new ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse(this);
+      public ar.com.montepagano.search.v1.Broker.RegisterProviderResponse buildPartial() {
+        ar.com.montepagano.search.v1.Broker.RegisterProviderResponse result = new ar.com.montepagano.search.v1.Broker.RegisterProviderResponse(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.Broker.RegisterProviderResponse result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.appId_ = appId_;
@@ -3230,16 +3230,16 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse) {
-          return mergeFrom((ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse)other);
+        if (other instanceof ar.com.montepagano.search.v1.Broker.RegisterProviderResponse) {
+          return mergeFrom((ar.com.montepagano.search.v1.Broker.RegisterProviderResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse other) {
-        if (other == ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.Broker.RegisterProviderResponse other) {
+        if (other == ar.com.montepagano.search.v1.Broker.RegisterProviderResponse.getDefaultInstance()) return this;
         if (!other.getAppId().isEmpty()) {
           appId_ = other.appId_;
           bitField0_ |= 0x00000001;
@@ -3381,12 +3381,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.RegisterProviderResponse)
-    private static final ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.Broker.RegisterProviderResponse DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.Broker.RegisterProviderResponse();
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.Broker.RegisterProviderResponse getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3422,7 +3422,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.broker.v1.Broker.RegisterProviderResponse getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.Broker.RegisterProviderResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3498,15 +3498,15 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RemoteParticipant_descriptor;
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RemoteParticipant_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RemoteParticipant_fieldAccessorTable
+      return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RemoteParticipant_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.class, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder.class);
+              ar.com.montepagano.search.v1.Broker.RemoteParticipant.class, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder.class);
     }
 
     public static final int URL_FIELD_NUMBER = 1;
@@ -3648,10 +3648,10 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.Broker.RemoteParticipant)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant other = (ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) obj;
+      ar.com.montepagano.search.v1.Broker.RemoteParticipant other = (ar.com.montepagano.search.v1.Broker.RemoteParticipant) obj;
 
       if (!getUrl()
           .equals(other.getUrl())) return false;
@@ -3677,44 +3677,44 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       return hash;
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3722,26 +3722,26 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant parseFrom(
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3754,7 +3754,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.Broker.RemoteParticipant prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -3775,21 +3775,21 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.RemoteParticipant)
-        ar.com.montepagano.search.broker.v1.Broker.RemoteParticipantOrBuilder {
+        ar.com.montepagano.search.v1.Broker.RemoteParticipantOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RemoteParticipant_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RemoteParticipant_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RemoteParticipant_fieldAccessorTable
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RemoteParticipant_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.class, ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.Builder.class);
+                ar.com.montepagano.search.v1.Broker.RemoteParticipant.class, ar.com.montepagano.search.v1.Broker.RemoteParticipant.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.Broker.RemoteParticipant.newBuilder()
       private Builder() {
 
       }
@@ -3811,17 +3811,17 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.internal_static_search_v1_RemoteParticipant_descriptor;
+        return ar.com.montepagano.search.v1.Broker.internal_static_search_v1_RemoteParticipant_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getDefaultInstanceForType() {
-        return ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.getDefaultInstance();
+      public ar.com.montepagano.search.v1.Broker.RemoteParticipant getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.Broker.RemoteParticipant.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant build() {
-        ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant result = buildPartial();
+      public ar.com.montepagano.search.v1.Broker.RemoteParticipant build() {
+        ar.com.montepagano.search.v1.Broker.RemoteParticipant result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3829,14 +3829,14 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant buildPartial() {
-        ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant result = new ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant(this);
+      public ar.com.montepagano.search.v1.Broker.RemoteParticipant buildPartial() {
+        ar.com.montepagano.search.v1.Broker.RemoteParticipant result = new ar.com.montepagano.search.v1.Broker.RemoteParticipant(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.Broker.RemoteParticipant result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.url_ = url_;
@@ -3880,16 +3880,16 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant) {
-          return mergeFrom((ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant)other);
+        if (other instanceof ar.com.montepagano.search.v1.Broker.RemoteParticipant) {
+          return mergeFrom((ar.com.montepagano.search.v1.Broker.RemoteParticipant)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant other) {
-        if (other == ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.Broker.RemoteParticipant other) {
+        if (other == ar.com.montepagano.search.v1.Broker.RemoteParticipant.getDefaultInstance()) return this;
         if (!other.getUrl().isEmpty()) {
           url_ = other.url_;
           bitField0_ |= 0x00000001;
@@ -4153,12 +4153,12 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.RemoteParticipant)
-    private static final ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.Broker.RemoteParticipant DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.Broker.RemoteParticipant();
     }
 
-    public static ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.Broker.RemoteParticipant getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4194,7 +4194,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.Broker.RemoteParticipant getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4269,14 +4269,14 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       "1.BrokerChannelResponse\"\000\022]\n\020RegisterPro" +
       "vider\022\".search.v1.RegisterProviderReques" +
       "t\032#.search.v1.RegisterProviderResponse\"\000" +
-      "BO\n#ar.com.montepagano.search.broker.v1Z" +
-      "(github.com/pmontepagano/search/gen/go/v" +
-      "1b\006proto3"
+      "BH\n\034ar.com.montepagano.search.v1Z(github" +
+      ".com/pmontepagano/search/gen/go/v1b\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          ar.com.montepagano.search.contracts.v1.Contracts.getDescriptor(),
+          ar.com.montepagano.search.v1.Contracts.getDescriptor(),
         });
     internal_static_search_v1_BrokerChannelRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -4320,7 +4320,7 @@ ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant defaultValue) {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_search_v1_RemoteParticipant_descriptor,
         new java.lang.String[] { "Url", "AppId", });
-    ar.com.montepagano.search.contracts.v1.Contracts.getDescriptor();
+    ar.com.montepagano.search.v1.Contracts.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

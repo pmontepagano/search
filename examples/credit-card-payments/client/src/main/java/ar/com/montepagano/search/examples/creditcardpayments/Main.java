@@ -6,19 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import ar.com.montepagano.search.middleware.v1.Middleware;
 import com.google.gson.Gson;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import com.google.protobuf.ByteString;
-import ar.com.montepagano.search.middleware.v1.PrivateMiddlewareServiceGrpc;
-import ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelRequest;
-import ar.com.montepagano.search.middleware.v1.Middleware.RegisterChannelResponse;
-import ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppSendRequest;
-import ar.com.montepagano.search.appmessage.v1.AppMessageOuterClass.AppMessage;
-import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract;
-import ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat;
-import ar.com.montepagano.search.broker.v1.Broker.RemoteParticipant;
+import ar.com.montepagano.search.v1.PrivateMiddlewareServiceGrpc;
+import ar.com.montepagano.search.v1.Middleware;
+import ar.com.montepagano.search.v1.Middleware.RegisterChannelRequest;
+import ar.com.montepagano.search.v1.Middleware.RegisterChannelResponse;
+import ar.com.montepagano.search.v1.AppMessageOuterClass.AppSendRequest;
+import ar.com.montepagano.search.v1.AppMessageOuterClass.AppMessage;
+import ar.com.montepagano.search.v1.Contracts.GlobalContract;
+import ar.com.montepagano.search.v1.Contracts.GlobalContractFormat;
+import ar.com.montepagano.search.v1.Broker.RemoteParticipant;
 
 public class Main {
     public static void main(String[] args) {

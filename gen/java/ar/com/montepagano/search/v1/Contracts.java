@@ -2,7 +2,7 @@
 // source: search/v1/contracts.proto
 
 // Protobuf Java Version: 3.25.0
-package ar.com.montepagano.search.contracts.v1;
+package ar.com.montepagano.search.v1;
 
 public final class Contracts {
   private Contracts() {}
@@ -122,7 +122,7 @@ public final class Contracts {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return ar.com.montepagano.search.contracts.v1.Contracts.getDescriptor().getEnumTypes().get(0);
+      return ar.com.montepagano.search.v1.Contracts.getDescriptor().getEnumTypes().get(0);
     }
 
     private static final GlobalContractFormat[] VALUES = values();
@@ -238,7 +238,7 @@ public final class Contracts {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return ar.com.montepagano.search.contracts.v1.Contracts.getDescriptor().getEnumTypes().get(1);
+      return ar.com.montepagano.search.v1.Contracts.getDescriptor().getEnumTypes().get(1);
     }
 
     private static final LocalContractFormat[] VALUES = values();
@@ -283,7 +283,7 @@ public final class Contracts {
      * <code>.search.v1.GlobalContractFormat format = 2 [json_name = "format"];</code>
      * @return The format.
      */
-    ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat getFormat();
+    ar.com.montepagano.search.v1.Contracts.GlobalContractFormat getFormat();
 
     /**
      * <code>string initiator_name = 3 [json_name = "initiatorName"];</code>
@@ -324,15 +324,15 @@ public final class Contracts {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_GlobalContract_descriptor;
+      return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_GlobalContract_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_GlobalContract_fieldAccessorTable
+      return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_GlobalContract_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.class, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.Builder.class);
+              ar.com.montepagano.search.v1.Contracts.GlobalContract.class, ar.com.montepagano.search.v1.Contracts.GlobalContract.Builder.class);
     }
 
     public static final int CONTRACT_FIELD_NUMBER = 1;
@@ -359,9 +359,9 @@ public final class Contracts {
      * <code>.search.v1.GlobalContractFormat format = 2 [json_name = "format"];</code>
      * @return The format.
      */
-    @java.lang.Override public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat getFormat() {
-      ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat result = ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat.forNumber(format_);
-      return result == null ? ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat.UNRECOGNIZED : result;
+    @java.lang.Override public ar.com.montepagano.search.v1.Contracts.GlobalContractFormat getFormat() {
+      ar.com.montepagano.search.v1.Contracts.GlobalContractFormat result = ar.com.montepagano.search.v1.Contracts.GlobalContractFormat.forNumber(format_);
+      return result == null ? ar.com.montepagano.search.v1.Contracts.GlobalContractFormat.UNRECOGNIZED : result;
     }
 
     public static final int INITIATOR_NAME_FIELD_NUMBER = 3;
@@ -420,7 +420,7 @@ public final class Contracts {
       if (!contract_.isEmpty()) {
         output.writeBytes(1, contract_);
       }
-      if (format_ != ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
+      if (format_ != ar.com.montepagano.search.v1.Contracts.GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
         output.writeEnum(2, format_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(initiatorName_)) {
@@ -439,7 +439,7 @@ public final class Contracts {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, contract_);
       }
-      if (format_ != ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
+      if (format_ != ar.com.montepagano.search.v1.Contracts.GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, format_);
       }
@@ -456,10 +456,10 @@ public final class Contracts {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.Contracts.GlobalContract)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract other = (ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract) obj;
+      ar.com.montepagano.search.v1.Contracts.GlobalContract other = (ar.com.montepagano.search.v1.Contracts.GlobalContract) obj;
 
       if (!getContract()
           .equals(other.getContract())) return false;
@@ -488,44 +488,44 @@ public final class Contracts {
       return hash;
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -533,26 +533,26 @@ public final class Contracts {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -565,7 +565,7 @@ public final class Contracts {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.Contracts.GlobalContract prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -586,21 +586,21 @@ public final class Contracts {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.GlobalContract)
-        ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractOrBuilder {
+        ar.com.montepagano.search.v1.Contracts.GlobalContractOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_GlobalContract_descriptor;
+        return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_GlobalContract_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_GlobalContract_fieldAccessorTable
+        return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_GlobalContract_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.class, ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.Builder.class);
+                ar.com.montepagano.search.v1.Contracts.GlobalContract.class, ar.com.montepagano.search.v1.Contracts.GlobalContract.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.Contracts.GlobalContract.newBuilder()
       private Builder() {
 
       }
@@ -623,17 +623,17 @@ public final class Contracts {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_GlobalContract_descriptor;
+        return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_GlobalContract_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract getDefaultInstanceForType() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.getDefaultInstance();
+      public ar.com.montepagano.search.v1.Contracts.GlobalContract getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.Contracts.GlobalContract.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract build() {
-        ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract result = buildPartial();
+      public ar.com.montepagano.search.v1.Contracts.GlobalContract build() {
+        ar.com.montepagano.search.v1.Contracts.GlobalContract result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -641,14 +641,14 @@ public final class Contracts {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract buildPartial() {
-        ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract result = new ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract(this);
+      public ar.com.montepagano.search.v1.Contracts.GlobalContract buildPartial() {
+        ar.com.montepagano.search.v1.Contracts.GlobalContract result = new ar.com.montepagano.search.v1.Contracts.GlobalContract(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.Contracts.GlobalContract result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.contract_ = contract_;
@@ -695,16 +695,16 @@ public final class Contracts {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract) {
-          return mergeFrom((ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract)other);
+        if (other instanceof ar.com.montepagano.search.v1.Contracts.GlobalContract) {
+          return mergeFrom((ar.com.montepagano.search.v1.Contracts.GlobalContract)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract other) {
-        if (other == ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.Contracts.GlobalContract other) {
+        if (other == ar.com.montepagano.search.v1.Contracts.GlobalContract.getDefaultInstance()) return this;
         if (other.getContract() != com.google.protobuf.ByteString.EMPTY) {
           setContract(other.getContract());
         }
@@ -830,16 +830,16 @@ public final class Contracts {
        * @return The format.
        */
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat getFormat() {
-        ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat result = ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat.forNumber(format_);
-        return result == null ? ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat.UNRECOGNIZED : result;
+      public ar.com.montepagano.search.v1.Contracts.GlobalContractFormat getFormat() {
+        ar.com.montepagano.search.v1.Contracts.GlobalContractFormat result = ar.com.montepagano.search.v1.Contracts.GlobalContractFormat.forNumber(format_);
+        return result == null ? ar.com.montepagano.search.v1.Contracts.GlobalContractFormat.UNRECOGNIZED : result;
       }
       /**
        * <code>.search.v1.GlobalContractFormat format = 2 [json_name = "format"];</code>
        * @param value The format to set.
        * @return This builder for chaining.
        */
-      public Builder setFormat(ar.com.montepagano.search.contracts.v1.Contracts.GlobalContractFormat value) {
+      public Builder setFormat(ar.com.montepagano.search.v1.Contracts.GlobalContractFormat value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -947,12 +947,12 @@ public final class Contracts {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.GlobalContract)
-    private static final ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.Contracts.GlobalContract DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.Contracts.GlobalContract();
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.Contracts.GlobalContract getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -988,7 +988,7 @@ public final class Contracts {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.contracts.v1.Contracts.GlobalContract getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.Contracts.GlobalContract getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1013,7 +1013,7 @@ public final class Contracts {
      * <code>.search.v1.LocalContractFormat format = 2 [json_name = "format"];</code>
      * @return The format.
      */
-    ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat getFormat();
+    ar.com.montepagano.search.v1.Contracts.LocalContractFormat getFormat();
   }
   /**
    * Protobuf type {@code search.v1.LocalContract}
@@ -1041,15 +1041,15 @@ public final class Contracts {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_LocalContract_descriptor;
+      return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_LocalContract_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_LocalContract_fieldAccessorTable
+      return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_LocalContract_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.class, ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.Builder.class);
+              ar.com.montepagano.search.v1.Contracts.LocalContract.class, ar.com.montepagano.search.v1.Contracts.LocalContract.Builder.class);
     }
 
     public static final int CONTRACT_FIELD_NUMBER = 1;
@@ -1076,9 +1076,9 @@ public final class Contracts {
      * <code>.search.v1.LocalContractFormat format = 2 [json_name = "format"];</code>
      * @return The format.
      */
-    @java.lang.Override public ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat getFormat() {
-      ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat result = ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat.forNumber(format_);
-      return result == null ? ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat.UNRECOGNIZED : result;
+    @java.lang.Override public ar.com.montepagano.search.v1.Contracts.LocalContractFormat getFormat() {
+      ar.com.montepagano.search.v1.Contracts.LocalContractFormat result = ar.com.montepagano.search.v1.Contracts.LocalContractFormat.forNumber(format_);
+      return result == null ? ar.com.montepagano.search.v1.Contracts.LocalContractFormat.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1098,7 +1098,7 @@ public final class Contracts {
       if (!contract_.isEmpty()) {
         output.writeBytes(1, contract_);
       }
-      if (format_ != ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat.LOCAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
+      if (format_ != ar.com.montepagano.search.v1.Contracts.LocalContractFormat.LOCAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
         output.writeEnum(2, format_);
       }
       getUnknownFields().writeTo(output);
@@ -1114,7 +1114,7 @@ public final class Contracts {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, contract_);
       }
-      if (format_ != ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat.LOCAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
+      if (format_ != ar.com.montepagano.search.v1.Contracts.LocalContractFormat.LOCAL_CONTRACT_FORMAT_UNSPECIFIED.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, format_);
       }
@@ -1128,10 +1128,10 @@ public final class Contracts {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ar.com.montepagano.search.contracts.v1.Contracts.LocalContract)) {
+      if (!(obj instanceof ar.com.montepagano.search.v1.Contracts.LocalContract)) {
         return super.equals(obj);
       }
-      ar.com.montepagano.search.contracts.v1.Contracts.LocalContract other = (ar.com.montepagano.search.contracts.v1.Contracts.LocalContract) obj;
+      ar.com.montepagano.search.v1.Contracts.LocalContract other = (ar.com.montepagano.search.v1.Contracts.LocalContract) obj;
 
       if (!getContract()
           .equals(other.getContract())) return false;
@@ -1156,44 +1156,44 @@ public final class Contracts {
       return hash;
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(byte[] data)
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1201,26 +1201,26 @@ public final class Contracts {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseDelimitedFrom(java.io.InputStream input)
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseDelimitedFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract parseFrom(
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1233,7 +1233,7 @@ public final class Contracts {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ar.com.montepagano.search.contracts.v1.Contracts.LocalContract prototype) {
+    public static Builder newBuilder(ar.com.montepagano.search.v1.Contracts.LocalContract prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1254,21 +1254,21 @@ public final class Contracts {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:search.v1.LocalContract)
-        ar.com.montepagano.search.contracts.v1.Contracts.LocalContractOrBuilder {
+        ar.com.montepagano.search.v1.Contracts.LocalContractOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_LocalContract_descriptor;
+        return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_LocalContract_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_LocalContract_fieldAccessorTable
+        return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_LocalContract_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.class, ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.Builder.class);
+                ar.com.montepagano.search.v1.Contracts.LocalContract.class, ar.com.montepagano.search.v1.Contracts.LocalContract.Builder.class);
       }
 
-      // Construct using ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.newBuilder()
+      // Construct using ar.com.montepagano.search.v1.Contracts.LocalContract.newBuilder()
       private Builder() {
 
       }
@@ -1290,17 +1290,17 @@ public final class Contracts {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.internal_static_search_v1_LocalContract_descriptor;
+        return ar.com.montepagano.search.v1.Contracts.internal_static_search_v1_LocalContract_descriptor;
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.LocalContract getDefaultInstanceForType() {
-        return ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.getDefaultInstance();
+      public ar.com.montepagano.search.v1.Contracts.LocalContract getDefaultInstanceForType() {
+        return ar.com.montepagano.search.v1.Contracts.LocalContract.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.LocalContract build() {
-        ar.com.montepagano.search.contracts.v1.Contracts.LocalContract result = buildPartial();
+      public ar.com.montepagano.search.v1.Contracts.LocalContract build() {
+        ar.com.montepagano.search.v1.Contracts.LocalContract result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1308,14 +1308,14 @@ public final class Contracts {
       }
 
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.LocalContract buildPartial() {
-        ar.com.montepagano.search.contracts.v1.Contracts.LocalContract result = new ar.com.montepagano.search.contracts.v1.Contracts.LocalContract(this);
+      public ar.com.montepagano.search.v1.Contracts.LocalContract buildPartial() {
+        ar.com.montepagano.search.v1.Contracts.LocalContract result = new ar.com.montepagano.search.v1.Contracts.LocalContract(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(ar.com.montepagano.search.contracts.v1.Contracts.LocalContract result) {
+      private void buildPartial0(ar.com.montepagano.search.v1.Contracts.LocalContract result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.contract_ = contract_;
@@ -1359,16 +1359,16 @@ public final class Contracts {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ar.com.montepagano.search.contracts.v1.Contracts.LocalContract) {
-          return mergeFrom((ar.com.montepagano.search.contracts.v1.Contracts.LocalContract)other);
+        if (other instanceof ar.com.montepagano.search.v1.Contracts.LocalContract) {
+          return mergeFrom((ar.com.montepagano.search.v1.Contracts.LocalContract)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ar.com.montepagano.search.contracts.v1.Contracts.LocalContract other) {
-        if (other == ar.com.montepagano.search.contracts.v1.Contracts.LocalContract.getDefaultInstance()) return this;
+      public Builder mergeFrom(ar.com.montepagano.search.v1.Contracts.LocalContract other) {
+        if (other == ar.com.montepagano.search.v1.Contracts.LocalContract.getDefaultInstance()) return this;
         if (other.getContract() != com.google.protobuf.ByteString.EMPTY) {
           setContract(other.getContract());
         }
@@ -1484,16 +1484,16 @@ public final class Contracts {
        * @return The format.
        */
       @java.lang.Override
-      public ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat getFormat() {
-        ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat result = ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat.forNumber(format_);
-        return result == null ? ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat.UNRECOGNIZED : result;
+      public ar.com.montepagano.search.v1.Contracts.LocalContractFormat getFormat() {
+        ar.com.montepagano.search.v1.Contracts.LocalContractFormat result = ar.com.montepagano.search.v1.Contracts.LocalContractFormat.forNumber(format_);
+        return result == null ? ar.com.montepagano.search.v1.Contracts.LocalContractFormat.UNRECOGNIZED : result;
       }
       /**
        * <code>.search.v1.LocalContractFormat format = 2 [json_name = "format"];</code>
        * @param value The format to set.
        * @return This builder for chaining.
        */
-      public Builder setFormat(ar.com.montepagano.search.contracts.v1.Contracts.LocalContractFormat value) {
+      public Builder setFormat(ar.com.montepagano.search.v1.Contracts.LocalContractFormat value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1529,12 +1529,12 @@ public final class Contracts {
     }
 
     // @@protoc_insertion_point(class_scope:search.v1.LocalContract)
-    private static final ar.com.montepagano.search.contracts.v1.Contracts.LocalContract DEFAULT_INSTANCE;
+    private static final ar.com.montepagano.search.v1.Contracts.LocalContract DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ar.com.montepagano.search.contracts.v1.Contracts.LocalContract();
+      DEFAULT_INSTANCE = new ar.com.montepagano.search.v1.Contracts.LocalContract();
     }
 
-    public static ar.com.montepagano.search.contracts.v1.Contracts.LocalContract getDefaultInstance() {
+    public static ar.com.montepagano.search.v1.Contracts.LocalContract getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1570,7 +1570,7 @@ public final class Contracts {
     }
 
     @java.lang.Override
-    public ar.com.montepagano.search.contracts.v1.Contracts.LocalContract getDefaultInstanceForType() {
+    public ar.com.montepagano.search.v1.Contracts.LocalContract getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1607,9 +1607,9 @@ public final class Contracts {
       "TRACT_FORMAT_FSA\020\001\022\035\n\031GLOBAL_CONTRACT_FO" +
       "RMAT_GC\020\002*[\n\023LocalContractFormat\022%\n!LOCA" +
       "L_CONTRACT_FORMAT_UNSPECIFIED\020\000\022\035\n\031LOCAL" +
-      "_CONTRACT_FORMAT_FSA\020\001BR\n&ar.com.montepa" +
-      "gano.search.contracts.v1Z(github.com/pmo" +
-      "ntepagano/search/gen/go/v1b\006proto3"
+      "_CONTRACT_FORMAT_FSA\020\001BH\n\034ar.com.montepa" +
+      "gano.search.v1Z(github.com/pmontepagano/" +
+      "search/gen/go/v1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
