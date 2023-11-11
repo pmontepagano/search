@@ -1,0 +1,98 @@
+
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ../../
+      dockerfile: ./examples/credit-card-payments/backend/Dockerfile
+    networks:
+      - backend_network
+    depends_on:
+      - middleware-backend
+
+  client:
+    build:
+      context: ../../
+      dockerfile: ./examples/credit-card-payments/client/Dockerfile
+    networks:
+      - client_network
+    depends_on:
+      - middleware-client
+      - backend
+      - payments-service
+
+  payments-service:
+    build:
+      context: ../../
+      dockerfile: ./examples/credit-card-payments/payments-service/Dockerfile
+    networks:
+      - payments_network
+    depends_on:
+      - middleware-payments
+
+  broker:
+    build: ../../
+    networks:
+      - broker_network
+    command: ["broker"]
+
+  middleware-backend:
+    build: ../../
+    networks:
+      - backend_network
+      - broker_network
+    environment:
+      - SERVICE_NAME=backend
+    command: "middleware -broker_addr broker:10000 -private_host 0.0.0.0 -public_url middleware-backend:10000"
+    depends_on:
+      - broker
+    expose:
+      - "11000"
+      - "10000"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:11000"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+      start_period: 1s
+
+  middleware-client:
+    build: ../../
+    networks:
+      - client_network
+      - broker_network
+    environment:
+      - SERVICE_NAME=client
+    command: "middleware -broker_addr broker:10000 -private_host 0.0.0.0 -public_url middleware-client:10000"
+    depends_on:
+      - broker
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:11000"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+      start_period: 1s
+
+  middleware-payments:
+    build: ../../
+    networks:
+      - payments_network
+      - broker_network
+    environment:
+      - SERVICE_NAME=payments-service
+    command: "middleware -broker_addr broker:10000 -private_host 0.0.0.0 -public_url middleware-payments:10000"
+    depends_on:
+      - broker
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:11000"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+      start_period: 1s
+
+networks:
+  backend_network:
+  client_network:
+  payments_network:
+  broker_network:

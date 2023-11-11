@@ -9,6 +9,11 @@ __pycache__/
 # C extensions
 *.so
 
+# IDE config files
+.idea
+
 # Binaries
 /broker
 /middleware
+
+node_modules

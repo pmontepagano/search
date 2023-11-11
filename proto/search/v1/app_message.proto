@@ -1,6 +1,7 @@
 syntax = "proto3";
 package search.v1;
 option go_package = "github.com/pmontepagano/search/gen/go/v1";
+option java_package = "ar.com.montepagano.search.v1";
 
 
 // This is what will be exchanged between middlewares

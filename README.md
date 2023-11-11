@@ -4,6 +4,10 @@
 
 ### Buf para protobufs y gRPC
 
+- Tenemos que tener instalado [este paquete para generar los stubs de Python](https://github.com/danielgtaylor/python-betterproto). La manera más sencilla es crear un virtual environment de Python e instalar el archivo `requirements.txt` que se encuentra en la raíz de este repositorio.
+- También tenemos que tener instalada la herramienta [buf](https://buf.build/docs/installation).
+- Luego, basta con ejecutar el siguiente comando:
+
     buf generate proto
 
 ### Entgo para manejo de la base de datos del broker

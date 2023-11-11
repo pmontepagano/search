@@ -26,7 +26,7 @@ import (
 func TestRegisterChannel(t *testing.T) {
 	mw := NewMiddlewareServer("broker:7777")
 	var wg sync.WaitGroup
-	mw.StartMiddlewareServer(&wg, "localhost:4444", "localhost:5555", false, "", "", nil)
+	mw.StartMiddlewareServer(&wg, "localhost:4444", "localhost:4444", "localhost:5555", false, "", "", nil)
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -201,7 +201,7 @@ func TestNoCompatibleProviders(t *testing.T) {
 			t.Log("waiting for broker...")
 			brokerURL := <-brokerStartedURL // wait until the Broker has selected a free TCP port and started listening on it.
 			serviceClientMw := NewMiddlewareServer(brokerURL)
-			serviceClientMw.StartMiddlewareServer(&wgServiceClient, "localhost:", "localhost:", false, "", "", nil)
+			serviceClientMw.StartMiddlewareServer(&wgServiceClient, "", "localhost:", "localhost:", false, "", "", nil)
 			t.Cleanup(serviceClientMw.Stop)
 
 			// Connect to Service Client's middleware.
@@ -251,13 +251,13 @@ func TestCircle(t *testing.T) {
 	var wgInitiator sync.WaitGroup
 	// start middlewares
 	p1Mw := NewMiddlewareServer(brokerURL)
-	p1Mw.StartMiddlewareServer(&wgProviders, fmt.Sprintf("localhost:%d", p1Port), fmt.Sprintf("localhost:%d", p1Port+1), false, "", "", nil)
+	p1Mw.StartMiddlewareServer(&wgProviders, "", fmt.Sprintf("localhost:%d", p1Port), fmt.Sprintf("localhost:%d", p1Port+1), false, "", "", nil)
 	p2Mw := NewMiddlewareServer(brokerURL)
-	p2Mw.StartMiddlewareServer(&wgProviders, fmt.Sprintf("localhost:%d", p2Port), fmt.Sprintf("localhost:%d", p2Port+1), false, "", "", nil)
+	p2Mw.StartMiddlewareServer(&wgProviders, "", fmt.Sprintf("localhost:%d", p2Port), fmt.Sprintf("localhost:%d", p2Port+1), false, "", "", nil)
 	p3Mw := NewMiddlewareServer(brokerURL)
-	p3Mw.StartMiddlewareServer(&wgProviders, fmt.Sprintf("localhost:%d", p3Port), fmt.Sprintf("localhost:%d", p3Port+1), false, "", "", nil)
+	p3Mw.StartMiddlewareServer(&wgProviders, "", fmt.Sprintf("localhost:%d", p3Port), fmt.Sprintf("localhost:%d", p3Port+1), false, "", "", nil)
 	initiatorMw := NewMiddlewareServer(brokerURL)
-	initiatorMw.StartMiddlewareServer(&wgInitiator, fmt.Sprintf("localhost:%d", initiatorPort), fmt.Sprintf("localhost:%d", initiatorPort+1), false, "", "", nil)
+	initiatorMw.StartMiddlewareServer(&wgInitiator, "", fmt.Sprintf("localhost:%d", initiatorPort), fmt.Sprintf("localhost:%d", initiatorPort+1), false, "", "", nil)
 	defer initiatorMw.Stop()
 
 	// common grpc.DialOption
@@ -485,9 +485,9 @@ func TestPingPongFullExample(t *testing.T) {
 	// start middlewares
 	var wg sync.WaitGroup
 	pingMiddleware := NewMiddlewareServer(fmt.Sprintf("localhost:%d", brokerPort))
-	pingMiddleware.StartMiddlewareServer(&wg, fmt.Sprintf("localhost:%d", pingPubPort), fmt.Sprintf("localhost:%d", pingPrivPort), false, "", "", nil)
+	pingMiddleware.StartMiddlewareServer(&wg, "", fmt.Sprintf("localhost:%d", pingPubPort), fmt.Sprintf("localhost:%d", pingPrivPort), false, "", "", nil)
 	pongMiddleware := NewMiddlewareServer(fmt.Sprintf("localhost:%d", brokerPort))
-	pongMiddleware.StartMiddlewareServer(&wg, fmt.Sprintf("localhost:%d", pongPubPort), fmt.Sprintf("localhost:%d", pongPrivPort), false, "", "", nil)
+	pongMiddleware.StartMiddlewareServer(&wg, "", fmt.Sprintf("localhost:%d", pongPubPort), fmt.Sprintf("localhost:%d", pongPrivPort), false, "", "", nil)
 	defer pingMiddleware.Stop()
 	defer pongMiddleware.Stop()
 
