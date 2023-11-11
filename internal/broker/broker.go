@@ -396,7 +396,13 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 			client := pb.NewPublicMiddlewareServiceClient(conn)
 			result.client = client
 			var participantsMapping map[string]*pb.RemoteParticipant
-			participantsMapping, err = s.getParticipantMapping(reqContract, allParticipants, pname, candidates[pname])
+			// TODO: the current protocol design of preset participants only works if the Service Client and the
+			// preset participants have the same naming for participants. We should change this and include the mapping in the message that is sent by the Service Client.
+			if _, ok := presetParticipants[pname]; ok {
+				participantsMapping = allParticipants
+			} else {
+				participantsMapping, err = s.getParticipantMapping(reqContract, allParticipants, pname, candidates[pname])
+			}
 			if err != nil {
 				s.logger.Printf(err.Error())
 				unresponsiveParticipants <- pname
@@ -410,7 +416,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 			res, err := client.InitChannel(ctx, &req)
 			if err != nil {
 				unresponsiveParticipants <- pname
-				s.logger.Printf("Error doing InitChannel")
+				s.logger.Printf("Error doing InitChannel with participant name %s, with URL %s", pname, p.Url)
 				return result, fmt.Errorf("unresponsive provider during InitChannel: %w", err)
 			}
 			if res.Result != pb.InitChannelResponse_RESULT_ACK {
