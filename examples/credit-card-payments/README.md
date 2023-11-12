@@ -9,6 +9,7 @@ Please follow the instructions below to run the SEArch example:
 - Make sure you have [Docker Compose installed](https://docs.docker.com/compose/install/).
 - Open a terminal, navigate to this directory and run:
 
+
     docker-compose run client
 
 You will be prompted by the Service Client for different questions. The output should look like this:
