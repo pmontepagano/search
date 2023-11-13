@@ -38,7 +38,7 @@ func main() {
 		logger.Fatalf("Error connecting to middleware URL %s", *middlewareURL)
 	}
 	defer conn.Close()
-	client := pb.NewPrivateMiddlewareServiceClient(conn)
+	stub := pb.NewPrivateMiddlewareServiceClient(conn)
 
 	// Register provider contract with registry.
 	req := pb.RegisterAppRequest{
@@ -49,7 +49,7 @@ func main() {
 	}
 	streamCtx, streamCtxCancel := context.WithCancel(context.Background())
 	defer streamCtxCancel()
-	stream, err := client.RegisterApp(streamCtx, &req)
+	stream, err := stub.RegisterApp(streamCtx, &req)
 	if err != nil {
 		logger.Fatal("Could not Register App")
 	}
@@ -214,6 +214,6 @@ func main() {
 			}
 			logger.Printf("Finished PPS program for channel %s", channelID)
 
-		}(channelID, client)
+		}(channelID, stub)
 	}
 }
