@@ -76,8 +76,10 @@ public class Main {
                 GlobalContractFormat.GLOBAL_CONTRACT_FORMAT_FSA).setInitiatorName("ClientApp").build();
 
         // Get the stub to communicate with the middleware
-        ManagedChannel channel = ManagedChannelBuilder.forTarget("middleware-client:11000").usePlaintext().build();
-        PrivateMiddlewareServiceGrpc.PrivateMiddlewareServiceBlockingStub stub = PrivateMiddlewareServiceGrpc.newBlockingStub(channel);
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(
+                "middleware-client:11000").usePlaintext().build();
+        PrivateMiddlewareServiceGrpc.PrivateMiddlewareServiceBlockingStub stub =
+                PrivateMiddlewareServiceGrpc.newBlockingStub(channel);
 
         // Prompt the user to input hostname for the PPS and Srv apps. Both should have a default value of "middleware-payments:10000" and "middleware-backend:10000" respectively.
         System.out.print("Enter the hostname for the PPS app (default: middleware-payments:10000): ");
@@ -115,7 +117,9 @@ public class Main {
             }
         }
         Gson gson = new Gson();
-        var body = ByteString.copyFromUtf8(String.format("{\"items\": %s, \"shippingAddress\": \"%s\"}", gson.toJson(items), shippingAddress));
+        var body = ByteString.copyFromUtf8(String.format(
+                "{\"items\": %s, \"shippingAddress\": \"%s\"}",
+                gson.toJson(items), shippingAddress));
         var msg = AppMessage.newBuilder().setType("PurchaseRequest").setBody(body).build();
         var sendreq = AppSendRequest.newBuilder().setChannelId(channelId).setRecipient("Srv").setMessage(msg).build();
         var sendresp = stub.appSend(sendreq);
