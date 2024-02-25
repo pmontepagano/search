@@ -67,6 +67,21 @@ func allContractsIncompatible(ctx context.Context, req contract.LocalContract, p
 	return false, nil, nil
 }
 
+func bisimilarityAlgorithm(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+	reqPyFormat, err := req.Convert(contract.SingleCFSMPythonBisimulation)
+	if err != nil {
+		return false, nil, fmt.Errorf("error converting requirement contract to Python bisimulation format: %w", err)
+	}
+	provPyFormat, err := prov.Convert(contract.SingleCFSMPythonBisimulation)
+	if err != nil {
+		return false, nil, fmt.Errorf("error converting provider contract to Python bisimulation format: %w", err)
+	}
+	log.Printf("reqPyFormat: %s", reqPyFormat)
+	log.Printf("provPyFormat: %s", provPyFormat)
+
+	return false, nil, nil
+}
+
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig
 func filterParticipants(orig []string, r map[string]*pb.RemoteParticipant) []string {
 	result := make([]string, 0)

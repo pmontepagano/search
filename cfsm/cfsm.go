@@ -256,6 +256,8 @@ type Transition interface {
 	Label() string           // Label is the marking on the transition.
 	State() *State           // State after transition.
 	NameOfOtherCFSM() string // Name of the CFSM we are communicating with.
+	IsSend() bool            // True if the transition is a Send, false if it's a Recv.
+	Message() string         // Message payload.
 }
 
 // Send is a send transition (output).
@@ -284,6 +286,14 @@ func (s *Send) Label() string {
 		log.Fatal("Cannot get Label for Send:", ErrStateUndef)
 	}
 	return fmt.Sprintf("%s ! %s", s.NameOfOtherCFSM(), s.msg)
+}
+
+func (s *Send) IsSend() bool {
+	return true
+}
+
+func (s *Send) Message() string {
+	return s.msg
 }
 
 // Name of the CFSM we are communicating with.
@@ -329,6 +339,14 @@ func (r *Recv) Label() string {
 		log.Fatal("Cannot get Label for Recv:", ErrStateUndef)
 	}
 	return fmt.Sprintf("%s ? %s", r.NameOfOtherCFSM(), r.msg)
+}
+
+func (r *Recv) IsSend() bool {
+	return false
+}
+
+func (r *Recv) Message() string {
+	return r.msg
 }
 
 // Name of the CFSM we are communicating with.

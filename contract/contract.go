@@ -11,10 +11,17 @@ import (
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
 )
 
+type ContractOutputFormats int
+
+const (
+	SingleCFSMPythonBisimulation ContractOutputFormats = iota
+)
+
 type Contract interface {
 	GetContractID() string
 	GetRemoteParticipantNames() []string // Returns the names of all participants in this contract (except the Service Provider, who is unnamed).
 	GetBytesRepr() []byte
+	Convert(ContractOutputFormats) ([]byte, error)
 }
 
 // LocalContract is an interface that represents a local view of a contract. It is used to
@@ -170,4 +177,15 @@ func ConvertPBLocalContract(pbContract *pb.LocalContract) (LocalContract, error)
 		return &contract, nil
 	}
 	return nil, fmt.Errorf("not implemented")
+}
+
+func (lc *LocalCFSMContract) Convert(format ContractOutputFormats) ([]byte, error) {
+	if format == SingleCFSMPythonBisimulation {
+		return cfsm.ConvertCFSMToPythonBisimulationFormat(lc.CFSM)
+	}
+	return nil, fmt.Errorf("invalid output format for this type of contract")
+}
+
+func (lc *GlobalCFSMContract) Convert(format ContractOutputFormats) ([]byte, error) {
+	return nil, fmt.Errorf("invalid output format for this type of contract")
 }
