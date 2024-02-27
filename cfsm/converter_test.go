@@ -21,9 +21,19 @@ func TestConvertCFSMToPythonBisimulationFormat(t *testing.T) {
 	}
 
 	expectedOutput := []byte(`from cfsm_bisimulation import CommunicatingFiniteStateMachine
-	
-	cfsm = CommunicatingFiniteStateMachine(["self", "Server"])
-	`)
+
+cfsm = CommunicatingFiniteStateMachine(["Self","Server"])
+
+cfsm.add_states('0')
+cfsm.add_states('1')
+cfsm.add_states('2')
+
+cfsm.set_as_initial('0')
+
+cfsm.add_transition_between('0', '1', 'Self Server ! message0()')
+cfsm.add_transition_between('1', '2', 'Self Server ? message1()')
+
+`)
 
 	output, err := ConvertCFSMToPythonBisimulationFormat(contract)
 	if err != nil {

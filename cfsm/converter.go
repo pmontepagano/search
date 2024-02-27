@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+	"strings"
 )
 
 // This function converts a CFSM to a string in the format of the Python Bisimulation library
@@ -13,24 +14,44 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 	// Import statement
 	const importStatement = "from cfsm_bisimulation import CommunicatingFiniteStateMachine\n\n"
 
-	// Create CFSM
+	// We need all participant names to start with a single uppercase letter and then all lowercase or numbers.
+	// We'll have to keep track of all the translations we do here, so we can translate back when we're done.
+	participantNameTranslations := make(map[string]string)
+	otherCFSMs := make([]string, 0)
+	for _, name := range contract.OtherCFSMs() {
+		msgRegex := `[A-Z][a-z0-9]*`
+		matched, err := regexp.MatchString(msgRegex, name)
+		if err != nil {
+			return nil, err
+		}
+		translatedName := name
+		if matched {
+			participantNameTranslations[name] = name
+		} else {
+			translatedName = "C" + filterOutNonAlphanumeric(name)
+			participantNameTranslations[name] = translatedName
+			// TODO: check that the new name is unique.
+		}
+		otherCFSMs = append(otherCFSMs, translatedName)
+	}
+
 	// Diego's format expects also the name for the CFSM we're defining, so we'll have to pick
 	// a name that is unused. We'll use 'self' unless it's already used. If it is, we'll generate
 	// a random string and use that (verifying it's also unused).
-	otherCFSMs := contract.OtherCFSMs()
-	selfname := "self"
-	restart := false
+
+	selfname := "Self"
+	restart := true
 	for restart {
 		restart = false
 		for _, name := range otherCFSMs {
 			if name == selfname {
-				selfname = "self_" + generateRandomString(5)
+				selfname = "Self" + generateRandomString(5)
 				restart = true
 				break
 			}
 		}
 	}
-	allCFSMs := append(otherCFSMs, selfname)
+	allCFSMs := append([]string{selfname}, otherCFSMs...)
 	allCFSMsJSON, err := json.Marshal(allCFSMs)
 	if err != nil {
 		return nil, err
@@ -49,18 +70,27 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 
 	// Add transitions
 	addTransitions := ""
+	messageTranslations := make(map[string]string)
+	messageTranslationsInverted := make(map[string]string)
 	for _, state := range contract.States() {
 		for _, transition := range state.Transitions() {
-			// cfsm_bisimulation format expects the message to be a string with the format
-			// is SenderReceiver[!|?]function([typed parameters]). e.g "ClientServer!f(int x)" or "ServerClient?g()"
+			// cfsm_bisimulation format expects the message to be a string with the format like this:
+			// Sender Receiver [!|?] function([typed parameters]). e.g "Client Server ! f(int x)" or "ServerClient?g()"
+			// It actually uses this regex to match the "action_string" paramter:
+			// (?P<participant1>[A-Z][a-z0-9]*)\s*(?P<participant2>[A-Z][a-z0-9]*)\s*(?P<action>!|\?)\s*(?P<tag>\w+)\((?P<payload>.*)\)
+			// https://github.com/diegosenarruzza/bisimulation/blob/81af48aed977b79e41b2a96c36160354e230f5b2/src/cfsm_bisimulation/models/communicating_system/action_parser.py#L5-L8
 
-			msgRegex := `\w+\(.*\)`
-			matched, err := regexp.MatchString(msgRegex, transition.Message())
-			if err != nil {
-				return nil, err
-			}
-			if !matched {
-				return nil, fmt.Errorf("the message in transition %s does not match the format expected by cfsm_simulation", transition.Label())
+			// So we need participant names to start with a single uppercase letter and then all lowercase or numbers.
+			// We also need the "tag" to have parentheses after it. We're not going to use the payload (leave empty).
+			// We also will not set any conditions, so we'll use TrueFormula for that.
+
+			// We'll have to keep track of all the translations we do here, so we can translate back when we're done.
+
+			translatedMessage, ok := messageTranslations[transition.Message()]
+			if !ok {
+				translatedMessage = fmt.Sprintf("message%d()", len(messageTranslations))
+				messageTranslations[transition.Message()] = translatedMessage
+				messageTranslationsInverted[translatedMessage] = transition.Message()
 			}
 
 			var transitionTypeMarker string
@@ -69,8 +99,8 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 			} else {
 				transitionTypeMarker = "?"
 			}
-			action := fmt.Sprintf("%s%s%s%s", selfname, transition.NameOfOtherCFSM(), transitionTypeMarker, transition.Message())
-			addTransitions += fmt.Sprintf("cfsm.add_transition_between('%d', '%d', '%s', True)\n", state.ID, transition.State().ID, action)
+			action := fmt.Sprintf("%s %s %s %s", selfname, participantNameTranslations[transition.NameOfOtherCFSM()], transitionTypeMarker, translatedMessage)
+			addTransitions += fmt.Sprintf("cfsm.add_transition_between('%d', '%d', '%s')\n", state.ID, transition.State().ID, action)
 		}
 	}
 
@@ -87,4 +117,10 @@ func generateRandomString(length int) string {
 		result[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(result)
+}
+
+var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9]+`)
+
+func filterOutNonAlphanumeric(str string) string {
+	return nonAlphanumericRegex.ReplaceAllString(strings.ToLower(str), "")
 }
