@@ -18,12 +18,10 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 	// We'll have to keep track of all the translations we do here, so we can translate back when we're done.
 	participantNameTranslations := make(map[string]string)
 	otherCFSMs := make([]string, 0)
+	msgRegex := regexp.MustCompile(`[A-Z][a-z0-9]*`)
 	for _, name := range contract.OtherCFSMs() {
-		msgRegex := `[A-Z][a-z0-9]*`
-		matched, err := regexp.MatchString(msgRegex, name)
-		if err != nil {
-			return nil, err
-		}
+
+		matched := msgRegex.MatchString(name)
 		translatedName := name
 		if matched {
 			participantNameTranslations[name] = name
