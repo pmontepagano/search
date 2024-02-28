@@ -35,7 +35,7 @@ cfsm.add_transition_between('1', '2', 'Self Server ? message1()')
 
 `)
 
-	output, err := ConvertCFSMToPythonBisimulationFormat(contract)
+	output, _, _, err := ConvertCFSMToPythonBisimulationFormat(contract)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}

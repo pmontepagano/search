@@ -6,17 +6,22 @@ import (
 	"math/rand"
 	"regexp"
 	"strings"
+
+	"github.com/vishalkuo/bimap"
 )
 
 // This function converts a CFSM to a string in the format of the Python Bisimulation library
 // https://github.com/diegosenarruzza/bisimulation/
-func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
+func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, participantNameTranslations, messageTranslations *bimap.BiMap[string, string], funcErr error) {
 	// Import statement
 	const importStatement = "from cfsm_bisimulation import CommunicatingFiniteStateMachine\n\n"
 
 	// We need all participant names to start with a single uppercase letter and then all lowercase or numbers.
 	// We'll have to keep track of all the translations we do here, so we can translate back when we're done.
-	participantNameTranslations := make(map[string]string)
+
+	participantNameTranslations = bimap.NewBiMap[string, string]()
+	messageTranslations = bimap.NewBiMap[string, string]()
+
 	otherCFSMs := make([]string, 0)
 	msgRegex := regexp.MustCompile(`[A-Z][a-z0-9]*`)
 	for _, name := range contract.OtherCFSMs() {
@@ -24,10 +29,10 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 		matched := msgRegex.MatchString(name)
 		translatedName := name
 		if matched {
-			participantNameTranslations[name] = name
+			participantNameTranslations.Insert(name, name)
 		} else {
 			translatedName = "C" + filterOutNonAlphanumeric(name)
-			participantNameTranslations[name] = translatedName
+			participantNameTranslations.Insert(name, translatedName)
 			// TODO: check that the new name is unique.
 		}
 		otherCFSMs = append(otherCFSMs, translatedName)
@@ -52,7 +57,7 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 	allCFSMs := append([]string{selfname}, otherCFSMs...)
 	allCFSMsJSON, err := json.Marshal(allCFSMs)
 	if err != nil {
-		return nil, err
+		return nil, participantNameTranslations, messageTranslations, err
 	}
 	createCFSM := "cfsm = CommunicatingFiniteStateMachine(" + string(allCFSMsJSON) + ")\n\n"
 
@@ -68,8 +73,6 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 
 	// Add transitions
 	addTransitions := ""
-	messageTranslations := make(map[string]string)
-	messageTranslationsInverted := make(map[string]string)
 	for _, state := range contract.States() {
 		for _, transition := range state.Transitions() {
 			// cfsm_bisimulation format expects the message to be a string with the format like this:
@@ -84,11 +87,10 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 
 			// We'll have to keep track of all the translations we do here, so we can translate back when we're done.
 
-			translatedMessage, ok := messageTranslations[transition.Message()]
+			translatedMessage, ok := messageTranslations.Get(transition.Message())
 			if !ok {
-				translatedMessage = fmt.Sprintf("message%d()", len(messageTranslations))
-				messageTranslations[transition.Message()] = translatedMessage
-				messageTranslationsInverted[translatedMessage] = transition.Message()
+				translatedMessage = fmt.Sprintf("message%d()", messageTranslations.Size())
+				messageTranslations.Insert(transition.Message(), translatedMessage)
 			}
 
 			var transitionTypeMarker string
@@ -97,7 +99,8 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 			} else {
 				transitionTypeMarker = "?"
 			}
-			action := fmt.Sprintf("%s %s %s %s", selfname, participantNameTranslations[transition.NameOfOtherCFSM()], transitionTypeMarker, translatedMessage)
+			otherParticipantName, _ := participantNameTranslations.Get(transition.NameOfOtherCFSM())
+			action := fmt.Sprintf("%s %s %s %s", selfname, otherParticipantName, transitionTypeMarker, translatedMessage)
 			addTransitions += fmt.Sprintf("cfsm.add_transition_between('%d', '%d', '%s')\n", state.ID, transition.State().ID, action)
 		}
 	}
@@ -105,7 +108,7 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) ([]byte, error) {
 	// Combine all code blocks
 	code := importStatement + createCFSM + addStates + setInitialState + addTransitions + "\n"
 
-	return []byte(code), nil
+	return []byte(code), participantNameTranslations, messageTranslations, nil
 }
 
 func generateRandomString(length int) string {

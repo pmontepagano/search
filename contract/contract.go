@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/pmontepagano/search/cfsm"
+	"github.com/vishalkuo/bimap"
 
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
 )
@@ -181,11 +182,34 @@ func ConvertPBLocalContract(pbContract *pb.LocalContract) (LocalContract, error)
 
 func (lc *LocalCFSMContract) Convert(format ContractOutputFormats) ([]byte, error) {
 	if format == SingleCFSMPythonBisimulation {
-		return cfsm.ConvertCFSMToPythonBisimulationFormat(lc.CFSM)
+		code, _, _, err := cfsm.ConvertCFSMToPythonBisimulationFormat(lc.CFSM)
+		return code, err
 	}
 	return nil, fmt.Errorf("invalid output format for this type of contract")
 }
 
 func (lc *GlobalCFSMContract) Convert(format ContractOutputFormats) ([]byte, error) {
 	return nil, fmt.Errorf("invalid output format for this type of contract")
+}
+
+type LocalPyCFSMContract struct {
+	pythonCode []byte
+	id         string
+	sync.Mutex
+	convertedFrom               *LocalCFSMContract
+	participantNameTranslations *bimap.BiMap[string, string]
+	messageTranslations         *bimap.BiMap[string, string]
+}
+
+func (lc *LocalCFSMContract) ConvertToPyCFSM() (*LocalPyCFSMContract, error) {
+	pythonCode, participantTranslations, messageTranslations, err := cfsm.ConvertCFSMToPythonBisimulationFormat(lc.CFSM)
+	if err != nil {
+		return nil, err
+	}
+	return &LocalPyCFSMContract{
+		pythonCode:                  pythonCode,
+		convertedFrom:               lc,
+		participantNameTranslations: participantTranslations,
+		messageTranslations:         messageTranslations,
+	}, nil
 }
