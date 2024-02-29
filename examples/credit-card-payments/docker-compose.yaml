@@ -35,7 +35,7 @@ services:
     build: ../../
     networks:
       - broker_network
-    command: ["broker"]
+    command: ["broker", "-use_python_bisimulation"]
 
   middleware-backend:
     build: ../../

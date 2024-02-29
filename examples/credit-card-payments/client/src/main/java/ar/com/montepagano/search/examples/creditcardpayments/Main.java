@@ -82,27 +82,28 @@ public class Main {
                 PrivateMiddlewareServiceGrpc.newBlockingStub(channel);
 
         // Prompt the user to input hostname for the PPS and Srv apps. Both should have a default value of "middleware-payments:10000" and "middleware-backend:10000" respectively.
-        System.out.print("Enter the hostname for the PPS app (default: middleware-payments:10000): ");
-        String ppsHostname = scanner.nextLine();
-        if (ppsHostname.isEmpty()) {
-            ppsHostname = "middleware-payments:10000";
-        }
-        System.out.print("Enter the hostname for the Srv app (default: middleware-backend:10000): ");
-        String srvHostname = scanner.nextLine();
-        if (srvHostname.isEmpty()) {
-            srvHostname = "middleware-backend:10000";
-        }
+        // System.out.print("Enter the hostname for the PPS app (default: middleware-payments:10000): ");
+        // String ppsHostname = scanner.nextLine();
+        // if (ppsHostname.isEmpty()) {
+        //     ppsHostname = "middleware-payments:10000";
+        // }
+        // System.out.print("Enter the hostname for the Srv app (default: middleware-backend:10000): ");
+        // String srvHostname = scanner.nextLine();
+        // if (srvHostname.isEmpty()) {
+        //     srvHostname = "middleware-backend:10000";
+        // }
         // Prompt the user to input AppId for the PPS and Srv apps. They don't have default values and must be provided by the user.
-        System.out.print("Enter the AppId for the PPS app: ");
-        String ppsAppId = scanner.nextLine();
-        System.out.print("Enter the AppId for the Srv app: ");
-        String srvAppId = scanner.nextLine();
+        // System.out.print("Enter the AppId for the PPS app: ");
+        // String ppsAppId = scanner.nextLine();
+        // System.out.print("Enter the AppId for the Srv app: ");
+        // String srvAppId = scanner.nextLine();
 
         // Register channel with middleware using GlobalContract.
         // Add preset participants to the RegisterChannelRequest. We do this because we don't have an algorithm for compatibility checking in the broker.
-        RemoteParticipant pps = RemoteParticipant.newBuilder().setUrl(ppsHostname).setAppId(ppsAppId).build();
-        RemoteParticipant srv = RemoteParticipant.newBuilder().setUrl(srvHostname).setAppId(srvAppId).build();
-        RegisterChannelRequest request = RegisterChannelRequest.newBuilder().setRequirementsContract(contract).putPresetParticipants("PPS", pps).putPresetParticipants("Srv", srv).build();
+        // RemoteParticipant pps = RemoteParticipant.newBuilder().setUrl(ppsHostname).setAppId(ppsAppId).build();
+        // RemoteParticipant srv = RemoteParticipant.newBuilder().setUrl(srvHostname).setAppId(srvAppId).build();
+        // RegisterChannelRequest request = RegisterChannelRequest.newBuilder().setRequirementsContract(contract).putPresetParticipants("PPS", pps).putPresetParticipants("Srv", srv).build();
+        RegisterChannelRequest request = RegisterChannelRequest.newBuilder().setRequirementsContract(contract).build();
         RegisterChannelResponse response = stub.registerChannel(request);
         var channelId = response.getChannelId();
 
