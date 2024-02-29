@@ -68,11 +68,11 @@ func allContractsIncompatible(ctx context.Context, req contract.LocalContract, p
 }
 
 func bisimilarityAlgorithm(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
-	reqPyFormat, err := req.Convert(contract.SingleCFSMPythonBisimulation)
+	reqPyFormat, err := req.Convert(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE)
 	if err != nil {
 		return false, nil, fmt.Errorf("error converting requirement contract to Python bisimulation format: %w", err)
 	}
-	provPyFormat, err := prov.Convert(contract.SingleCFSMPythonBisimulation)
+	provPyFormat, err := prov.Convert(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE)
 	if err != nil {
 		return false, nil, fmt.Errorf("error converting provider contract to Python bisimulation format: %w", err)
 	}

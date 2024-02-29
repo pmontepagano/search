@@ -22,64 +22,6 @@ func (_m *GlobalContract) EXPECT() *GlobalContract_Expecter {
 	return &GlobalContract_Expecter{mock: &_m.Mock}
 }
 
-// Convert provides a mock function with given fields: _a0
-func (_m *GlobalContract) Convert(_a0 contract.ContractOutputFormats) ([]byte, error) {
-	ret := _m.Called(_a0)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Convert")
-	}
-
-	var r0 []byte
-	var r1 error
-	if rf, ok := ret.Get(0).(func(contract.ContractOutputFormats) ([]byte, error)); ok {
-		return rf(_a0)
-	}
-	if rf, ok := ret.Get(0).(func(contract.ContractOutputFormats) []byte); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]byte)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(contract.ContractOutputFormats) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GlobalContract_Convert_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Convert'
-type GlobalContract_Convert_Call struct {
-	*mock.Call
-}
-
-// Convert is a helper method to define mock.On call
-//   - _a0 contract.ContractOutputFormats
-func (_e *GlobalContract_Expecter) Convert(_a0 interface{}) *GlobalContract_Convert_Call {
-	return &GlobalContract_Convert_Call{Call: _e.mock.On("Convert", _a0)}
-}
-
-func (_c *GlobalContract_Convert_Call) Run(run func(_a0 contract.ContractOutputFormats)) *GlobalContract_Convert_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(contract.ContractOutputFormats))
-	})
-	return _c
-}
-
-func (_c *GlobalContract_Convert_Call) Return(_a0 []byte, _a1 error) *GlobalContract_Convert_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *GlobalContract_Convert_Call) RunAndReturn(run func(contract.ContractOutputFormats) ([]byte, error)) *GlobalContract_Convert_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // GetBytesRepr provides a mock function with given fields:
 func (_m *GlobalContract) GetBytesRepr() []byte {
 	ret := _m.Called()

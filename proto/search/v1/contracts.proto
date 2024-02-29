@@ -24,4 +24,5 @@ message LocalContract {
 enum LocalContractFormat {
     LOCAL_CONTRACT_FORMAT_UNSPECIFIED = 0;
     LOCAL_CONTRACT_FORMAT_FSA = 1; // Single CFSM in FSA file format (for Service Providers).
+    LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE = 2;  // Python code to construct CFSM for https://github.com/diegosenarruzza/bisimulation/
 }

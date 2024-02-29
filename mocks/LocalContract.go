@@ -23,27 +23,27 @@ func (_m *LocalContract) EXPECT() *LocalContract_Expecter {
 }
 
 // Convert provides a mock function with given fields: _a0
-func (_m *LocalContract) Convert(_a0 contract.ContractOutputFormats) ([]byte, error) {
+func (_m *LocalContract) Convert(_a0 v1.LocalContractFormat) (contract.LocalContract, error) {
 	ret := _m.Called(_a0)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Convert")
 	}
 
-	var r0 []byte
+	var r0 contract.LocalContract
 	var r1 error
-	if rf, ok := ret.Get(0).(func(contract.ContractOutputFormats) ([]byte, error)); ok {
+	if rf, ok := ret.Get(0).(func(v1.LocalContractFormat) (contract.LocalContract, error)); ok {
 		return rf(_a0)
 	}
-	if rf, ok := ret.Get(0).(func(contract.ContractOutputFormats) []byte); ok {
+	if rf, ok := ret.Get(0).(func(v1.LocalContractFormat) contract.LocalContract); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]byte)
+			r0 = ret.Get(0).(contract.LocalContract)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(contract.ContractOutputFormats) error); ok {
+	if rf, ok := ret.Get(1).(func(v1.LocalContractFormat) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -58,24 +58,24 @@ type LocalContract_Convert_Call struct {
 }
 
 // Convert is a helper method to define mock.On call
-//   - _a0 contract.ContractOutputFormats
+//   - _a0 v1.LocalContractFormat
 func (_e *LocalContract_Expecter) Convert(_a0 interface{}) *LocalContract_Convert_Call {
 	return &LocalContract_Convert_Call{Call: _e.mock.On("Convert", _a0)}
 }
 
-func (_c *LocalContract_Convert_Call) Run(run func(_a0 contract.ContractOutputFormats)) *LocalContract_Convert_Call {
+func (_c *LocalContract_Convert_Call) Run(run func(_a0 v1.LocalContractFormat)) *LocalContract_Convert_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(contract.ContractOutputFormats))
+		run(args[0].(v1.LocalContractFormat))
 	})
 	return _c
 }
 
-func (_c *LocalContract_Convert_Call) Return(_a0 []byte, _a1 error) *LocalContract_Convert_Call {
+func (_c *LocalContract_Convert_Call) Return(_a0 contract.LocalContract, _a1 error) *LocalContract_Convert_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *LocalContract_Convert_Call) RunAndReturn(run func(contract.ContractOutputFormats) ([]byte, error)) *LocalContract_Convert_Call {
+func (_c *LocalContract_Convert_Call) RunAndReturn(run func(v1.LocalContractFormat) (contract.LocalContract, error)) *LocalContract_Convert_Call {
 	_c.Call.Return(run)
 	return _c
 }

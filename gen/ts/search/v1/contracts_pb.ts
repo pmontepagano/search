@@ -51,11 +51,19 @@ export enum LocalContractFormat {
    * @generated from enum value: LOCAL_CONTRACT_FORMAT_FSA = 1;
    */
   FSA = 1,
+
+  /**
+   * Python code to construct CFSM for https://github.com/diegosenarruzza/bisimulation/
+   *
+   * @generated from enum value: LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE = 2;
+   */
+  PYTHON_BISIMULATION_CODE = 2,
 }
 // Retrieve enum metadata with: proto3.getEnumType(LocalContractFormat)
 proto3.util.setEnumType(LocalContractFormat, "search.v1.LocalContractFormat", [
   { no: 0, name: "LOCAL_CONTRACT_FORMAT_UNSPECIFIED" },
   { no: 1, name: "LOCAL_CONTRACT_FORMAT_FSA" },
+  { no: 2, name: "LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE" },
 ]);
 
 /**

@@ -35,6 +35,7 @@ class GlobalContractFormat(betterproto.Enum):
 class LocalContractFormat(betterproto.Enum):
     LOCAL_CONTRACT_FORMAT_UNSPECIFIED = 0
     LOCAL_CONTRACT_FORMAT_FSA = 1
+    LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE = 2
 
 
 class AppSendResponseResult(betterproto.Enum):
@@ -449,6 +450,7 @@ class PublicMiddlewareServiceStub(betterproto.ServiceStub):
 
 
 class BrokerServiceBase(ServiceBase):
+
     async def broker_channel(
         self, broker_channel_request: "BrokerChannelRequest"
     ) -> "BrokerChannelResponse":
@@ -493,6 +495,7 @@ class BrokerServiceBase(ServiceBase):
 
 
 class PrivateMiddlewareServiceBase(ServiceBase):
+
     async def register_channel(
         self, register_channel_request: "RegisterChannelRequest"
     ) -> "RegisterChannelResponse":
@@ -590,6 +593,7 @@ class PrivateMiddlewareServiceBase(ServiceBase):
 
 
 class PublicMiddlewareServiceBase(ServiceBase):
+
     async def init_channel(
         self, init_channel_request: "InitChannelRequest"
     ) -> "InitChannelResponse":

@@ -12,17 +12,10 @@ import (
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
 )
 
-type ContractOutputFormats int
-
-const (
-	SingleCFSMPythonBisimulation ContractOutputFormats = iota
-)
-
 type Contract interface {
 	GetContractID() string
 	GetRemoteParticipantNames() []string // Returns the names of all participants in this contract (except the Service Provider, who is unnamed).
 	GetBytesRepr() []byte
-	Convert(ContractOutputFormats) ([]byte, error)
 }
 
 // LocalContract is an interface that represents a local view of a contract. It is used to
@@ -30,6 +23,7 @@ type Contract interface {
 type LocalContract interface {
 	Contract
 	GetFormat() pb.LocalContractFormat
+	Convert(pb.LocalContractFormat) (LocalContract, error)
 	// TODO: add GetNextState()
 }
 
@@ -50,30 +44,7 @@ type LocalCFSMContract struct {
 	sync.Mutex
 }
 
-type GlobalCFSMContract struct {
-	*cfsm.System
-	id               string
-	localParticipant *cfsm.CFSM
-	sync.Mutex
-}
-
 func (c *LocalCFSMContract) GetContractID() string {
-	locked := c.TryLock()
-	if locked {
-		defer c.Unlock()
-		if c.id != "" {
-			return c.id
-		}
-	}
-	contractHash := sha512.Sum512(c.GetBytesRepr())
-	id := fmt.Sprintf("%x", contractHash[:])
-	if locked {
-		c.id = id
-	}
-	return id
-}
-
-func (c *GlobalCFSMContract) GetContractID() string {
 	locked := c.TryLock()
 	if locked {
 		defer c.Unlock()
@@ -91,6 +62,44 @@ func (c *GlobalCFSMContract) GetContractID() string {
 
 func (lc *LocalCFSMContract) GetRemoteParticipantNames() []string {
 	return lc.CFSM.OtherCFSMs()
+}
+
+func (c *LocalCFSMContract) GetBytesRepr() []byte {
+	return c.Bytes()
+}
+
+func (lc *LocalCFSMContract) GetFormat() pb.LocalContractFormat {
+	return pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA
+}
+
+func (lc *LocalCFSMContract) Convert(format pb.LocalContractFormat) (LocalContract, error) {
+	if format == pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE {
+		return lc.ConvertToPyCFSM()
+	}
+	return nil, fmt.Errorf("invalid output format for this type of contract")
+}
+
+type GlobalCFSMContract struct {
+	*cfsm.System
+	id               string
+	localParticipant *cfsm.CFSM
+	sync.Mutex
+}
+
+func (c *GlobalCFSMContract) GetContractID() string {
+	locked := c.TryLock()
+	if locked {
+		defer c.Unlock()
+		if c.id != "" {
+			return c.id
+		}
+	}
+	contractHash := sha512.Sum512(c.GetBytesRepr())
+	id := fmt.Sprintf("%x", contractHash[:])
+	if locked {
+		c.id = id
+	}
+	return id
 }
 
 func (c *GlobalCFSMContract) GetParticipants() (ret []string) {
@@ -122,16 +131,8 @@ func (c *GlobalCFSMContract) GetBytesRepr() []byte {
 	return c.Bytes()
 }
 
-func (c *LocalCFSMContract) GetBytesRepr() []byte {
-	return c.Bytes()
-}
-
 func (c *GlobalCFSMContract) GetFormat() pb.GlobalContractFormat {
 	return pb.GlobalContractFormat_GLOBAL_CONTRACT_FORMAT_FSA
-}
-
-func (lc *LocalCFSMContract) GetFormat() pb.LocalContractFormat {
-	return pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA
 }
 
 func (c *GlobalCFSMContract) GetProjection(participantName string) (LocalContract, error) {
@@ -180,18 +181,6 @@ func ConvertPBLocalContract(pbContract *pb.LocalContract) (LocalContract, error)
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (lc *LocalCFSMContract) Convert(format ContractOutputFormats) ([]byte, error) {
-	if format == SingleCFSMPythonBisimulation {
-		code, _, _, err := cfsm.ConvertCFSMToPythonBisimulationFormat(lc.CFSM)
-		return code, err
-	}
-	return nil, fmt.Errorf("invalid output format for this type of contract")
-}
-
-func (lc *GlobalCFSMContract) Convert(format ContractOutputFormats) ([]byte, error) {
-	return nil, fmt.Errorf("invalid output format for this type of contract")
-}
-
 type LocalPyCFSMContract struct {
 	pythonCode []byte
 	id         string
@@ -212,4 +201,44 @@ func (lc *LocalCFSMContract) ConvertToPyCFSM() (*LocalPyCFSMContract, error) {
 		participantNameTranslations: participantTranslations,
 		messageTranslations:         messageTranslations,
 	}, nil
+}
+
+// TODO: this is copy-pasted from LocalCFSMContract's implementation. Refactor w/ a common interface.
+func (c *LocalPyCFSMContract) GetContractID() string {
+	locked := c.TryLock()
+	if locked {
+		defer c.Unlock()
+		if c.id != "" {
+			return c.id
+		}
+	}
+	contractHash := sha512.Sum512(c.GetBytesRepr())
+	id := fmt.Sprintf("%x", contractHash[:])
+	if locked {
+		c.id = id
+	}
+	return id
+}
+
+func (lc *LocalPyCFSMContract) GetRemoteParticipantNames() []string {
+	inverseMap := lc.participantNameTranslations.GetInverseMap()
+	res := make([]string, len(inverseMap))
+	i := 0
+	for k := range inverseMap {
+		res[i] = k
+		i++
+	}
+	return res
+}
+
+func (c *LocalPyCFSMContract) GetBytesRepr() []byte {
+	return c.pythonCode
+}
+
+func (lc *LocalPyCFSMContract) GetFormat() pb.LocalContractFormat {
+	return pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE
+}
+
+func (lc *LocalPyCFSMContract) Convert(format pb.LocalContractFormat) (LocalContract, error) {
+	return nil, fmt.Errorf("not implemented")
 }
