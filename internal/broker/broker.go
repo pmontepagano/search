@@ -2,12 +2,14 @@ package broker
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/url"
 	"os"
+	"os/exec"
 	"sort"
 	"time"
 
@@ -67,19 +69,67 @@ func allContractsIncompatible(ctx context.Context, req contract.LocalContract, p
 	return false, nil, nil
 }
 
+// This function assumes that it can call out to Python with the cfsm-bisimulation package installed.
+// It also assumes both contracts are CFSMs.
 func bisimilarityAlgorithm(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
-	reqPyFormat, err := req.Convert(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE)
+	reqPyFormatInterface, err := req.Convert(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE)
 	if err != nil {
 		return false, nil, fmt.Errorf("error converting requirement contract to Python bisimulation format: %w", err)
 	}
-	provPyFormat, err := prov.Convert(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE)
+	provPyFormatInterface, err := prov.Convert(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE)
 	if err != nil {
 		return false, nil, fmt.Errorf("error converting provider contract to Python bisimulation format: %w", err)
 	}
-	log.Printf("reqPyFormat: %s", reqPyFormat)
-	log.Printf("provPyFormat: %s", provPyFormat)
+	reqPyFormat, ok := reqPyFormatInterface.(*contract.LocalPyCFSMContract)
+	if !ok {
+		return false, nil, errors.New("error casting requirement contract to LocalPyCFSMContract")
+	}
+	provPyFormat, ok := provPyFormatInterface.(*contract.LocalPyCFSMContract)
+	if !ok {
+		return false, nil, errors.New("error casting provider contract to LocalPyCFSMContract")
+	}
+	// log.Printf("reqPyFormat: %s", reqPyFormat.GetBytesRepr())
+	// log.Printf("provPyFormat: %s", provPyFormat.GetBytesRepr())
 
-	return false, nil, nil
+	pythonScript := "import json\n"
+	pythonScript += "from cfsm_bisimulation import CommunicatingFiniteStateMachine\n\n"
+
+	pythonScript += reqPyFormat.GetPythonCode("req") + "\n\n"
+	pythonScript += provPyFormat.GetPythonCode("prov") + "\n\n"
+	pythonScript += "relation, matches = req.calculate_bisimulation_with(prov)\n\n"
+	pythonScript += "print(json.dumps({'relation': bool(relation), 'participant_matches': matches['participants']}))\n"
+
+	// Create a temporary file to store the Python code
+	tempFile, err := os.CreateTemp("", "bisimilarity_check_*.py")
+	if err != nil {
+		panic(err)
+	}
+	defer os.Remove(tempFile.Name()) // Delete the temporary file when finished
+
+	// Write the Python code to the temporary file
+	_, err = tempFile.WriteString(pythonScript)
+	if err != nil {
+		panic(err)
+	}
+
+	// Execute the Python code using exec.Command
+	cmd := exec.Command("python", tempFile.Name())
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return false, nil, fmt.Errorf("error executing Python code: %w", err)
+	}
+
+	type BisimOuput struct {
+		Result                      bool              `json:"relation"`
+		ParticipantNameTranslations map[string]string `json:"participant_matches"`
+	}
+	var data BisimOuput
+	err = json.Unmarshal(output, &data)
+	if err != nil {
+		return false, nil, fmt.Errorf("Error parsing JSON: %w", err)
+	}
+
+	return data.Result, data.ParticipantNameTranslations, nil
 }
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig

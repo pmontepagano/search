@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"sync"
+	"text/template"
 
 	"github.com/pmontepagano/search/cfsm"
 	"github.com/vishalkuo/bimap"
@@ -241,4 +242,25 @@ func (lc *LocalPyCFSMContract) GetFormat() pb.LocalContractFormat {
 
 func (lc *LocalPyCFSMContract) Convert(format pb.LocalContractFormat) (LocalContract, error) {
 	return nil, fmt.Errorf("not implemented")
+}
+
+func (lc *LocalPyCFSMContract) GetPythonCode(varName string) string {
+	type templateData struct {
+		MachineName string
+	}
+	// Parse the template string
+	tmpl, err := template.New("templatePyCFSM").Parse(string(lc.pythonCode))
+	if err != nil {
+		panic(err)
+	}
+
+	// Create a buffer to capture the output
+	var buffer bytes.Buffer
+
+	// Execute the template
+	err = tmpl.Execute(&buffer, templateData{MachineName: varName})
+	if err != nil {
+		panic(err)
+	}
+	return buffer.String()
 }

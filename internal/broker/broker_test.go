@@ -573,3 +573,58 @@ func TestGetBestCandidate_CachedResult(t *testing.T) {
 	require.Equal(t, provider1RegisteredProvider.ContractID, result.ContractID)
 	// assert.Equal(t, 1, numberOfCallsToCompatFunc) // Compatibility check is only run for provider 2.
 }
+
+func TestBisimulationPython(t *testing.T) {
+	testDir := t.TempDir()
+	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
+	t.Cleanup(b.Stop)
+
+	const prov1FSA = `.outputs PPS
+	.state graph
+	q0 ClientApp ? CardDetailsWithTotalAmount q1
+	q1 ClientApp ! PaymentNonce q2
+	q2 Srv ? RequestChargeWithNonce q3
+	q3 Srv ! ChargeOK q4
+	q3 Srv ! ChargeFail q5
+	.marking q0
+	.end`
+
+	const prov2FSA = `.outputs PPS2
+	.state graph
+	q0 cliente ? CardDetailsWithTotalAmount q1
+	q1 cliente ! PaymentNonce q2
+	q2 backend ? RequestChargeWithNonce q3
+	q3 backend ! ChargeOK q4
+	q3 backend ! ChargeFail q5
+	.marking q0
+	.end`
+
+	prov1Contract, err := contract.ConvertPBLocalContract(
+		&pb.LocalContract{
+			Contract: []byte(prov1FSA),
+			Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
+		},
+	)
+	if err != nil {
+		t.Fatalf("error converting contract: %v", err)
+	}
+
+	prov2Contract, err := contract.ConvertPBLocalContract(
+		&pb.LocalContract{
+			Contract: []byte(prov2FSA),
+			Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
+		},
+	)
+	if err != nil {
+		t.Fatalf("error converting contract: %v", err)
+	}
+
+	res, _, err := bisimilarityAlgorithm(context.Background(), prov1Contract, prov2Contract)
+	if err != nil {
+		t.Fatalf("error running bisimilarity algorithm: %v", err)
+	}
+	if !res {
+		t.Fatalf("bisimilarity algorithm returned false")
+	}
+
+}

@@ -13,8 +13,6 @@ import (
 // This function converts a CFSM to a string in the format of the Python Bisimulation library
 // https://github.com/diegosenarruzza/bisimulation/
 func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, participantNameTranslations, messageTranslations *bimap.BiMap[string, string], funcErr error) {
-	// Import statement
-	const importStatement = "from cfsm_bisimulation import CommunicatingFiniteStateMachine\n\n"
 
 	// We need all participant names to start with a single uppercase letter and then all lowercase or numbers.
 	// We'll have to keep track of all the translations we do here, so we can translate back when we're done.
@@ -23,7 +21,7 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, p
 	messageTranslations = bimap.NewBiMap[string, string]()
 
 	otherCFSMs := make([]string, 0)
-	msgRegex := regexp.MustCompile(`[A-Z][a-z0-9]*`)
+	msgRegex := regexp.MustCompile(`^[A-Z][a-z0-9]*$`)
 	for _, name := range contract.OtherCFSMs() {
 
 		matched := msgRegex.MatchString(name)
@@ -59,17 +57,17 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, p
 	if err != nil {
 		return nil, participantNameTranslations, messageTranslations, err
 	}
-	createCFSM := "cfsm = CommunicatingFiniteStateMachine(" + string(allCFSMsJSON) + ")\n\n"
+	createCFSM := "{{.MachineName}} = CommunicatingFiniteStateMachine(" + string(allCFSMsJSON) + ")\n\n"
 
 	// Add states
 	addStates := ""
 	for _, state := range contract.States() {
-		addStates += fmt.Sprintf("cfsm.add_states('%d')\n", state.ID)
+		addStates += fmt.Sprintf("{{.MachineName}}.add_states('%d')\n", state.ID)
 	}
 	addStates += "\n"
 
 	// Set initial state
-	setInitialState := fmt.Sprintf("cfsm.set_as_initial('%d')\n\n", contract.Start.ID)
+	setInitialState := fmt.Sprintf("{{.MachineName}}.set_as_initial('%d')\n\n", contract.Start.ID)
 
 	// Add transitions
 	addTransitions := ""
@@ -101,12 +99,12 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, p
 			}
 			otherParticipantName, _ := participantNameTranslations.Get(transition.NameOfOtherCFSM())
 			action := fmt.Sprintf("%s %s %s %s", selfname, otherParticipantName, transitionTypeMarker, translatedMessage)
-			addTransitions += fmt.Sprintf("cfsm.add_transition_between('%d', '%d', '%s')\n", state.ID, transition.State().ID, action)
+			addTransitions += fmt.Sprintf("{{.MachineName}}.add_transition_between('%d', '%d', '%s')\n", state.ID, transition.State().ID, action)
 		}
 	}
 
 	// Combine all code blocks
-	code := importStatement + createCFSM + addStates + setInitialState + addTransitions + "\n"
+	code := createCFSM + addStates + setInitialState + addTransitions + "\n"
 
 	return []byte(code), participantNameTranslations, messageTranslations, nil
 }
