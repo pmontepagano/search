@@ -189,10 +189,11 @@ type LocalPyCFSMContract struct {
 	convertedFrom               *LocalCFSMContract
 	participantNameTranslations *bimap.BiMap[string, string]
 	messageTranslations         *bimap.BiMap[string, string]
+	Selfname                    string
 }
 
 func (lc *LocalCFSMContract) ConvertToPyCFSM() (*LocalPyCFSMContract, error) {
-	pythonCode, participantTranslations, messageTranslations, err := cfsm.ConvertCFSMToPythonBisimulationFormat(lc.CFSM)
+	pythonCode, participantTranslations, messageTranslations, selfname, err := cfsm.ConvertCFSMToPythonBisimulationFormat(lc.CFSM)
 	if err != nil {
 		return nil, err
 	}
@@ -201,6 +202,7 @@ func (lc *LocalCFSMContract) ConvertToPyCFSM() (*LocalPyCFSMContract, error) {
 		convertedFrom:               lc,
 		participantNameTranslations: participantTranslations,
 		messageTranslations:         messageTranslations,
+		Selfname:                    selfname,
 	}, nil
 }
 
@@ -263,4 +265,12 @@ func (lc *LocalPyCFSMContract) GetPythonCode(varName string) string {
 		panic(err)
 	}
 	return buffer.String()
+}
+
+func (lc *LocalPyCFSMContract) GetOriginalParticipantName(translated string) (string, error) {
+	original, ok := lc.participantNameTranslations.GetInverse(translated)
+	if !ok {
+		return "", fmt.Errorf("translated name not found")
+	}
+	return original, nil
 }

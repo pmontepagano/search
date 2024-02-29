@@ -12,7 +12,7 @@ import (
 
 // This function converts a CFSM to a string in the format of the Python Bisimulation library
 // https://github.com/diegosenarruzza/bisimulation/
-func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, participantNameTranslations, messageTranslations *bimap.BiMap[string, string], funcErr error) {
+func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, participantNameTranslations, messageTranslations *bimap.BiMap[string, string], selfname string, funcErr error) {
 
 	// We need all participant names to start with a single uppercase letter and then all lowercase or numbers.
 	// We'll have to keep track of all the translations we do here, so we can translate back when we're done.
@@ -40,7 +40,7 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, p
 	// a name that is unused. We'll use 'self' unless it's already used. If it is, we'll generate
 	// a random string and use that (verifying it's also unused).
 
-	selfname := "Self"
+	selfname = "Self"
 	restart := true
 	for restart {
 		restart = false
@@ -55,7 +55,7 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, p
 	allCFSMs := append([]string{selfname}, otherCFSMs...)
 	allCFSMsJSON, err := json.Marshal(allCFSMs)
 	if err != nil {
-		return nil, participantNameTranslations, messageTranslations, err
+		return nil, participantNameTranslations, messageTranslations, "", err
 	}
 	createCFSM := "{{.MachineName}} = CommunicatingFiniteStateMachine(" + string(allCFSMsJSON) + ")\n\n"
 
@@ -106,7 +106,7 @@ func ConvertCFSMToPythonBisimulationFormat(contract *CFSM) (pythonCode []byte, p
 	// Combine all code blocks
 	code := createCFSM + addStates + setInitialState + addTransitions + "\n"
 
-	return []byte(code), participantNameTranslations, messageTranslations, nil
+	return []byte(code), participantNameTranslations, messageTranslations, selfname, nil
 }
 
 func generateRandomString(length int) string {

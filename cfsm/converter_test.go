@@ -33,7 +33,7 @@ func TestConvertCFSMToPythonBisimulationFormat(t *testing.T) {
 
 `)
 
-	output, _, _, err := ConvertCFSMToPythonBisimulationFormat(contract)
+	output, _, _, _, err := ConvertCFSMToPythonBisimulationFormat(contract)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}

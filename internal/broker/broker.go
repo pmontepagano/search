@@ -71,7 +71,7 @@ func allContractsIncompatible(ctx context.Context, req contract.LocalContract, p
 
 // This function assumes that it can call out to Python with the cfsm-bisimulation package installed.
 // It also assumes both contracts are CFSMs.
-func bisimilarityAlgorithm(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
+func BisimilarityAlgorithm(ctx context.Context, req contract.LocalContract, prov contract.LocalContract) (bool, map[string]string, error) {
 	reqPyFormatInterface, err := req.Convert(pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_PYTHON_BISIMULATION_CODE)
 	if err != nil {
 		return false, nil, fmt.Errorf("error converting requirement contract to Python bisimulation format: %w", err)
@@ -129,7 +129,26 @@ func bisimilarityAlgorithm(ctx context.Context, req contract.LocalContract, prov
 		return false, nil, fmt.Errorf("Error parsing JSON: %w", err)
 	}
 
-	return data.Result, data.ParticipantNameTranslations, nil
+	// We need to translate participant names back because the Python code uses different naming schemas for the participants.
+	// data.ParticipantNameTranslations is a map from the participant names in the requirement contract to the participant names in the provider contract.
+
+	participantMapping := make(map[string]string)
+	for k, v := range data.ParticipantNameTranslations {
+		if k == reqPyFormat.Selfname {
+			continue
+		}
+		nameInReq, err := reqPyFormat.GetOriginalParticipantName(k)
+		if err != nil {
+			return false, nil, fmt.Errorf("error getting original participant name for %s: %w", k, err)
+		}
+		nameInProv, err := provPyFormat.GetOriginalParticipantName(v)
+		if err != nil {
+			return false, nil, fmt.Errorf("error getting original participant name for %s: %w", v, err)
+		}
+		participantMapping[nameInReq] = nameInProv
+	}
+
+	return data.Result, participantMapping, nil
 }
 
 // returns new slice with keys of r filtered-out from orig. All keys of r MUST be present in orig

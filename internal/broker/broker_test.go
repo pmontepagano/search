@@ -579,7 +579,7 @@ func TestBisimulationPython(t *testing.T) {
 	b := NewBrokerServer(fmt.Sprintf("%s/t.db", testDir))
 	t.Cleanup(b.Stop)
 
-	const prov1FSA = `.outputs PPS
+	const reqFSA = `.outputs PPS
 	.state graph
 	q0 ClientApp ? CardDetailsWithTotalAmount q1
 	q1 ClientApp ! PaymentNonce q2
@@ -589,7 +589,7 @@ func TestBisimulationPython(t *testing.T) {
 	.marking q0
 	.end`
 
-	const prov2FSA = `.outputs PPS2
+	const provFSA = `.outputs PPS2
 	.state graph
 	q0 cliente ? CardDetailsWithTotalAmount q1
 	q1 cliente ! PaymentNonce q2
@@ -599,9 +599,9 @@ func TestBisimulationPython(t *testing.T) {
 	.marking q0
 	.end`
 
-	prov1Contract, err := contract.ConvertPBLocalContract(
+	reqContract, err := contract.ConvertPBLocalContract(
 		&pb.LocalContract{
-			Contract: []byte(prov1FSA),
+			Contract: []byte(reqFSA),
 			Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
 		},
 	)
@@ -609,9 +609,9 @@ func TestBisimulationPython(t *testing.T) {
 		t.Fatalf("error converting contract: %v", err)
 	}
 
-	prov2Contract, err := contract.ConvertPBLocalContract(
+	provContract, err := contract.ConvertPBLocalContract(
 		&pb.LocalContract{
-			Contract: []byte(prov2FSA),
+			Contract: []byte(provFSA),
 			Format:   pb.LocalContractFormat_LOCAL_CONTRACT_FORMAT_FSA,
 		},
 	)
@@ -619,12 +619,28 @@ func TestBisimulationPython(t *testing.T) {
 		t.Fatalf("error converting contract: %v", err)
 	}
 
-	res, _, err := bisimilarityAlgorithm(context.Background(), prov1Contract, prov2Contract)
+	res, participantMapping, err := BisimilarityAlgorithm(context.Background(), reqContract, provContract)
 	if err != nil {
 		t.Fatalf("error running bisimilarity algorithm: %v", err)
 	}
 	if !res {
 		t.Fatalf("bisimilarity algorithm returned false")
+	}
+
+	p, ok := participantMapping["ClientApp"]
+	if !ok {
+		t.Fatalf("participant mapping does not contain ClientApp")
+	}
+	if p != "cliente" {
+		t.Fatalf("participant mapping for ClientApp is not cliente")
+	}
+
+	p, ok = participantMapping["Srv"]
+	if !ok {
+		t.Fatalf("participant mapping does not contain Srv")
+	}
+	if p != "backend" {
+		t.Fatalf("participant mapping for Srv is not backend")
 	}
 
 }
