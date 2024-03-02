@@ -72,65 +72,74 @@ Usage of ./middleware:
 
 ### Prerequisites
 
-If you want to modify and/or contribute to this project, you will n
+If you want to modify and/or contribute to this project, you will need the following tools installed:
 
-# Implementación de SEArch
 
-## Código generado (go protobufs y go-grpc)
+1. [Python 3.12](https://python.org/) and these Python packages:
+  - [python-betterproto](https://github.com/danielgtaylor/python-betterproto), used to compile our Protocol Buffer definitions to Python code.
+  - [cfsm-bisimulation](https://github.com/diegosenarruzza/bisimulation/), used to calculate compatibility between contracts.
+  - [z3-solver](https://github.com/Z3Prover/z3), which is a dependency of `cfsm-bisimulation`.
 
-### Buf para protobufs y gRPC
+A simple way of installing all of these is to install Python 3.12 and run `pip install -r requirements.txt`
 
-- Tenemos que tener instalado [este paquete para generar los stubs de Python](https://github.com/danielgtaylor/python-betterproto). La manera más sencilla es crear un virtual environment de Python e instalar el archivo `requirements.txt` que se encuentra en la raíz de este repositorio.
-- También tenemos que tener instalada la herramienta [buf](https://buf.build/docs/installation).
-- Luego, basta con ejecutar el siguiente comando:
+2. [Go 1.21](https://go.dev/) and these tools
+  - [buf](https://buf.build/docs/installation), used to generate code from our Protocol Buffer definitions.
+  - [mockery](https://vektra.github.io/mockery/), used to generate mocks for tests.
+
+### Code generation from Protocol Buffer definitions
+
+Our Protocol Buffer definitions live in the `proto` directory. The generated code lives in the `gen` directory. If you modify the Protocol Buffer definitions or add more output languages (see `buf.gen.yaml`), just run:
 
     buf generate proto
 
-### Entgo para manejo de la base de datos del broker
+The generated code should be commited to the repository.
+
+When modifying the Protocol Buffers, make sure you run the linter like this:
+
+    buf lint proto
+
+### Code generation for database management
+
+We use [Ent](https://github.com/ent/ent) to model the database where we store contracts, providers and compatibility checks already computed.
+
+The database definitions live in `ent/schema`. The rest of the files and directories in the `ent` directory are auto-generated from the schema definitions. If you change the schemas, run the folllowing command to regenerate code and commit any changes to the repository:
 
     go generate ./ent
 
-### Para regenerar mocks con [mockery](https://vektra.github.io/mockery/)
+#### Other useful Ent commands
+
+##### Show schema in CLI
+
+    go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
+
+##### Show schema in [Atlas Cloud](https://gh.atlasgo.cloud/)
+
+    go run -mod=mod ariga.io/entviz ./ent/schema
+
+##### Generate Entity Relation diagram locally
+
+    go run -mod=mod github.com/a8m/enter ./ent/schema
+
+### Code generation for test mocks
+
+ We use [mockery](https://vektra.github.io/mockery/) to generate test _mocks_ (only for the `contract` package for now). If you modify the `contact` package, regenerate the mocks by running the following command and commiting the changes to the repository. These generated mocks live in the `mocks` directory:
 
     mockery --dir contract --all --with-expecter
 
-## Comandos varios
+### Run tests
+
+    go test ./...
+
+And with [race detector](https://go.dev/doc/articles/race_detector):
+
+    go test ./... -count=1 -race
 
 ### To get a report of code coverage
 
     go test ./... -coverprofile=coverage.txt -covermode atomic -coverpkg=./cfsm/...,./internal/...,./contract -timeout 30s
     go tool cover -html=coverage.txt
 
-### Para correr los tests
-
-    go test ./...
-
-Y con el [race detector](https://go.dev/doc/articles/race_detector):
-
-    go test ./... -count=1 -race
-
-### Para compilar los binarios de broker y middleware
+### To compile broker and middleware binaries:
 
     go build -o . ./...
-
-### Comandos útiles de Entgo (ORM)
-
-#### Show schema in CLI
-
-    go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
-
-#### Show schema in [Atlas Cloud](https://gh.atlasgo.cloud/)
-
-    go run -mod=mod ariga.io/entviz ./ent/schema
-
-#### Generate Entity Relation diagram locally
-
-    go run -mod=mod github.com/a8m/enter ./ent/schema
-
-
-## Run ChorGram's gc2fsa
-
-After `--` you send the parameters. In this example, we simply pass the input file name.
-
-    wasmtime --dir=. gc2fsa.wasm -- pingpong.gc
 
