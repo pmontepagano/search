@@ -52,7 +52,7 @@ A simple way of installing all of these is to install Python 3.12 and then run:
 
 
 ### Obtain the code
-Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`; alternatively unzip the file containing it.
+Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`; alternatively unzip the [file](https://github.com/pmontepagano/search/archive/refs/heads/bisimulation-impl-paper.zip) containing it.
 
 The structure of the repository is:
 - `internal`: contains the code of the middleware and the broker, along with their tests.
