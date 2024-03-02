@@ -15,10 +15,13 @@ Before running the client, Docker will first build the infraestructure (i.e., th
 
 ## How to compile and run the Broker and Middleware
 
-You need to have Go 1.21 installed and run:
 
-    go build -o . ./...
-
+1. **Tools**:
+    1.1. [Go 1.21](https://go.dev/).
+    1.2. [Python 3.12](https://python.org/) and these packages (this is only required to run the _broker_, not the _middleware_):
+        1.2.1. [cfsm-bisimulation](https://github.com/diegosenarruzza/bisimulation/), used to calculate compatibility between contracts.
+        1.2.2. [z3-solver](https://github.com/Z3Prover/z3), which is a dependency of `cfsm-bisimulation`.
+2. **Build**: `go build -o . ./...`
 
 This will generate the binaries `broker` and `middleware`. Both programs have a `--help` flag:
 
@@ -62,7 +65,6 @@ Usage of ./middleware:
     	Connection uses TLS if true, else plain TCP
 ```
 
-## How to see 
 
 ## How to set up a development environment
 
