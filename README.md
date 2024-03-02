@@ -5,8 +5,8 @@
 
 Do you want to just see an example of the infrastructure running?
 
-1. **Tools:** Docker (v25+) and Docker Compose (v2.24+).
-2. Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`, or unzip [the file containing it](https://github.com/pmontepagano/search/archive/refs/heads/bisimulation-impl-paper.zip).
+1. **Tools:** Docker (v25+), included in [Docker Desktop](https://docs.docker.com/desktop/), and [Docker Compose (v2.24+)](https://docs.docker.com/compose/).
+2. Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`, or unzip the [file](https://github.com/pmontepagano/search/archive/refs/heads/bisimulation-impl-paper.zip) containing it.
 3. Once in the repository root, navigate in your terminal to the `examples/credit-card-payments` directory: 
 ```
 cd examples/credit-card-payments/
@@ -16,6 +16,19 @@ cd examples/credit-card-payments/
 docker-compose run client
 ```
 Before running the client, Docker will first build the infraestructure (i.e., the Broker and the Middleware), the services and the client. Then, it will run everything within containers; the Broker, a Middleware for each service required by the example, and their corresponding services behind them. Finally, it will run a Middleware for the client, and the client application behind it.
+
+To see all the logs, open another terminal, navigate to this same directory, and run:
+```
+    docker-compose logs -f
+```
+
+That command will show you the logs all the containers:
+- the broker
+- the backend (a Service Provider)
+- the payments-service (another Service Provider)
+- the client application (Service Client)
+- 3 different instances of the middleware, one for each service and one for the application
+
 
 ## Setting up a development environment
 
