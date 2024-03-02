@@ -37,8 +37,6 @@ Usage of ./broker:
     	Port number on which the broker listens (default 10000)
   -tls
     	Connection uses TLS if true, else plain TCP
-  -use_python_bisimulation
-    	Use the Python Bisimulation library to check for bisimulation
 ```
 
 ```
