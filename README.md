@@ -30,10 +30,10 @@ That command will show you the logs all the containers:
 - 3 different instances of the middleware, one for each service and one for the application
 
 
-## Setting up a development environment
+## Setting up  SEArch step-by-step
 
 ### Prerequisites
-Modify and/or contributing to this project requires the following tools to be installed:
+Modifying and/or playing  with SEArch requires to install the following tools:
 
 1. **Tools:** [Python 3.12](https://python.org/) and the following Python packages:
   - [python-betterproto](https://github.com/danielgtaylor/python-betterproto), used to compile our Protocol Buffer definitions to Python code.
@@ -171,11 +171,11 @@ In order to get a report of code coverage after running the tests, use the follo
 To setup the infrastructure requires:
 1. running the broker:
 ```
-    ./cmd/broker -host [ host_name ] -port [ port_number ]
+    [ repository location ]/cmd/broker -host [ host_name ] -port [ port_number ]
 ```
 2. running the middlewares in each of the machines that will participate: 
 ```
-    ./cmd/middleware -private_port [ port_number ] -public_port [ port_number ] -broker_addr [ host:port ]
+    [ repository location ]/cmd/middleware -private_port [ port_number ] -public_port [ port_number ] -broker_addr [ host:port ]
 ```
 
 ### Compiling applications
