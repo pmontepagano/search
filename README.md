@@ -175,16 +175,18 @@ With the Middleware running, the applications must be run, according to their la
 ### Running the example
 The example can be run in different computers by appropriately setting the host and ports. For the sake of this section we will show how to run it in the localhost.
 
-1. **Broker:**
+1. **Broker**
+
 In a terminal run:
 ```
-    [ repository location ]go run cmd/broker/broker.go -host localhost -port 12000
+    [ repository location ]/go run cmd/broker/broker.go -host localhost -port 12000
 ```
 
-2. **Backend:**
+2. **Backend**
+
 In a terminal run the middleware for the backend service:
 ```
-    [ repository location ]go run cmd/middleware/middleware.go -private_port 11001 -public_port 10001 -public_host localhost --broker_addr localhost:12000
+    [ repository location ]/go run cmd/middleware/middleware.go -private_port 11001 -public_port 10001 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/backend` and run the backend service:
 ```
@@ -192,24 +194,26 @@ In another terminal navigate to directory `[ repository location ]/examples/cred
     python main.py --middleware-host localhost --middleware-port 11001
 ```
 
-3. **Payments service:**
+3. **Payments service**
+
 In a terminal run the middleware for the payments service:
 ```
-    [ repository location ]go run cmd/middleware/middleware.go -private_port 11002 -public_port 10002 -public_host localhost --broker_addr localhost:12000
+    [ repository location ]/go run cmd/middleware/middleware.go -private_port 11002 -public_port 10002 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/payments service` and run the payments service:
 ```
     go run main.go --middleware-url localhost:11002
 ```
 
-4. **Client application:**
+4. **Client application**
+
 In a terminal run the middleware for the client application:
 ```
-    [ repository location ]go run cmd/middleware/middleware.go -private_port 11003 -public_port 10003 -public_host localhost --broker_addr localhost:12000
+    [ repository location ]/go run cmd/middleware/middleware.go -private_port 11003 -public_port 10003 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/client` and run the client application:
 ```
-mvn verify --fail-never
-mvn package
-java -jar target/clientapp-1.0-SNAPSHOT-jar-with-dependencies.jar localhost:11003
+    mvn verify --fail-never
+    mvn package
+    java -jar target/clientapp-1.0-SNAPSHOT-jar-with-dependencies.jar localhost:11003
 ```
