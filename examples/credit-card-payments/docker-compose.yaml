@@ -10,6 +10,12 @@ services:
       - backend_network
     depends_on:
       - middleware-backend
+    healthcheck:
+      test: ["CMD", "/usr/bin/stat", "/tmp/registered"]
+      interval: 2s
+      timeout: 1s
+      retries: 10
+      start_period: 2s
 
   client:
     build:

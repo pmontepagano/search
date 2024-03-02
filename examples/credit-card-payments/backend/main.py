@@ -58,6 +58,9 @@ async def main(grpc_channel):
             # This should only happen once, in the first iteration.
             registered = True
             logger.info(f"App registered with id {r.app_id}")
+            # Create temp file for Docker Compose healthcheck.
+            with open("/tmp/registered", "w") as f:
+                f.write("OK")
         else:
             logger.error(f"Unexpected response: {r}. Exiting.")
             break
