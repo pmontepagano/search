@@ -30,6 +30,7 @@ q3 Srv ! ChargeFail q5
 `
 
 func main() {
+	flag.Parse()
 	var logger = log.New(os.Stderr, fmt.Sprintf("[PPS] - "), log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))

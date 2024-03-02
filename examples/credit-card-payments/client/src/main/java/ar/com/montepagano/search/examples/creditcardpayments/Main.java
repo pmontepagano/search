@@ -22,6 +22,7 @@ import ar.com.montepagano.search.v1.Broker.RemoteParticipant;
 
 public class Main {
     public static void main(String[] args) {
+        String middlewareURL = args.length > 0 ? args[0] : "middleware-client:11000";
         Scanner scanner = new Scanner(System.in);
 
         // List of book titles
@@ -77,7 +78,7 @@ public class Main {
 
         // Get the stub to communicate with the middleware
         ManagedChannel channel = ManagedChannelBuilder.forTarget(
-                "middleware-client:11000").usePlaintext().build();
+                middlewareURL).usePlaintext().build();
         PrivateMiddlewareServiceGrpc.PrivateMiddlewareServiceBlockingStub stub =
                 PrivateMiddlewareServiceGrpc.newBlockingStub(channel);
 
