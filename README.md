@@ -5,14 +5,12 @@
 
 Do you want to just see an example of the infrastructure runnung?
 
-You'll need Docker (v25+) and Docker Compose (v2.24+).
+1. **Tools:** Docker (v25+) and Docker Compose (v2.24+).
+2. Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`, or unzip [the file containing it](https://github.com/pmontepagano/search/archive/refs/heads/bisimulation-impl-paper.zip).
+3. Once in the repository root, navigate in your terminal to the `examples/credit-card-payments` directory: `cd examples/credit-card-payments/`
+4. Run the client: `docker-compose run client`
 
-Navigate in your terminal to the `examples/credit-card-payments` directory and run:
-
-```
-cd examples/credit-card-payments/
-docker-compose run client
-```
+Before running the client, Docker will first build the infraestructure (i.e., the Broker and the Middleware), the services and the client. Then, it will run everything within containers; the Broker, a Middleware for each service required by the example, and their corresponding services behind them. Finally, it will run a Middleware for the client, and the client application behind it.
 
 
 ## How to compile and run the Broker and Middleware
@@ -143,3 +141,8 @@ And with [race detector](https://go.dev/doc/articles/race_detector):
 
     go build -o . ./...
 
+## The example
+
+```
+cd examples/credit-card-payments
+docker-compose build 
