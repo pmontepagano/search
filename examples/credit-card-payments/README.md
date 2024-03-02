@@ -35,10 +35,6 @@ Selected Books:
 - The Catcher in the Rye
 - To Kill a Mockingbird
 Shipping Address: Balcarce 50
-Enter the hostname for the PPS app (default: middleware-payments-service:10000):
-Enter the hostname for the Srv app (default: middleware-backend:10000):
-Enter the AppId for the PPS app: 7c697682-3646-4b2c-b99d-b25edd467cc2
-Enter the AppId for the Srv app: 07d97309-dd52-4355-8149-a5f5b67b3324
 Total amount: 410.0
 Enter the credit card number: 4111111111111
 Enter the credit card expiration date: 11/25
@@ -47,8 +43,15 @@ Payment nonce: 1234567890
 Purchase successful!
 ```
 
-For the AppId values, you will have to obtain them from the logs. To do that, open another terminal, navigate to this same directory, and run:
 
-    docker-compose logs -f backend payments-service
+To see all the logs, open another terminal, navigate to this same directory, and run:
 
-That command will show you the logs for the two Service Providers. The AppIds for each one will be shown.
+    docker-compose logs -f
+
+That command will show you the logs all the containers:
+
+- the broker
+- the payments-service (a Service Provider)
+- the backend (another Service Provider)
+- the client (Service Client)
+- 3 different instances of the middleware, one for each service
