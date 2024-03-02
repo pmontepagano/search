@@ -10,7 +10,7 @@ Please follow the instructions below to run the SEArch example:
 - Open a terminal, navigate to this directory and run:
 
 
-    docker-compose run client
+    docker compose run client
 
 You will be prompted by the Service Client for different questions. The output should look like this:
 
@@ -46,7 +46,7 @@ Purchase successful!
 
 To see all the logs, open another terminal, navigate to this same directory, and run:
 
-    docker-compose logs -f
+    docker compose logs -f
 
 That command will show you the logs all the containers:
 
