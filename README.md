@@ -178,13 +178,13 @@ The example can be run in different computers by appropriately setting the host 
 1. **Broker:**
 In a terminal run:
 ```
-    [ repository location ]/cmd/broker -host localhost -port 12000
+    [ repository location ]/broker -host localhost -port 12000
 ```
 
 2. **Backend:**
 In a terminal run the middleware for the backend service:
 ```
-    [ repository location ]/cmd/middleware -private_port 11001 -public_port 10001 --broker_addr localhost:12000
+    [ repository location ]/middleware -private_port 11001 -public_port 10001 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/backend` and run the backend service:
 ```
@@ -195,7 +195,7 @@ In another terminal navigate to directory `[ repository location ]/examples/cred
 3. **Payments service:**
 In a terminal run the middleware for the payments service:
 ```
-    [ repository location ]/cmd/middleware -private_port 11002 -public_port 10002 --broker_addr localhost:12000
+    [ repository location ]/middleware -private_port 11002 -public_port 10002 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/payments service` and run the payments service:
 ```
@@ -205,7 +205,7 @@ In another terminal navigate to directory `[ repository location ]/examples/cred
 4. **Client application:**
 In a terminal run the middleware for the client application:
 ```
-    [ repository location ]/cmd/middleware -private_port 11003 -public_port 10003 --broker_addr localhost:10000
+    [ repository location ]/middleware -private_port 11003 -public_port 10003 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/client` and run the client application:
 ```
