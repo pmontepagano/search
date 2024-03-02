@@ -29,7 +29,7 @@ services:
     networks:
       - payments_network
     depends_on:
-      - middleware-payments
+      - middleware-payments-service
 
   broker:
     build: ../../
@@ -74,14 +74,14 @@ services:
       retries: 5
       start_period: 1s
 
-  middleware-payments:
+  middleware-payments-service:
     build: ../../
     networks:
       - payments_network
       - broker_network
     environment:
       - SERVICE_NAME=payments-service
-    command: "middleware -broker_addr broker:10000 -private_host 0.0.0.0 -public_url middleware-payments:10000"
+    command: "middleware -broker_addr broker:10000 -private_host 0.0.0.0 -public_url middleware-payments-service:10000"
     depends_on:
       - broker
     healthcheck:

@@ -35,7 +35,7 @@ Selected Books:
 - The Catcher in the Rye
 - To Kill a Mockingbird
 Shipping Address: Balcarce 50
-Enter the hostname for the PPS app (default: middleware-payments:10000):
+Enter the hostname for the PPS app (default: middleware-payments-service:10000):
 Enter the hostname for the Srv app (default: middleware-backend:10000):
 Enter the AppId for the PPS app: 7c697682-3646-4b2c-b99d-b25edd467cc2
 Enter the AppId for the Srv app: 07d97309-dd52-4355-8149-a5f5b67b3324

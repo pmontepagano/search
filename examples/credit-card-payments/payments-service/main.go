@@ -15,7 +15,7 @@ import (
 	pb "github.com/pmontepagano/search/gen/go/search/v1"
 )
 
-var middlewareURL = flag.String("middleware-url", "middleware-payments:11000", "The URL for the middleware")
+var middlewareURL = flag.String("middleware-url", "middleware-payments-service:11000", "The URL for the middleware")
 
 const ppsContract = `
 .outputs PPS

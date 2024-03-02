@@ -81,11 +81,11 @@ public class Main {
         PrivateMiddlewareServiceGrpc.PrivateMiddlewareServiceBlockingStub stub =
                 PrivateMiddlewareServiceGrpc.newBlockingStub(channel);
 
-        // Prompt the user to input hostname for the PPS and Srv apps. Both should have a default value of "middleware-payments:10000" and "middleware-backend:10000" respectively.
-        // System.out.print("Enter the hostname for the PPS app (default: middleware-payments:10000): ");
+        // Prompt the user to input hostname for the PPS and Srv apps. Both should have a default value of "middleware-payments-service:10000" and "middleware-backend:10000" respectively.
+        // System.out.print("Enter the hostname for the PPS app (default: middleware-payments-service:10000): ");
         // String ppsHostname = scanner.nextLine();
         // if (ppsHostname.isEmpty()) {
-        //     ppsHostname = "middleware-payments:10000";
+        //     ppsHostname = "middleware-payments-service:10000";
         // }
         // System.out.print("Enter the hostname for the Srv app (default: middleware-backend:10000): ");
         // String srvHostname = scanner.nextLine();
