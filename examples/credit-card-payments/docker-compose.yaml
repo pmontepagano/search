@@ -30,6 +30,12 @@ services:
       - payments_network
     depends_on:
       - middleware-payments-service
+    healthcheck:
+      test: ["CMD", "/usr/bin/stat", "/tmp/registered"]
+      interval: 2s
+      timeout: 1s
+      retries: 10
+      start_period: 2s
 
   broker:
     build: ../../

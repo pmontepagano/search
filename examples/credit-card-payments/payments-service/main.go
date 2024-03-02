@@ -60,6 +60,11 @@ func main() {
 	}
 	appID := ack.GetAppId()
 	logger.Printf("Finished registration. Got AppId %s", appID)
+	// create empty file for Docker Compose healthcheck
+	_, err = os.Create("/tmp/registered")
+	if err != nil {
+		logger.Printf("Error creating /tmp/registered: %v", err)
+	}
 
 	// wait on RegisterAppResponse stream to await for new channel
 	type NewSessionNotification struct {
