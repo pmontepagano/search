@@ -462,7 +462,7 @@ func (s *brokerServer) BrokerChannel(ctx context.Context, request *pb.BrokerChan
 				client pb.PublicMiddlewareServiceClient
 				conn   *grpc.ClientConn
 			}{pname, nil, nil}
-			s.logger.Printf("Connecting to participant %s during brokerage. Provider AppId: %s", pname, p.AppId)
+			s.logger.Printf("Connecting to participant %s during brokerage. Provider AppId: %s, URL: %s", pname, p.AppId, p.Url)
 
 			// Connect to the provider's middleware.
 			conn, err := grpc.DialContext(

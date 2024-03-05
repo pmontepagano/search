@@ -15,7 +15,11 @@ Do you want to just see an example of the infrastructure running?
 ```
 cd examples/credit-card-payments/
 ```
-4. Run the client:
+4. Build:
+```
+docker compose build
+```
+5. Run:
 ```
 docker compose run client
 ```
@@ -172,14 +176,16 @@ In order to get a report of code coverage after running the tests, use the follo
 ```
 
 ### Running the infrastructure
-To setup the infrastructure requires:
-1. running the broker:
+
+After having compiled the broker and the middleware you'll have executables for both in the root directory.
+
+1. Running the broker:
 ```
-    [ repository location ]/cmd/broker -host [ host_name ] -port [ port_number ]
+    [ repository location ]/broker -host [ host_name ] -port [ port_number ]
 ```
 2. running the middlewares in each of the machines that will participate: 
 ```
-    [ repository location ]/cmd/middleware -private_port [ port_number ] -public_port [ port_number ] -broker_addr [ host:port ]
+    [ repository location ]/middleware -private_port [ port_number ] -public_port [ port_number ] -broker_addr [ host:port ]
 ```
 
 ### Compiling applications
@@ -196,14 +202,14 @@ The example can be run in different computers by appropriately setting the host 
 
 In a terminal run:
 ```
-    [ repository location ]/go run cmd/broker/broker.go -host localhost -port 12000
+    go run cmd/broker/broker.go -host localhost -port 12000
 ```
 
 2. **Backend**
 
 In a terminal run the middleware for the backend service:
 ```
-    [ repository location ]/go run cmd/middleware/middleware.go -private_port 11001 -public_port 10001 -public_host localhost --broker_addr localhost:12000
+    go run cmd/middleware/middleware.go -private_port 11001 -public_port 10001 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/backend` and run the backend service:
 ```
@@ -215,9 +221,9 @@ In another terminal navigate to directory `[ repository location ]/examples/cred
 
 In a terminal run the middleware for the payments service:
 ```
-    [ repository location ]/go run cmd/middleware/middleware.go -private_port 11002 -public_port 10002 -public_host localhost --broker_addr localhost:12000
+    go run cmd/middleware/middleware.go -private_port 11002 -public_port 10002 -public_host localhost --broker_addr localhost:12000
 ```
-In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/payments service` and run the payments service:
+In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/payments-service` and run the payments service:
 ```
     go run main.go --middleware-url localhost:11002
 ```
@@ -226,7 +232,7 @@ In another terminal navigate to directory `[ repository location ]/examples/cred
 
 In a terminal run the middleware for the client application:
 ```
-    [ repository location ]/go run cmd/middleware/middleware.go -private_port 11003 -public_port 10003 -public_host localhost --broker_addr localhost:12000
+    go run cmd/middleware/middleware.go -private_port 11003 -public_port 10003 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `[ repository location ]/examples/credit-card-payments/client` and run the client application:
 ```
