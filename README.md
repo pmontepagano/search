@@ -1,21 +1,22 @@
 # SEArch
 
 
-## Quickstart example
+## How to run the exoeriment that demonstrates SEArch runnung
 
-Do you want to just see an example of the infrastructure running?
+Prerequisites:
 
-1. **Tools:**
+1. Linux or MacOS, either x86_64 or ARM CPU.
+2. Have installed Docker with buildx and Compose plugins. 
   - [Docker Engine](https://docs.docker.com/engine/) (v25+)
   - [Docker buildx plugin](https://github.com/docker/buildx)
   - [Docker Compose](https://docs.docker.com/compose/) v2.24+
   These tools are all bundled in [Docker Desktop](https://docs.docker.com/desktop/).
-2. Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`, or unzip the [file](https://github.com/pmontepagano/search/archive/refs/heads/bisimulation-impl-paper.zip) containing it.
-3. Once in the repository root, navigate in your terminal to the `examples/credit-card-payments` directory: 
+
+3. Navigate in your terminal to the `examples/credit-card-payments` directory: 
 ```
 cd examples/credit-card-payments/
 ```
-4. Build:
+4. Build the Docker containers:
 ```
 docker compose build
 ```
@@ -37,13 +38,15 @@ That command will show you the logs all the containers:
 - the client application (Service Client)
 - 3 different instances of the middleware, one for each service and one for the application
 
+The expected total runtime to run the experiments is of 10 minutes at most, of which most of it is building the containers. Build time on a 2022 laptop takes 3 minutes.
 
-## Setting up  SEArch step-by-step
+
+## Setting up SEArch step-by-step
 
 ### Prerequisites
-Modifying and/or playing  with SEArch requires to install the following tools:
+Modifying and/or playing with SEArch requires you to install the following tools:
 
-1. **Tools:** [Python 3.12](https://python.org/) and the following Python packages:
+1. [Python 3.12](https://python.org/) and the following Python packages:
   - [python-betterproto](https://github.com/danielgtaylor/python-betterproto), used to compile our Protocol Buffer definitions to Python code.
   - [cfsm-bisimulation](https://github.com/diegosenarruzza/bisimulation/), used to calculate compatibility between contracts.
   - [z3-solver](https://github.com/Z3Prover/z3), which is a dependency of `cfsm-bisimulation`.
@@ -60,6 +63,7 @@ A simple way of installing all of these is to install Python 3.12 and then run:
 
 
 ### Obtain the code
+
 Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`; alternatively unzip the [file](https://github.com/pmontepagano/search/archive/refs/heads/bisimulation-impl-paper.zip) containing it.
 
 The structure of the repository is:
