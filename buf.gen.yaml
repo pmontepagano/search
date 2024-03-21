@@ -22,9 +22,9 @@ plugins:
     out: gen/python
 
   # Java
-  - plugin: buf.build/grpc/java:v1.58.0
+  - plugin: buf.build/grpc/java:v1.62.2
     out: gen/java
-  - plugin: buf.build/protocolbuffers/java
+  - plugin: buf.build/protocolbuffers/java:v26.0
     out: gen/java
 
   # Typescript
