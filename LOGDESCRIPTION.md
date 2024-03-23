@@ -1,10 +1,6 @@
 # SEArch logs description
 
-Logs, as *SEArch* itself, are under development and, in some sense, they must undergo a process of major redesign. In their current state, logs only meet the basic requirement of being a debugging tool for the infrastructure. Such a redesign requires elaborating of a conceptual hierarchy of logable events such that they can expose relevant aspects of the state of each component (i.e., components of the infrastructure such as the middlewares and the broker, services and applications running within the infrastructure). 
-
-One key limitation of the current logging infrastructure is that it is done by streaming the messages through the standard output of each of the processes involved in executing the application within *SEArch*; this posses difficulties for understanding executions as they relay on quite intricate communication schemes.
-
-Regardless future plans, as for today, logs mainly allow basic monitoring of communication messages between components. This is split in four categories:
+In their current state, logs only meet the basic requirement for debugging purposes. Logs mainly allow basic monitoring of communication messages between components and are split in four categories:
 
 1. **middleware - broker:** encompases messages sent or received between a middleware and the broker, for example:
 
@@ -13,7 +9,7 @@ Regardless future plans, as for today, logs mainly allow basic monitoring of com
      middleware-client:10000 - Requesting brokerage of contract
 ```
 
-2. **service/client - middleware:** encompases messages exchanged between agents participating in an execution and their corresponding middlewares. As we mentioned before, not having a unified logging infrastructure exposses limitations, mainly related to the heterogeneity derived from the idiosyncracies of the different programming languages involved and their associated logging libraries. Examples of these events are: 
+2. **service/client - middleware:** encompases messages exchanged between agents participating in an execution and their corresponding middlewares. Examples of these events are: 
 
 *A Middleware logs it's view of a message sent by a process running behind it:*
 ```
@@ -38,7 +34,7 @@ Regardless future plans, as for today, logs mainly allow basic monitoring of com
      Started sender routine for channel cf4ea1f5-44d3-4b27-b489-64c424911611, participant Srv
 ```
 
-Naturally, as *SEArch* is still under development, many debug logging entries can be found in the code. These entries are used to get a close look at critical parts of the code implementing the different components, both of the infrastructure, and the example provided with the implementation.
+Several debugging entries of logs can be found in the code. These entries are used to get a close look at critical parts of the code implementing the different components, both of the infrastructure, and the example provided with the implementation.
 
 ## Logs when running within Docker containers
 
