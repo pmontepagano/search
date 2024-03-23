@@ -1,33 +1,32 @@
 # SEArch
 
+## Quickstart example shipped with `SEArch`
 
-## How to run the exoeriment that demonstrates SEArch runnung
+To run the infrastructure of `SEArch` on the example of the paper follow the following steps:
 
-Prerequisites:
+1. **Linux or MacOS**, either x86_64 or ARM CPU.
+2. **Tools:** **Docker** with buildx and Compose plugins (These tools are all bundled in [Docker Desktop](https://docs.docker.com/desktop/)):
 
-1. Linux or MacOS, either x86_64 or ARM CPU.
-2. Have installed Docker with buildx and Compose plugins. 
-  - [Docker Engine](https://docs.docker.com/engine/) (v25+)
-  - [Docker buildx plugin](https://github.com/docker/buildx)
-  - [Docker Compose](https://docs.docker.com/compose/) v2.24+
-  These tools are all bundled in [Docker Desktop](https://docs.docker.com/desktop/).
-
-3. Navigate in your terminal to the `examples/credit-card-payments` directory: 
+	- [Docker Engine](https://docs.docker.com/engine/) (v25+)
+	- [Docker buildx plugin](https://github.com/docker/buildx)
+	- [Docker Compose](https://docs.docker.com/compose/) v2.24+  
+4. Navigate the root directory `search-bisimulation-impl-paper` , and then to the example folder `examples/credit-card-payments`; for instance, in a Linux terminal you can type:
+```bash
+	cd [path_to_search]
+	cd examples/credit-card-payments/
 ```
-cd examples/credit-card-payments/
+5. **Build the Docker containers:**
+```bash
+     docker compose build
 ```
-4. Build the Docker containers:
-```
-docker compose build
-```
-5. Run:
-```
-docker compose run client
+6. **Run:**
+```bash
+     docker compose run client
 ```
 Before running the client, Docker will first build the infraestructure (i.e., the Broker and the Middleware), the services and the client. Then, it will run everything within containers; the Broker, a Middleware for each service required by the example, and their corresponding services behind them. Finally, it will run a Middleware for the client, and the client application behind it.
 
 To see all the logs, open another terminal, navigate to this same directory, and run:
-```
+```bash
     docker compose logs -f
 ```
 
@@ -38,35 +37,36 @@ That command will show you the logs all the containers:
 - the client application (Service Client)
 - 3 different instances of the middleware, one for each service and one for the application
 
-The expected total runtime to run the experiments is of 10 minutes at most, of which most of it is building the containers. Build time on a 2022 laptop takes 3 minutes.
+The expected total runtime to run the example is of 10 minutes at most, of which most of it is building the containers. Build time on a 2022 laptop takes 3 minutes.
 
 
 ## Setting up SEArch step-by-step
 
 ### Prerequisites
-Modifying and/or playing with SEArch requires you to install the following tools:
+Modifying and/or playing with `SEArch` requires you to install the following tools:
 
-1. [Python 3.11+](https://python.org/) and the following Python packages:
-  - [python-betterproto](https://github.com/danielgtaylor/python-betterproto), used to compile our Protocol Buffer definitions to Python code.
-  - [cfsm-bisimulation](https://github.com/diegosenarruzza/bisimulation/), used to calculate compatibility between contracts.
-  - [z3-solver](https://github.com/Z3Prover/z3), which is a dependency of `cfsm-bisimulation`.
+1. Python 3.11+ [https://python.org/](https://python.org/) and the following Python packages:
+  - `python-betterproto` [https://github.com/danielgtaylor/python-betterproto](https://github.com/danielgtaylor/python-betterproto), used to compile our Protocol Buffer definitions to Python code.
+  - `cfsm-bisimulation` [https://github.com/diegosenarruzza/bisimulation/](https://github.com/diegosenarruzza/bisimulation/), used to calculate compatibility between contracts.
+  - `z3-solver` [https://github.com/Z3Prover/z3](https://github.com/Z3Prover/z3), which is a dependency of `cfsm-bisimulation`.
 
 On Ubuntu 23.10 you can install the packages: `python3 python-is-python3 python3.11-venv`. Other distributions/versions may have differences in versions and package names.
 
 With Python 3.11+ installed, you can then run the following commands to install the three dependencies in a temp virtualenv:
-```
+```bash
     python -m venv /tmp/search-paper-python-deps
     source /tmp/search-paper-python-deps/bin/activate
     pip install -r requirements.txt
 ```
 
-2. [Go 1.21+](https://go.dev/) and the following tools:
-  - [buf](https://buf.build/docs/installation), used to generate code from our Protocol Buffer definitions to Go code.
-  - [mockery](https://vektra.github.io/mockery/), used to generate mocks for tests.
+2. Go 1.21+ [https://go.dev/](https://go.dev/) and the following tools:
+  - `buf` [https://buf.build/docs/installation](https://buf.build/docs/installation), used to generate code from our Protocol Buffer definitions to Go code *(cf. Section 3 of the paper)*.
+  - `mockery`: [https://vektra.github.io/mockery/](https://vektra.github.io/mockery/latest/installation/), used to generate mocks for tests.
+  - `ent` [https://github.com/ent/ent](https://github.com/ent/ent), used to model the database where we store contracts, providers and compatibility checks already computed.
 
 
-### Obtain the code
 
+### Obtain `SEArch`
 Clone the [repository](https://github.com/pmontepagano/search.git) and checkout the branch `origin/bisimulation-impl-paper`; alternatively unzip the [file](https://github.com/pmontepagano/search/archive/refs/heads/bisimulation-impl-paper.zip) containing it.
 
 The structure of the repository is:
@@ -81,52 +81,52 @@ The structure of the repository is:
 
 
 ### Code generation from Protocol Buffer definitions
-We use [buf](https://buf.build/docs/installation) to generate definition for message types and gRPC services. Our Protocol Buffer definitions live in the `proto` directory. The generated code lives in the `gen` directory. If you modify the Protocol Buffer definitions or add more output languages (see `buf.gen.yaml`), just run:
-```
+We use `buf` to generate definition for message types and gRPC services. Our Protocol Buffer definitions live in the `proto` directory. The generated code lives in the `gen` directory. If you modify the Protocol Buffer definitions or add more output languages (see `buf.gen.yaml`), just run:
+```bash
     buf generate proto
 ```
 The generated code should be commited to the repository. After modifying the Protocol Buffers, make sure you run the linter like this:
-```
+```bash
     buf lint proto
 ```
 
 ### Code generation for database management
-We use [ent](https://github.com/ent/ent) to model the database where we store contracts, providers and compatibility checks already computed.
+We use `ent` to model the database where we store contracts, providers and compatibility checks already computed.
 
 The database definitions live in `ent/schema`. The rest of the files and directories in the `ent` directory are auto-generated from the schema definitions. If you change the schemas, run the folllowing command to regenerate code and commit any changes to the repository:
-```
+```bash
     go generate ./ent
 ```
 
 #### Other useful Ent commands
 - Show schema in CLI:
-```
+```bash
     go run -mod=mod entgo.io/ent/cmd/ent describe ./ent/schema
 ```
-- Show schema in [Atlas Cloud](https://gh.atlasgo.cloud/):
-```
+- Show schema in `Atlas Cloud` [https://gh.atlasgo.cloud/](https://gh.atlasgo.cloud/):
+```bash
     go run -mod=mod ariga.io/entviz ./ent/schema
 ```
 - Generate Entity Relation diagram locally
-```
+```bash
     go run -mod=mod github.com/a8m/enter ./ent/schema
 ```
 
 ### Code generation for test mocks
 In software development, test mocks are simulated objects used in testing. They replace real objects or modules, allowing developers to isolate and test specific code independently. This means tests run faster and are more reliable because they aren't influenced by external factors. Mocks also offer predictable behavior, enabling developers to define how they respond to interactions and pinpoint potential issues within the code under test. Essentially, test mocks facilitate focused, efficient, and reliable unit testing, contributing to stronger software development.
 
-We use [mockery](https://vektra.github.io/mockery/) to generate test _mocks_ (only for the `contract` package for now). If you modify the `contract` package, regenerate the mocks by running the following command and commiting the changes to the repository. The generated mocks live in the `mocks` directory:
-```
+We use `mockery` to generate test _mocks_ (only for the `contract` package for now). If you modify the `contract` package, regenerate the mocks by running the following command and commiting the changes to the repository. The generated mocks live in the `mocks` directory:
+```bash
     mockery --dir contract --all --with-expecter
 ```
 
 ### Compiling the broker and the middleware:
 Building the infrastructure (i.e., the Broker and the Middleware) account to executing the following command:
-```
+```bash
     go build -o . ./...
 ```
 It will compile the code found in `internal`, `cfsm`, `contract`, `gen` and `ent`. This will generate the binaries `broker` and `middleware` and placed in `cmd`. Both programs have a `--help` flag:
-```
+```bash
 ./broker --help
 Usage of ./broker:
   -cert_file string
@@ -144,7 +144,7 @@ Usage of ./broker:
   -use_python_bisimulation
     	Use the Python Bisimulation library to check for bisimulation
 ```
-```
+```bash
 ./middleware --help
 Usage of ./middleware:
   -broker_addr string
@@ -169,48 +169,43 @@ Usage of ./middleware:
 
 ### Running the tests
 Running the tests requires running the following command:
-```
+```bash
     go test ./...
 ```
-Running the tests with [race detector](https://go.dev/doc/articles/race_detector) requires the use to the following command:
-```
+Running the tests with `race detector` [https://go.dev/doc/articles/race_detector](https://go.dev/doc/articles/race_detector) requires the use to the following command:
+```bash
     go test ./... -count=1 -race
 ```
 In order to get a report of code coverage after running the tests, use the following commands:
-```
+```bash
     go test ./... -coverprofile=coverage.txt -covermode atomic -coverpkg=./cfsm/...,./internal/...,./contract -timeout 30s
     go tool cover -html=coverage.txt
 ```
 
 ### Running the infrastructure
-
-After having compiled the broker and the middleware you'll have executables for both in the root directory.
-
-1. Running the broker:
+To setup the infrastructure requires to navigate to the root directory of `SEArch` and
+1. run the broker:
+```bash
+    ./cmd/broker -host [ host_name ] -port [ port_number ]
 ```
-    ./broker -host [ host_name ] -port [ port_number ]
-```
-2. running the middlewares in each of the machines that will participate: 
-```
-    ./middleware -private_port [ port_number ] -public_port [ port_number ] -broker_addr [ host:port ]
+2. run the middlewares in each of the machines that will participate: 
+```bash
+    ./cmd/middleware -private_port [ port_number ] -public_port [ port_number ] -broker_addr [ host:port ]
 ```
 
 ### Compiling applications
-
-Compiling application, if it was required, to run within this infrastructure is not different that compliling any other program to run in a computer. The only significant difference is that its execution requires the use of the communication primitives provided by the Middleware, thus, the application will resort to the libraries generated by buf that can be found in `gen`. In the commercial setting these libraries should be available from the package manager of choice.
+Compiling application, if it was required, to run within `SEArch` is similar to standard compilation. The only significant difference is that its execution requires the use of the communication primitives provided by the middleware, thus, the application will resort to the libraries generated by `buf` that can be found in `gen`. In the commercial setting these libraries should be available from the package manager of choice.
 
 ### Running applications
-
 With the Middleware running, the applications must be run, according to their language requirements. They will need to communicate with their corresponding Middleware; a good practice is to develop them in way that they can be configured to communicate to a middleware host and port.
 
-
 ### Running the example
-The example can be run in different computers by appropriately setting the host and ports. For the sake of this section we will show how to run it in the localhost.
+The example can be run in different computers by appropriately setting the host and ports. For the sake of this section we will show how to run it in the localhost from the root directory of `SEArch`.
 
 1. **Broker**
 
 Make sure you run this from a terminal that has the Python virtual environment on which you installed `cfsm-bisimulation`. In a terminal run:
-```
+```bash
     source /tmp/search-paper-python-deps/bin/activate
     go run cmd/broker/broker.go -host localhost -port 12000
 ```
@@ -218,11 +213,11 @@ Make sure you run this from a terminal that has the Python virtual environment o
 2. **Backend**
 
 In a terminal run the middleware for the backend service:
-```
+```bash
     go run cmd/middleware/middleware.go -private_port 11001 -public_port 10001 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `examples/credit-card-payments/backend` and run the backend service:
-```
+```bash
     python -m venv /tmp/search-paper-example-backend
     source /tmp/search-paper-example-backend/bin/activate
     pip install -r requirements.txt
@@ -232,25 +227,25 @@ In another terminal navigate to directory `examples/credit-card-payments/backend
 3. **Payments service**
 
 In a terminal run the middleware for the payments service:
-```
+```bash
     go run cmd/middleware/middleware.go -private_port 11002 -public_port 10002 -public_host localhost --broker_addr localhost:12000
 ```
 In another terminal navigate to directory `examples/credit-card-payments/payments-service` and run the payments service:
-```
+```bash
     go run main.go --middleware-url localhost:11002
 ```
 
 4. **Client application**
 
 In a terminal run the middleware for the client application:
-```
+```bash
     go run cmd/middleware/middleware.go -private_port 11003 -public_port 10003 -public_host localhost --broker_addr localhost:12000
 ```
 
 For this example we need OpenJDK 21 and Maven 3.9. On Ubuntu 23.10 you can install them by installing the packages `maven openjdk-21-jdk-headless`.
 
 In another terminal navigate to directory `examples/credit-card-payments/client` and run the client application:
-```
+```bash
     mvn verify --fail-never
     mvn package
     java -jar target/clientapp-1.0-SNAPSHOT-jar-with-dependencies.jar localhost:11003
