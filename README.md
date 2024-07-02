@@ -1,3 +1,9 @@
+# This project was moved
+
+This project was moved to the [SEArch-Service-Execution-Architecture](https://github.com/SEArch-Service-Execution-Architecture/search) organization. Further development will be continued there.
+
+----------
+
 # SEArch
 
 ## Quickstart example shipped with `SEArch`
